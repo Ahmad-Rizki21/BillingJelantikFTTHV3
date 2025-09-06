@@ -10,7 +10,8 @@ from ..database import Base
 
 if TYPE_CHECKING:
     from .odp import ODP
-    from .mikrotik_server import MikrotikServer # <-- Import MikrotikServer
+    from .mikrotik_server import MikrotikServer  # <-- Import MikrotikServer
+
 
 class OLT(Base):
     __tablename__ = "olt"
@@ -21,14 +22,16 @@ class OLT(Base):
     tipe_olt: Mapped[str] = mapped_column(String(50), nullable=False)
     username: Mapped[str | None] = mapped_column(String(100), nullable=True)
     password: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    
+
     # --- TAMBAHAN UNTUK RELASI KE MIKROTIK ---
     # 2. Tambahkan Foreign Key ke tabel mikrotik_servers
-    mikrotik_server_id: Mapped[int | None] = mapped_column(ForeignKey("mikrotik_servers.id"))
+    mikrotik_server_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mikrotik_servers.id")
+    )
 
     # 3. Tambahkan relasi balik ke model MikrotikServer
     mikrotik_server: Mapped["MikrotikServer"] = relationship(back_populates="olts")
     # --------------------------------------------
-    
+
     # Relasi ke ODP (ini sudah benar)
     odps: Mapped[List["ODP"]] = relationship(back_populates="olt")

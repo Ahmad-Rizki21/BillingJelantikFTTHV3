@@ -10,8 +10,10 @@ from ..models.user import User as UserModel
 
 router = APIRouter(prefix="/settings", tags=["System Settings"])
 
+
 class SettingUpdate(BaseModel):
     value: str
+
 
 @router.get("/{key}")
 async def get_setting(key: str, db: AsyncSession = Depends(get_db)):
@@ -22,24 +24,27 @@ async def get_setting(key: str, db: AsyncSession = Depends(get_db)):
         return {"key": key, "value": None}
     return {"key": key, "value": setting.setting_value}
 
+
 @router.put("/{key}")
 async def update_setting(
-    key: str, 
-    payload: SettingUpdate, 
+    key: str,
+    payload: SettingUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: UserModel = Depends(get_current_active_user)
+    current_user: UserModel = Depends(get_current_active_user),
 ):
     """Memperbarui nilai sebuah pengaturan (Hanya Admin)."""
     # Pastikan hanya admin yang bisa mengubah
-    if current_user.role.name.lower() != 'admin':
-        raise HTTPException(status_code=403, detail="Hanya admin yang dapat mengubah pengaturan.")
+    if current_user.role.name.lower() != "admin":
+        raise HTTPException(
+            status_code=403, detail="Hanya admin yang dapat mengubah pengaturan."
+        )
 
     stmt = select(SettingModel).where(SettingModel.setting_key == key)
     setting = (await db.execute(stmt)).scalar_one_or_none()
-    
-    if not setting: # Jika belum ada, buat baru
+
+    if not setting:  # Jika belum ada, buat baru
         setting = SettingModel(setting_key=key, setting_value=payload.value)
-    else: # Jika sudah ada, update nilainya
+    else:  # Jika sudah ada, update nilainya
         setting.setting_value = payload.value
 
     db.add(setting)

@@ -3,14 +3,18 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class InventoryItemTypeBase(BaseModel):
     name: str
+
 
 class InventoryItemTypeCreate(InventoryItemTypeBase):
     pass
 
+
 class InventoryItemTypeUpdate(InventoryItemTypeBase):
     pass
+
 
 class InventoryItemType(InventoryItemTypeBase):
     id: int

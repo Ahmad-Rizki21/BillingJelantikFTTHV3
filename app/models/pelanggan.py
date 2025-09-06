@@ -8,6 +8,7 @@ from ..database import Base
 
 if TYPE_CHECKING:
     from .data_teknis import DataTeknis
+
     # Tambahkan import lain yang dibutuhkan jika ada
     from .langganan import Langganan
     from .invoice import Invoice
@@ -43,7 +44,9 @@ class Pelanggan(Base):
     brand_default: Mapped[str | None] = mapped_column(String(191))
 
     # # Relationships
-    data_teknis: Mapped["DataTeknis"] = relationship(back_populates="pelanggan", uselist=False, cascade="all, delete-orphan")
+    data_teknis: Mapped["DataTeknis"] = relationship(
+        back_populates="pelanggan", uselist=False, cascade="all, delete-orphan"
+    )
 
     # langganan = relationship("Langganan", back_populates="pelanggan")
     # invoices = relationship("Invoice", back_populates="pelanggan")

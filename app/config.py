@@ -23,7 +23,7 @@ class Settings(BaseSettings):
         "S&K",
         "Simulasi Harga",
         "Kelola S&K",
-        "Manajemen Inventaris", 
+        "Manajemen Inventaris",
         "Dashboard Jakinet",
     ]
 
@@ -39,15 +39,14 @@ class Settings(BaseSettings):
         "invoice_bulanan",
         "status_langganan",
         "alamat_aktif",
-
-        #Dashboard Pelanggan Widget
+        # Dashboard Pelanggan Widget
         "pelanggan_statistik_utama",
         "pelanggan_pendapatan_jakinet",
         "pelanggan_distribusi_chart",
         "pelanggan_pertumbuhan_chart",
         "pelanggan_status_overview_chart",
         "pelanggan_metrik_cepat",
-        "pelanggan_tren_pendapatan_chart"
+        "pelanggan_tren_pendapatan_chart",
     ]
     # ---------------------
 

@@ -108,7 +108,9 @@ async def create_langganan(
         .where(LanggananModel.id == db_langganan.id)
         .options(
             # Sama seperti di atas, muat relasi secara bersarang
-            selectinload(LanggananModel.pelanggan).selectinload(PelangganModel.harga_layanan),
+            selectinload(LanggananModel.pelanggan).selectinload(
+                PelangganModel.harga_layanan
+            ),
             selectinload(LanggananModel.paket_layanan),
         )
     )
@@ -133,8 +135,10 @@ async def get_all_langganan(
         select(LanggananModel)
         .join(LanggananModel.pelanggan)
         .options(
-            selectinload(LanggananModel.pelanggan).selectinload(PelangganModel.harga_layanan),
-            selectinload(LanggananModel.paket_layanan)
+            selectinload(LanggananModel.pelanggan).selectinload(
+                PelangganModel.harga_layanan
+            ),
+            selectinload(LanggananModel.paket_layanan),
         )
     )
 
@@ -181,7 +185,9 @@ async def update_langganan(
         .options(
             # UBAH BAGIAN INI:
             # Muat relasi pelanggan, DAN di dalamnya muat juga relasi harga_layanan
-            selectinload(LanggananModel.pelanggan).selectinload(PelangganModel.harga_layanan),
+            selectinload(LanggananModel.pelanggan).selectinload(
+                PelangganModel.harga_layanan
+            ),
             selectinload(LanggananModel.paket_layanan),
         )
     )

@@ -127,10 +127,11 @@ async def generate_single_invoice(db, langganan: LanggananModel):
             f"Gagal membuat invoice untuk Langganan ID {langganan.id}: {e}\n{traceback.format_exc()}"
         )
 
+
 async def job_update_overdue_invoices():
     """Tugas untuk menandai invoice yang belum dibayar menjadi 'Kadaluarsa'."""
     log_scheduler_event(logger, "job_update_overdue_invoices", "started")
-    
+
     async with SessionLocal() as db:
         try:
             # Aturan: Kadaluarsa jika hari ini adalah hari ke-6 setelah jatuh tempo (telah lewat 5 hari).
@@ -164,10 +165,9 @@ async def job_update_overdue_invoices():
 
         except Exception as e:
             await db.rollback()
-            logger.error(f"[FAIL] Scheduler 'job_update_overdue_invoices' gagal. Rincian: {traceback.format_exc()}")
-
-
-
+            logger.error(
+                f"[FAIL] Scheduler 'job_update_overdue_invoices' gagal. Rincian: {traceback.format_exc()}"
+            )
 
 
 # ==========================================================
@@ -297,13 +297,15 @@ async def job_suspend_services():
                 data_teknis = langganan.pelanggan.data_teknis
                 if data_teknis:
                     await mikrotik_service.trigger_mikrotik_update(
-                        db, 
-                        langganan, 
-                        data_teknis, 
-                        data_teknis.id_pelanggan # old_id_pelanggan diisi dengan id saat ini
+                        db,
+                        langganan,
+                        data_teknis,
+                        data_teknis.id_pelanggan,  # old_id_pelanggan diisi dengan id saat ini
                     )
                 else:
-                    logger.error(f"Data Teknis tidak ditemukan untuk langganan ID {langganan.id}, skip update Mikrotik.")
+                    logger.error(
+                        f"Data Teknis tidak ditemukan untuk langganan ID {langganan.id}, skip update Mikrotik."
+                    )
                     await mikrotik_service.trigger_mikrotik_update(db, langganan)
 
                 await db.commit()
@@ -409,12 +411,13 @@ async def job_verify_payments():
                     "completed",
                     "Tidak ada pembayaran baru di Xendit.",
                 )
-                await db.commit() # Tetap commit untuk menutup transaksi
+                await db.commit()  # Tetap commit untuk menutup transaksi
                 return
 
             unprocessed_stmt = select(InvoiceModel).where(
                 InvoiceModel.xendit_external_id.in_(paid_invoice_ids),
-                InvoiceModel.status_invoice != "Lunas", # Ubah dari "Belum Dibayar" agar lebih fleksibel
+                InvoiceModel.status_invoice
+                != "Lunas",  # Ubah dari "Belum Dibayar" agar lebih fleksibel
             )
             invoices_to_process = (await db.execute(unprocessed_stmt)).scalars().all()
 
@@ -442,19 +445,31 @@ async def job_verify_payments():
                 f"[FAIL] Scheduler 'job_verify_payments' failed. Details:\n{error_details}"
             )
 
+
 async def job_retry_mikrotik_syncs():
     log_scheduler_event(logger, "job_retry_mikrotik_syncs", "started")
     total_retried = 0
     async with SessionLocal() as db:
         try:
             # Cari semua data teknis yang sinkronisasinya tertunda
-            stmt = select(DataTeknisModel).where(DataTeknisModel.mikrotik_sync_pending == True).options(
-                selectinload(DataTeknisModel.pelanggan).selectinload(PelangganModel.langganan)
+            stmt = (
+                select(DataTeknisModel)
+                .where(DataTeknisModel.mikrotik_sync_pending == True)
+                .options(
+                    selectinload(DataTeknisModel.pelanggan).selectinload(
+                        PelangganModel.langganan
+                    )
+                )
             )
             pending_syncs = (await db.execute(stmt)).scalars().all()
 
             if not pending_syncs:
-                log_scheduler_event(logger, "job_retry_mikrotik_syncs", "completed", "No pending Mikrotik syncs.")
+                log_scheduler_event(
+                    logger,
+                    "job_retry_mikrotik_syncs",
+                    "completed",
+                    "No pending Mikrotik syncs.",
+                )
                 return
 
             logger.info(f"Found {len(pending_syncs)} pending Mikrotik syncs to retry.")
@@ -463,23 +478,31 @@ async def job_retry_mikrotik_syncs():
                     langganan = data_teknis.pelanggan.langganan[0]
                     # Coba jalankan lagi fungsi update ke Mikrotik DENGAN ARGUMEN LENGKAP
                     await mikrotik_service.trigger_mikrotik_update(
-                        db,
-                        langganan,
-                        data_teknis,
-                        data_teknis.id_pelanggan
+                        db, langganan, data_teknis, data_teknis.id_pelanggan
                     )
-                    
+
                     # Jika berhasil, set flag kembali ke False
                     data_teknis.mikrotik_sync_pending = False
                     db.add(data_teknis)
-                    logger.info(f"Successfully synced pending update for Data Teknis ID: {data_teknis.id}")
+                    logger.info(
+                        f"Successfully synced pending update for Data Teknis ID: {data_teknis.id}"
+                    )
                     total_retried += 1
                 except Exception as e:
                     # Jika masih gagal, biarkan flag tetap True dan catat error
-                    logger.error(f"Still failing to sync Mikrotik for Data Teknis ID {data_teknis.id}: {e}")
-            
+                    logger.error(
+                        f"Still failing to sync Mikrotik for Data Teknis ID {data_teknis.id}: {e}"
+                    )
+
             await db.commit()
-            log_scheduler_event(logger, "job_retry_mikrotik_syncs", "completed", f"Successfully retried {total_retried} syncs.")
+            log_scheduler_event(
+                logger,
+                "job_retry_mikrotik_syncs",
+                "completed",
+                f"Successfully retried {total_retried} syncs.",
+            )
         except Exception as e:
             await db.rollback()
-            logger.error(f"[FAIL] Scheduler 'job_retry_mikrotik_syncs' encountered an error: {traceback.format_exc()}")
+            logger.error(
+                f"[FAIL] Scheduler 'job_retry_mikrotik_syncs' encountered an error: {traceback.format_exc()}"
+            )

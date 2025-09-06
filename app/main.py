@@ -29,11 +29,11 @@ from .routers import (
     odp,
     topology,
     settings,
-    inventory, 
-    inventory_status, 
+    inventory,
+    inventory_status,
     inventory_type,
-    dashboard_pelanggan  
-    )
+    dashboard_pelanggan,
+)
 from .jobs import (
     job_generate_invoices,
     job_suspend_services,
@@ -220,21 +220,18 @@ async def startup_event():
     # scheduler.add_job(job_verify_payments, 'cron', hour='*', minute=15, timezone='Asia/Jakarta', id="verify_payments_job") #Cek pembayaran setiap jam menit ke-15.
     # ======================================================== INI UNTUK CRONJOB PRODACION & TEST========================================================
 
-
     # ======================================================== INI UNTUK CRONJOB PRODACION & TEST========================================================
     # scheduler.add_job(job_verify_payments, 'interval', minutes=1, id="verify_payments_job")
     # scheduler.add_job(job_verify_payments, 'interval', minutes=20, id="verify_payments_job")
     # ======================================================== INI UNTUK CRONJOB PRODACION & TEST========================================================
 
+    # ========================================================= INI UNTUK CRONJOB SYNCRONISE MIKROTIK ====================================================
+    # scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job")
+    # ========================================================= INI UNTUK CRONJOB SYNCRONISE MIKROTIK ====================================================
 
-    #========================================================= INI UNTUK CRONJOB SYNCRONISE MIKROTIK ====================================================
-    #scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job")
-    #========================================================= INI UNTUK CRONJOB SYNCRONISE MIKROTIK ====================================================
-
-    #=============================================== INI UNTUK CRONJOB MENCARI STATUS YANG MASIH BELUM DIBAYAR=================================
+    # =============================================== INI UNTUK CRONJOB MENCARI STATUS YANG MASIH BELUM DIBAYAR=================================
     # scheduler.add_job(job_update_overdue_invoices, 'cron', hour=0, minute=30, timezone='Asia/Jakarta', id="update_overdue_invoices_job")
-    #=============================================== INI UNTUK CRONJOB MENCARI STATUS YANG MASIH BELUM DIBAYAR=================================
-
+    # =============================================== INI UNTUK CRONJOB MENCARI STATUS YANG MASIH BELUM DIBAYAR=================================
 
     # 3. Mulai scheduler
     scheduler.start()
@@ -247,6 +244,7 @@ async def startup_event():
 async def shutdown_event():
     scheduler.shutdown()
     print("Scheduler telah dimatikan.")
+
 
 API_PREFIX = os.getenv("API_PREFIX", "")
 
@@ -274,8 +272,8 @@ app.include_router(odp.router, prefix=API_PREFIX)
 app.include_router(topology.router, prefix=API_PREFIX)
 app.include_router(settings.router, prefix=API_PREFIX)
 app.include_router(inventory.router, prefix=API_PREFIX)
-app.include_router(inventory_status.router, prefix=API_PREFIX) 
-app.include_router(inventory_type.router, prefix=API_PREFIX)   
+app.include_router(inventory_status.router, prefix=API_PREFIX)
+app.include_router(inventory_type.router, prefix=API_PREFIX)
 app.include_router(dashboard_pelanggan.router, prefix=API_PREFIX)
 
 

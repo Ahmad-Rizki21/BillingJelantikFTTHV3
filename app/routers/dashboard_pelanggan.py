@@ -15,16 +15,19 @@ from ..models.harga_layanan import HargaLayanan as HargaLayananModel
 from ..models.invoice import Invoice as InvoiceModel
 from pydantic import BaseModel
 
+
 # --- Skema Pydantic untuk respons Chart ---
 class ChartData(BaseModel):
     labels: List[str]
     data: List[int | float]
+
 
 router = APIRouter(
     prefix="/dashboard-pelanggan",
     tags=["Dashboard Pelanggan"],
     responses={404: {"description": "Not found"}},
 )
+
 
 @router.get("/statistik-utama")
 async def get_main_statistics(db: AsyncSession = Depends(get_db)):
@@ -33,7 +36,7 @@ async def get_main_statistics(db: AsyncSession = Depends(get_db)):
     """
     today = date.today()
     first_day_of_month = today.replace(day=1)
-    
+
     # Inisialisasi variabel dengan nilai default
     pelanggan_aktif = 0
     pelanggan_baru_bulan_ini = 0
@@ -42,7 +45,9 @@ async def get_main_statistics(db: AsyncSession = Depends(get_db)):
     pendapatan_jakinet_bulan_ini = 0
 
     # 1. Hitung Pelanggan Aktif
-    q_aktif = select(func.count(LanggananModel.id)).where(LanggananModel.status == 'Aktif')
+    q_aktif = select(func.count(LanggananModel.id)).where(
+        LanggananModel.status == "Aktif"
+    )
     res_aktif = await db.execute(q_aktif)
     pelanggan_aktif = res_aktif.scalar_one_or_none() or 0
 
@@ -55,20 +60,17 @@ async def get_main_statistics(db: AsyncSession = Depends(get_db)):
 
     # 3. Hitung Pelanggan Berhenti Bulan Ini
     q_berhenti = select(func.count(LanggananModel.id)).where(
-        LanggananModel.status == 'Berhenti',
-        LanggananModel.tgl_berhenti >= first_day_of_month
+        LanggananModel.status == "Berhenti",
+        LanggananModel.tgl_berhenti >= first_day_of_month,
     )
     res_berhenti = await db.execute(q_berhenti)
     pelanggan_berhenti_bulan_ini = res_berhenti.scalar_one_or_none() or 0
-    
+
     # 4. Hitung Pelanggan Aktif Khusus Brand Jakinet
     q_jakinet = (
         select(func.count(LanggananModel.id))
         .join(LanggananModel.pelanggan)
-        .where(
-            LanggananModel.status == 'Aktif',
-            PelangganModel.id_brand == 'ajn-01' 
-        )
+        .where(LanggananModel.status == "Aktif", PelangganModel.id_brand == "ajn-01")
     )
     res_jakinet = await db.execute(q_jakinet)
     pelanggan_jakinet_aktif = res_jakinet.scalar_one_or_none() or 0
@@ -78,9 +80,9 @@ async def get_main_statistics(db: AsyncSession = Depends(get_db)):
         select(func.sum(InvoiceModel.paid_amount))
         .join(InvoiceModel.pelanggan)
         .where(
-            InvoiceModel.status_invoice == 'Lunas',
-            PelangganModel.id_brand == 'ajn-01', # Filter khusus brand Jakinet
-            InvoiceModel.paid_at >= first_day_of_month # Filter pembayaran bulan ini
+            InvoiceModel.status_invoice == "Lunas",
+            PelangganModel.id_brand == "ajn-01",  # Filter khusus brand Jakinet
+            InvoiceModel.paid_at >= first_day_of_month,  # Filter pembayaran bulan ini
         )
     )
     res_pendapatan = await db.execute(q_pendapatan)
@@ -91,10 +93,12 @@ async def get_main_statistics(db: AsyncSession = Depends(get_db)):
         "pelanggan_baru_bulan_ini": pelanggan_baru_bulan_ini,
         "pelanggan_berhenti_bulan_ini": pelanggan_berhenti_bulan_ini,
         "pelanggan_jakinet_aktif": pelanggan_jakinet_aktif,
-        "pendapatan_jakinet_bulan_ini": pendapatan_jakinet_bulan_ini, 
+        "pendapatan_jakinet_bulan_ini": pendapatan_jakinet_bulan_ini,
     }
 
+
 # --- ENDPOINT BARU UNTUK CHART ---
+
 
 @router.get("/tren-pertumbuhan", response_model=ChartData)
 async def get_growth_trend(db: AsyncSession = Depends(get_db)):
@@ -113,19 +117,23 @@ async def get_growth_trend(db: AsyncSession = Depends(get_db)):
 
         # Hitung total pelanggan aktif pada akhir bulan tersebut
         q_total = select(func.count(LanggananModel.id)).where(
-            LanggananModel.status == 'Aktif',
-            func.date(LanggananModel.tgl_mulai_langganan) <= target_date.replace(day=28) # Perkiraan akhir bulan
+            LanggananModel.status == "Aktif",
+            func.date(LanggananModel.tgl_mulai_langganan)
+            <= target_date.replace(day=28),  # Perkiraan akhir bulan
         )
-        total_pelanggan_data.append((await db.execute(q_total)).scalar_one_or_none() or 0)
+        total_pelanggan_data.append(
+            (await db.execute(q_total)).scalar_one_or_none() or 0
+        )
 
         # Hitung pelanggan Jakinet aktif pada akhir bulan tersebut
         q_jakinet = (
             select(func.count(LanggananModel.id))
             .join(LanggananModel.pelanggan)
             .where(
-                LanggananModel.status == 'Aktif',
-                PelangganModel.id_brand == 'ajn-01',
-                func.date(LanggananModel.tgl_mulai_langganan) <= target_date.replace(day=28)
+                LanggananModel.status == "Aktif",
+                PelangganModel.id_brand == "ajn-01",
+                func.date(LanggananModel.tgl_mulai_langganan)
+                <= target_date.replace(day=28),
             )
         )
         jakinet_data.append((await db.execute(q_jakinet)).scalar_one_or_none() or 0)
@@ -134,21 +142,20 @@ async def get_growth_trend(db: AsyncSession = Depends(get_db)):
     # Di frontend, Anda akan membuat 2 dataset dari data ini.
     return {
         "labels": labels,
-        "datasets": {
-            "total_pelanggan": total_pelanggan_data,
-            "jakinet": jakinet_data
-        }
+        "datasets": {"total_pelanggan": total_pelanggan_data, "jakinet": jakinet_data},
     }
 
 
 @router.get("/tren-pendapatan-jakinet", response_model=ChartData)
-async def get_jakinet_revenue_trend(timespan: str = "6m", db: AsyncSession = Depends(get_db)):
+async def get_jakinet_revenue_trend(
+    timespan: str = "6m", db: AsyncSession = Depends(get_db)
+):
     """
     Menyediakan data tren pendapatan JakiNet berdasarkan rentang waktu (3m, 6m, 1y).
     """
-    months_map = {'3m': 3, '6m': 6, '1y': 12}
+    months_map = {"3m": 3, "6m": 6, "1y": 12}
     num_months = months_map.get(timespan, 6)
-    
+
     today = datetime.now()
     labels = []
     revenue_data = []
@@ -157,21 +164,21 @@ async def get_jakinet_revenue_trend(timespan: str = "6m", db: AsyncSession = Dep
         target_date = today - relativedelta(months=i)
         first_day = target_date.replace(day=1)
         last_day = (first_day + relativedelta(months=1)) - timedelta(days=1)
-        
+
         labels.append(target_date.strftime("%b %y"))
 
         q_pendapatan = (
             select(func.sum(InvoiceModel.paid_amount))
             .join(InvoiceModel.pelanggan)
             .where(
-                InvoiceModel.status_invoice == 'Lunas',
-                PelangganModel.id_brand == 'ajn-01',
+                InvoiceModel.status_invoice == "Lunas",
+                PelangganModel.id_brand == "ajn-01",
                 InvoiceModel.paid_at >= first_day,
-                InvoiceModel.paid_at <= last_day
+                InvoiceModel.paid_at <= last_day,
             )
         )
         result = await db.execute(q_pendapatan)
         monthly_revenue = float(result.scalar_one_or_none() or 0)
         revenue_data.append(monthly_revenue)
-        
+
     return ChartData(labels=labels, data=revenue_data)

@@ -4,23 +4,30 @@ from datetime import date
 from .paket_layanan import PaketLayanan
 from .pelanggan import PelangganInLangganan
 
+
 class PaketLayananInLangganan(BaseModel):
     harga: float
+
     class Config:
         from_attributes = True
+
 
 class HargaLayananInPelanggan(BaseModel):
     pajak: float
+
     class Config:
         from_attributes = True
 
+
 class PelangganInLangganan(BaseModel):
-    id: int               
-    nama: str             
-    alamat: str           
+    id: int
+    nama: str
+    alamat: str
     harga_layanan: Optional[HargaLayananInPelanggan] = None
+
     class Config:
         from_attributes = True
+
 
 # -- Base Schema --
 # Berisi field yang sama persis dengan kolom di database
@@ -69,23 +76,23 @@ class LanggananImport(BaseModel):
 class Langganan(LanggananBase):
     id: int
     # Pastikan relasi ini sudah benar dan di-load di router Anda
-    paket_layanan: PaketLayananInLangganan 
+    paket_layanan: PaketLayananInLangganan
     pelanggan: PelangganInLangganan
 
     @computed_field
     @property
     def harga_final(self) -> float:
-        """ Menghitung harga final (paket + PPN) untuk ditampilkan. """
-        
+        """Menghitung harga final (paket + PPN) untuk ditampilkan."""
+
         # Jika data relasi tidak lengkap, tampilkan harga awal sebagai fallback
         if not self.paket_layanan or not self.pelanggan.harga_layanan:
             return self.harga_awal or 0.0
 
         harga_paket = self.paket_layanan.harga
         pajak_persen = self.pelanggan.harga_layanan.pajak
-        
+
         harga_total = harga_paket * (1 + (pajak_persen / 100))
-        
+
         return round(harga_total)
 
     class Config:

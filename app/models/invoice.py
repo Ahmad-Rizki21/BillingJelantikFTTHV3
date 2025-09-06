@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .pelanggan import Pelanggan
+
+
 class Invoice(Base):
     __tablename__ = "invoices"
 

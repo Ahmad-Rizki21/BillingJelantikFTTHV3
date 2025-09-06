@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .inventory_item_type import InventoryItemType
     from .inventory_status import InventoryStatus
 
+
 class InventoryItem(Base):
     __tablename__ = "inventory_items"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -20,7 +21,7 @@ class InventoryItem(Base):
     location: Mapped[str | None] = mapped_column(String(255))
     purchase_date: Mapped[Date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    
+
     item_type_id: Mapped[int] = mapped_column(ForeignKey("inventory_item_types.id"))
     status_id: Mapped[int] = mapped_column(ForeignKey("inventory_statuses.id"))
     pelanggan_id: Mapped[int | None] = mapped_column(ForeignKey("pelanggan.id"))
@@ -29,4 +30,3 @@ class InventoryItem(Base):
     item_type: Mapped["InventoryItemType"] = relationship()
     status: Mapped["InventoryStatus"] = relationship()
     # --- AKHIR BLOK TAMBAHAN ▲▲▲
-    
