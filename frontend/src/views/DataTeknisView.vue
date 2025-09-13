@@ -281,7 +281,11 @@
         <v-icon class="me-3 text-primary" size="24">mdi-table</v-icon>
         <span class="text-h5 font-weight-bold">Daftar Infrastruktur</span>
       </v-card-title>
-      <div class="responsive-table-container">
+      
+      <!-- PERUBAHAN DIMULAI DI SINI -->
+
+      <!-- Tampilan Tabel untuk Desktop (Medium ke atas) -->
+      <div class="responsive-table-container d-none d-md-block">
         <v-data-table
           v-model="selectedDataTeknis"
           v-model:expanded="expanded"
@@ -448,6 +452,133 @@
           </template>
         </v-data-table>
       </div>
+
+      <!-- Tampilan Kartu untuk Mobile (Small ke bawah) -->
+      <div class="d-md-none pa-4">
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-8">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          <p class="mt-4 text-medium-emphasis">Memuat data...</p>
+        </div>
+
+        <!-- No Data State -->
+        <div v-else-if="!dataTeknisList.length" class="text-center py-8">
+          <v-icon size="48" class="text-disabled mb-4">mdi-database-off-outline</v-icon>
+          <p class="text-medium-emphasis">Tidak ada data teknis ditemukan</p>
+        </div>
+
+        <!-- Data Teknis Cards -->
+        <div v-else>
+          <v-card
+            v-for="item in paginatedDataTeknis"
+            :key="item.id"
+            class="data-teknis-card-mobile mb-4"
+            elevation="2"
+          >
+            <!-- Card Header with Checkbox and Customer Info -->
+            <div class="d-flex align-center pa-3">
+              <v-checkbox-btn v-model="selectedDataTeknis" :value="item" multiple hide-details class="flex-grow-0"></v-checkbox-btn>
+              <v-avatar :color="getAvatarColor(item.pelanggan_id)" size="40" class="ms-3">
+                <span class="text-white font-weight-bold">{{ getPelangganInitials(item.pelanggan_id) }}</span>
+              </v-avatar>
+              <div class="ms-3 flex-grow-1" @click="expanded = expanded.includes(item.id) ? [] : [item.id]">
+                <div class="font-weight-bold">{{ getPelangganName(item.pelanggan_id) }}</div>
+                <div class="text-caption text-medium-emphasis">ID: {{ item.id_pelanggan }}</div>
+              </div>
+               <v-btn
+                  icon
+                  variant="text"
+                  size="small"
+                  @click="expanded = expanded.includes(item.id) ? [] : [item.id]"
+                >
+                  <v-icon>{{ expanded.includes(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                </v-btn>
+            </div>
+            
+            <!-- Card Body -->
+            <v-list density="compact" class="py-2 px-4">
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon class="me-4" color="primary">mdi-ip-network</v-icon>
+                  </template>
+                  <v-list-item-title>IP Pelanggan</v-list-item-title>
+                   <template v-slot:append>
+                     <a :href="`http://${item.ip_pelanggan}`" target="_blank" class="text-decoration-none">
+                      <v-chip size="small" variant="tonal" color="primary">{{ item.ip_pelanggan }}</v-chip>
+                     </a>
+                   </template>
+                </v-list-item>
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon class="me-4" color="deep-purple">mdi-router-network</v-icon>
+                  </template>
+                  <v-list-item-title>OLT</v-list-item-title>
+                   <template v-slot:append>
+                     <span class="font-weight-medium">{{ item.olt }}</span>
+                   </template>
+                </v-list-item>
+                <v-list-item class="px-0">
+                  <template v-slot:prepend>
+                    <v-icon class="me-4" :color="getOnuPowerColor(item.onu_power)">mdi-signal</v-icon>
+                  </template>
+                  <v-list-item-title>ONU Power</v-list-item-title>
+                   <template v-slot:append>
+                     <v-chip :color="getOnuPowerColor(item.onu_power)" size="small" variant="flat" label class="font-weight-bold">
+                       {{ item.onu_power }} dBm
+                     </v-chip>
+                   </template>
+                </v-list-item>
+            </v-list>
+
+            <!-- Expanded Content -->
+             <v-expand-transition>
+                <div v-if="expanded.includes(item.id)">
+                  <v-divider></v-divider>
+                  <div class="pa-4" style="background-color: rgba(0,0,0,0.02);">
+                     <h4 class="text-subtitle-1 font-weight-bold mb-2">Detail Lengkap</h4>
+                      <v-list density="compact" class="bg-transparent">
+                        <v-list-item prepend-icon="mdi-key-variant">Password: {{ item.password_pppoe }}</v-list-item>
+                        <v-list-item prepend-icon="mdi-account-details">Profile: {{ item.profile_pppoe }}</v-list-item>
+                        <v-list-item prepend-icon="mdi-lan">VLAN: {{ item.id_vlan }}</v-list-item>
+                        <v-list-item prepend-icon="mdi-timeline">PON: {{ item.pon }}</v-list-item>
+                        <v-list-item prepend-icon="mdi-barcode-scan">SN: {{ item.sn || 'N/A' }}</v-list-item>
+                      </v-list>
+                  </div>
+                </div>
+              </v-expand-transition>
+            
+            <v-divider></v-divider>
+
+            <!-- Card Actions -->
+            <v-card-actions class="justify-space-around pa-1">
+                <v-btn variant="text" color="primary" @click="openDialog(item)">
+                  <v-icon start>mdi-pencil</v-icon>
+                  Edit
+                </v-btn>
+                <v-btn variant="text" color="error" @click="openDeleteDialog(item)">
+                   <v-icon start>mdi-delete</v-icon>
+                   Hapus
+                </v-btn>
+            </v-card-actions>
+          </v-card>
+
+          <!-- Tombol Load More -->
+          <div v-if="hasMoreData" class="text-center pa-4">
+            <v-btn
+              variant="tonal"
+              color="primary"
+              @click="loadMore"
+              :loading="loadingMore"
+              class="text-none"
+            >
+              Muat Lebih Banyak
+            </v-btn>
+          </div>
+
+        </div>
+      </div>
+      <!-- PERUBAHAN SELESAI DI SINI -->
+
     </v-card>
 
     <v-dialog 
@@ -814,13 +945,19 @@ const dialogImport = ref(false);
 const importing = ref(false);
 const snackbar = ref({ show: false, text: '', color: 'success' });
 const importErrors = ref<string[]>([]);
+
+// --- State Baru untuk Paginasi Mobile ---
+const mobilePage = ref(1);
+const itemsPerPage = 15; // Jumlah item per halaman untuk mobile
+const hasMoreData = ref(true);
+const loadingMore = ref(false);
 const selectedOlt = ref<string | null>(null);
 
 const authStore = useAuthStore();
 
 // Ref untuk komponen file input
 const fileInputComponent = ref<any>(null);
-const expanded = ref<readonly any[]>([]);
+const expanded = ref<any[]>([]); // Ganti dari readonly
 
 // --- Computed Properties ---
 const isEditMode = computed(() => !!editedItem.value.id);
@@ -872,6 +1009,11 @@ const pelangganForSelect = computed(() => {
 const oltOptions = computed(() => {
   const olts = dataTeknisList.value.map(item => item.olt);
   return [...new Set(olts)]; // Mengambil daftar OLT yang unik
+});
+
+const paginatedDataTeknis = computed(() => {
+  if (dataTeknisList.value.length === 0) return [];
+  return dataTeknisList.value;
 });
 
 // --- Table Headers ---
@@ -927,8 +1069,15 @@ onMounted(() => {
   fetchOdpList();
 });
 
-async function fetchDataTeknis() {
-  loading.value = true;
+async function fetchDataTeknis(isLoadMore = false) {
+  if (isLoadMore) {
+    loadingMore.value = true;
+  } else {
+    loading.value = true;
+    mobilePage.value = 1; // Reset halaman saat filter baru
+    hasMoreData.value = true; // Reset status data
+  }
+
   try {
     const params = new URLSearchParams();
     if (searchQuery.value) {
@@ -937,14 +1086,36 @@ async function fetchDataTeknis() {
     if (selectedOlt.value) {
       params.append('olt', selectedOlt.value);
     }
+
+    // Tambahkan parameter paginasi
+    const skip = (mobilePage.value - 1) * itemsPerPage;
+    params.append('skip', String(skip));
+    params.append('limit', String(itemsPerPage));
     
     const response = await apiClient.get(`/data_teknis/?${params.toString()}`);
-    dataTeknisList.value = response.data;
+    const newData = response.data;
+
+    if (isLoadMore) {
+      dataTeknisList.value.push(...newData);
+    } else {
+      dataTeknisList.value = newData;
+    }
+
+    // Cek apakah masih ada data untuk dimuat
+    if (newData.length < itemsPerPage) {
+      hasMoreData.value = false;
+    }
+
   } finally {
     loading.value = false;
+    loadingMore.value = false;
   }
 }
 
+function loadMore() {
+  mobilePage.value++;
+  fetchDataTeknis(true);
+}
 
 async function fetchOdpList() {
   loadingOdps.value = true;
@@ -961,7 +1132,7 @@ async function fetchOdpList() {
 
 
 const applyFilters = debounce(() => {
-  fetchDataTeknis();
+  fetchDataTeknis(false); // Panggil dengan `isLoadMore = false` untuk mereset
 }, 500);
 
 watch([searchQuery, selectedOlt], () => {
@@ -971,6 +1142,7 @@ watch([searchQuery, selectedOlt], () => {
 function resetFilters() {
   searchQuery.value = '';
   selectedOlt.value = null;
+  // fetchDataTeknis() akan ter-trigger oleh watch
 }
 
 async function fetchMikrotikServers() {
@@ -984,7 +1156,10 @@ async function fetchMikrotikServers() {
 
 async function fetchPelanggan() {
   try {
-    const response = await apiClient.get('/pelanggan/');
+    // PERBAIKAN: Ambil semua pelanggan tanpa limit untuk pemetaan nama
+    // Ini tidak ideal, tapi untuk sementara bisa jalan.
+    // Solusi idealnya adalah membuat endpoint khusus untuk mengambil nama berdasarkan ID.
+    const response = await apiClient.get('/pelanggan/?limit=10000');
     pelangganList.value = response.data;
     const newMap = new Map<number, Pelanggan>();
     for (const pelanggan of response.data) {
@@ -1359,6 +1534,30 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
 </script>
 
 <style scoped>
+/* MENAMBAHKAN STYLE BARU UNTUK KARTU MOBILE */
+.data-teknis-card-mobile {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 16px;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.data-teknis-card-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+.data-teknis-card-mobile .v-list-item {
+  min-height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.data-teknis-card-mobile .v-list-item-title {
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+}
+.data-teknis-card-mobile .v-list-item__append {
+  font-size: 0.9rem;
+}
+/* ------------------------------------------- */
+
 .gap-3 {
   gap: 12px;
 }
@@ -1370,11 +1569,6 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
   overflow-x: auto;
   width: 100%;
 }
-
-/* DIHAPUS: Semua CSS custom untuk dialog responsive dihilangkan
-   karena sudah ditangani oleh prop :fullscreen dan struktur flexbox.
-   Ini adalah cara yang paling bersih dan stabil.
-*/
 
 .filter-card {
   border-radius: 20px;

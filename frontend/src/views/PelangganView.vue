@@ -160,7 +160,7 @@
 
         <div v-else class="mobile-cards-container">
           <v-card
-            v-for="item in pelangganList"
+            v-for="item in paginatedPelanggan"
             :key="item.id"
             class="mobile-customer-card mb-3"
             elevation="2"
@@ -255,6 +255,20 @@
               </div>
             </v-card-text>
           </v-card>
+
+          <!-- Tombol Load More -->
+          <div v-if="hasMoreData" class="text-center pa-4">
+            <v-btn
+              variant="tonal"
+              color="primary"
+              @click="loadMore"
+              :loading="loadingMore"
+              class="text-none"
+            >
+              Muat Lebih Banyak
+            </v-btn>
+          </div>
+
         </div>
       </div>
 
@@ -909,6 +923,12 @@ const searchQuery = ref('');
 const selectedAlamat = ref<string | null>(null);
 const selectedBrand = ref<string | null>(null);
 
+// --- State Baru untuk Paginasi Mobile ---
+const mobilePage = ref(1);
+const itemsPerPage = 15;
+const hasMoreData = ref(true);
+const loadingMore = ref(false);
+
 const defaultItem: Partial<Pelanggan> = { 
   id: undefined, 
   nama: '', 
@@ -974,6 +994,11 @@ const headers = [
 // --- COMPUTED PROPERTIES ---
 const formTitle = computed(() => editedIndex.value === -1 ? 'Tambah Pelanggan Baru' : 'Edit Pelanggan');
 
+const paginatedPelanggan = computed(() => {
+  if (pelangganList.value.length === 0) return [];
+  return pelangganList.value;
+});
+
 // --- LIFECYCLE HOOK ---
 onMounted(() => {
   fetchPelanggan();
@@ -1012,9 +1037,15 @@ async function confirmBulkDelete() {
   }
 }
 
-// --- CRUD METHODS ---
-async function fetchPelanggan() {
-  loading.value = true;
+async function fetchPelanggan(isLoadMore = false) {
+  if (isLoadMore) {
+    loadingMore.value = true;
+  } else {
+    loading.value = true;
+    mobilePage.value = 1;
+    hasMoreData.value = true;
+  }
+
   try {
     const params = new URLSearchParams();
     if (searchQuery.value) {
@@ -1027,14 +1058,36 @@ async function fetchPelanggan() {
       params.append('id_brand', selectedBrand.value);
     }
 
+    // Tambahkan parameter paginasi
+    const skip = (mobilePage.value - 1) * itemsPerPage;
+    params.append('skip', String(skip));
+    params.append('limit', String(itemsPerPage));
+
     const response = await apiClient.get(`/pelanggan/?${params.toString()}`);
-    pelangganList.value = response.data;
+    const newData = response.data;
+
+    if (isLoadMore) {
+      pelangganList.value.push(...newData);
+    } else {
+      pelangganList.value = newData;
+    }
+
+    if (newData.length < itemsPerPage) {
+      hasMoreData.value = false;
+    }
+
   } catch (error) { 
     console.error("Gagal mengambil data pelanggan:", error);
     showSnackbar('Gagal mengambil data pelanggan', 'error');
   } finally { 
     loading.value = false; 
+    loadingMore.value = false;
   }
+}
+
+function loadMore() {
+  mobilePage.value++;
+  fetchPelanggan(true);
 }
 
 const applyFilters = debounce(() => {

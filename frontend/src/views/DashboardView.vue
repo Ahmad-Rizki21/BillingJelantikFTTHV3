@@ -888,18 +888,23 @@ onMounted(async () => {
     }
 
     if (data.growth_chart) {
-      growthChartData.value = {
-        labels: data.growth_chart.labels,
-        datasets: [{
-          label: 'Pelanggan Baru',
-          data: data.growth_chart.data,
-          borderColor: 'rgb(236, 72, 153)',
-          backgroundColor: 'rgba(236, 72, 153, 0.1)',
-          tension: 0.4,
-          fill: true,
-        }]
-      };
-    }
+    growthChartData.value = {
+      labels: data.growth_chart.labels,
+      datasets: [{
+        label: 'Pelanggan Baru',
+        data: data.growth_chart.data,
+        borderColor: 'rgb(99, 102, 241)', // Biru yang kontras
+        backgroundColor: 'rgba(99, 102, 241, 0.25)', // Background lebih terlihat
+        borderWidth: 3, // Garis lebih tebal
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: 'rgb(99, 102, 241)',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+      }]
+    };
+  }
     
     if (data.invoice_summary_chart) {
       invoiceChartData.value = {
@@ -1214,6 +1219,34 @@ onMounted(async () => {
     margin: 1.5rem 0;
   }
 }
+
+
+.growth-chart .chart-container canvas {
+  filter: contrast(1.2) saturate(1.1);
+}
+
+/* Alternatif: Jika masih tidak terlihat, tambahkan styling khusus untuk growth chart */
+.v-theme--light .growth-chart .chart-container {
+  background: rgba(248, 250, 252, 0.3);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+/* Pastikan grid lines terlihat dengan baik di light mode */
+.v-theme--light .growth-chart .chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+              linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
 
 /* Stat Cards */
 .stat-card {

@@ -180,7 +180,10 @@
         </div>
       </v-expand-transition>
       
-      <div class="responsive-table-container">
+      <!-- PERUBAHAN DIMULAI DI SINI -->
+      
+      <!-- Tampilan Tabel untuk Desktop (Medium ke atas) -->
+      <div class="responsive-table-container d-none d-md-block">
         <v-data-table
             v-model="selectedInvoices"
             :headers="headers"
@@ -372,6 +375,124 @@
           </template>
         </v-data-table>
       </div>
+
+      <!-- Tampilan Kartu untuk Mobile (Small ke bawah) -->
+      <div class="d-md-none pa-4">
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-8">
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          <p class="mt-4 text-medium-emphasis">Memuat data invoice...</p>
+        </div>
+
+        <!-- No Data State -->
+        <div v-else-if="!filteredInvoices.length" class="text-center py-8">
+          <v-icon size="48" class="text-disabled mb-4">mdi-receipt-text-remove-outline</v-icon>
+          <p class="text-medium-emphasis">Tidak ada data invoice ditemukan</p>
+        </div>
+
+        <!-- Invoice Cards -->
+        <div v-else>
+          <v-card
+            v-for="item in filteredInvoices"
+            :key="item.id"
+            class="invoice-card-mobile mb-4"
+            elevation="2"
+          >
+            <!-- Card Header with Checkbox and Status -->
+            <div class="d-flex align-center pa-2">
+              <v-checkbox-btn
+                v-model="selectedInvoices"
+                :value="item"
+                multiple
+                hide-details
+                class="flex-grow-0"
+              ></v-checkbox-btn>
+              <div class="ms-2 flex-grow-1" @click="openDetailDialog(item)">
+                <div class="font-weight-bold text-primary">{{ item.invoice_number }}</div>
+                <div class="text-caption text-medium-emphasis">{{ getPelangganName(item.pelanggan_id) }}</div>
+              </div>
+              <v-chip
+                :color="getStatusColor(item.status_invoice)"
+                variant="elevated"
+                size="small"
+                class="font-weight-bold ms-2 me-2"
+                label
+              >
+                {{ item.status_invoice }}
+              </v-chip>
+            </div>
+            <v-divider></v-divider>
+
+            <!-- Card Body with details -->
+            <v-list density="compact" class="py-2 px-4">
+              <v-list-item class="px-0">
+                <template v-slot:prepend>
+                  <v-icon color="success" class="me-4">mdi-cash-multiple</v-icon>
+                </template>
+                <v-list-item-title>Total Tagihan</v-list-item-title>
+                <template v-slot:append>
+                  <span class="font-weight-bold text-success">{{ formatCurrency(item.total_harga) }}</span>
+                </template>
+              </v-list-item>
+              <v-list-item class="px-0">
+                <template v-slot:prepend>
+                  <v-icon color="grey" class="me-4">mdi-calendar-start</v-icon>
+                </template>
+                <v-list-item-title>Tgl. Invoice</v-list-item-title>
+                <template v-slot:append>
+                  <span>{{ formatDate(item.tgl_invoice) }}</span>
+                </template>
+              </v-list-item>
+              <v-list-item class="px-0">
+                <template v-slot:prepend>
+                  <v-icon :color="item.status_invoice === 'Kadaluarsa' ? 'error' : 'warning'" class="me-4">mdi-calendar-alert</v-icon>
+                </template>
+                <v-list-item-title>Jatuh Tempo</v-list-item-title>
+                <template v-slot:append>
+                  <div class="text-right">
+                    <div>{{ formatDate(item.tgl_jatuh_tempo) }}</div>
+                    <div v-if="item.status_invoice !== 'Lunas'" class="text-caption" :class="item.status_invoice === 'Kadaluarsa' ? 'text-error' : 'text-warning'">
+                      {{ getDueDateLabel(item) }}
+                    </div>
+                  </div>
+                </template>
+              </v-list-item>
+            </v-list>
+            <v-divider></v-divider>
+
+            <!-- Card Actions -->
+            <v-card-actions class="justify-space-between pa-1">
+              <v-tooltip text="Salin Link">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon variant="text" size="small" color="primary" @click="copyPaymentLink(item.payment_link)" :disabled="!item.payment_link"><v-icon>mdi-content-copy</v-icon></v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Kirim WA">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon variant="text" size="small" color="green" @click="sendWhatsAppReminder(item)" :disabled="!item.payment_link || !item.no_telp"><v-icon>mdi-whatsapp</v-icon></v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Lihat Detail">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon variant="text" size="small" @click="openDetailDialog(item)"><v-icon>mdi-eye</v-icon></v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Tandai Lunas" v-if="auth.hasPermission('edit_invoices') && item.status_invoice !== 'Lunas'">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon variant="text" size="small" color="success" @click="openMarkAsPaidDialog(item)"><v-icon>mdi-check-decagram</v-icon></v-btn>
+                </template>
+              </v-tooltip>
+              <v-tooltip text="Hapus" v-if="auth.hasPermission('delete_invoices')">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon variant="text" size="small" color="error" @click="openDeleteDialog(item)"><v-icon>mdi-delete</v-icon></v-btn>
+                </template>
+              </v-tooltip>
+            </v-card-actions>
+          </v-card>
+        </div>
+      </div>
+      <!-- PERUBAHAN SELESAI DI SINI -->
+
     </v-card>
 
     <v-dialog v-model="dialogDelete" max-width="500px" persistent>
@@ -929,7 +1050,31 @@ async function confirmMarkAsPaid() {
 </script>
 
 <style scoped>
-/* PERUBAHAN: Menambahkan style untuk responsive table */
+/* MENAMBAHKAN STYLE BARU UNTUK KARTU MOBILE */
+.invoice-card-mobile {
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-radius: 12px;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+.invoice-card-mobile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+.invoice-card-mobile .v-list-item {
+  min-height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.invoice-card-mobile .v-list-item-title {
+  font-size: 0.9rem;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+}
+.invoice-card-mobile .v-list-item__append {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+/* ------------------------------------------- */
+
 .responsive-table-container {
   overflow-x: auto;
   width: 100%;

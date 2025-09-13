@@ -5176,3 +5176,9 @@ json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 2025-09-13 20:38:46 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
 2025-09-13 20:38:57 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
 2025-09-13 20:39:05 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:39:18 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:39:26 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:39:36 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:39:46 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:39:55 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
+2025-09-13 20:40:03 │ ROUTERS.N...    │ [91mERROR   [0m │ websocket_endpoint   │ WebSocket authentication error: 401: Could not validate credentials
