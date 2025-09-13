@@ -15,6 +15,7 @@
         </div>
         <v-spacer class="d-none d-md-block"></v-spacer>
         <v-btn 
+          v-if="auth.hasPermission('create_invoices')"
           color="white"
           variant="elevated"
           size="large"
@@ -312,6 +313,7 @@
               <v-tooltip location="top">
                 <template v-slot:activator="{ props }">
                   <v-btn 
+                    v-if="auth.hasPermission('delete_invoices')"
                     icon="mdi-delete" 
                     v-bind="props"
                     variant="text" 
@@ -324,7 +326,7 @@
                 <span>Hapus</span>
               </v-tooltip>
 
-              <v-tooltip location="top">
+              <v-tooltip location="top" v-if="auth.hasPermission('edit_invoices')">
                   <template v-slot:activator="{ props }">
                     <v-btn 
                       v-if="item.status_invoice !== 'Lunas'"
@@ -536,6 +538,8 @@ import type { Invoice, PelangganSelectItem } from '@/interfaces/invoice';
 import InvoiceDetailDialog from '@/components/dialogs/InvoiceDetailDialog.vue';
 import { debounce } from 'lodash-es';
 
+import { useAuthStore } from '@/stores/auth';
+const auth = useAuthStore();
 
 // --- State ---
 const invoices = ref<Invoice[]>([]);

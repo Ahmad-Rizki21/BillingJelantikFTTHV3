@@ -80,6 +80,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        extra = "ignore"  # <-- TAMBAHKAN BARIS INI
 
 
 settings = Settings()

@@ -17,6 +17,7 @@ from sqlalchemy import and_
 from typing import Optional
 
 # Impor semua model dan skema yang dibutuhkan
+from ..auth import has_permission
 from ..models.invoice import Invoice as InvoiceModel
 from ..models.langganan import Langganan as LanggananModel
 from ..models.pelanggan import Pelanggan as PelangganModel
@@ -393,8 +394,10 @@ async def handle_xendit_callback(
     return {"message": "Callback processed successfully"}
 
 
-@router.post(
-    "/generate", response_model=InvoiceSchema, status_code=status.HTTP_201_CREATED
+@router.post("/generate", 
+    response_model=InvoiceSchema,
+    status_code=status.HTTP_201_CREATED, 
+    dependencies=[Depends(has_permission("create_invoices"))],
 )
 async def generate_manual_invoice(
     invoice_data: InvoiceGenerate, db: AsyncSession = Depends(get_db)
@@ -556,7 +559,7 @@ async def generate_manual_invoice(
     return db_invoice
 
 
-@router.post("/{invoice_id}/mark-as-paid", response_model=InvoiceSchema)
+@router.post("/{invoice_id}/mark-as-paid", response_model=InvoiceSchema, dependencies=[Depends(has_permission("edit_invoices"))])
 async def mark_invoice_as_paid(
     invoice_id: int, payload: MarkAsPaidRequest, db: AsyncSession = Depends(get_db)
 ):
@@ -596,7 +599,7 @@ async def mark_invoice_as_paid(
     return invoice
 
 
-@router.delete("/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(has_permission("delete_invoices"))],)
 async def delete_invoice(invoice_id: int, db: AsyncSession = Depends(get_db)):
     """Menghapus satu invoice berdasarkan ID-nya."""
 

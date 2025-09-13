@@ -3,6 +3,7 @@
 import './assets/main.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // 1. Impor semua yang dibutuhkan
 import App from './App.vue'

@@ -905,10 +905,6 @@ const isNocUser = computed(() => {
       // Jika ya, baru akses .name
       return role.name.toLowerCase() === 'noc';
     }
-    // Jika 'role' adalah string, lakukan perbandingan langsung
-    if (typeof role === 'string') {
-      return role.toLowerCase() === 'noc';
-    }
   }
   return false;
 });

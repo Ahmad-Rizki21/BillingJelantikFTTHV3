@@ -421,7 +421,7 @@ function playSound(type: string) {
   } else if (type === 'new_customer_for_noc') {
     audioFile = '/payment.mp3';
   } else if (type === 'new_technical_data') {
-    audioFile = '/langganan.mp3';
+    audioFile = '/noc_finance.mp3';
   }
 
   if (audioFile) {
@@ -597,8 +597,6 @@ onMounted(async () => {
     if (typeof role === 'object' && role !== null && role.name) {
       if (role.name.toLowerCase() === 'admin') userPermissions.value = ['*'];
       else userPermissions.value = role.permissions?.map((p: any) => p.name) || [];
-    } else if (typeof role === 'string') {
-      if (role.toLowerCase() === 'admin') userPermissions.value = ['*'];
     }
     fetchRoleCount();
     fetchUserCount();

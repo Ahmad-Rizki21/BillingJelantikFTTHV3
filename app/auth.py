@@ -81,6 +81,25 @@ async def get_current_active_user(
     return user
 
 
+def has_permission(required_permission: str):
+    """
+    Dependency yang memeriksa apakah user yang login
+    memiliki permission yang dibutuhkan.
+    """
+    async def permission_checker(current_user: User = Depends(get_current_active_user)):
+        # Ambil semua nama permission yang dimiliki user
+        user_permissions = {p.name for p in current_user.role.permissions}
+
+        # Jika permission yang dibutuhkan tidak ada, tolak akses
+        if required_permission not in user_permissions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Tidak memiliki hak akses untuk: '{required_permission}'",
+            )
+    
+    return permission_checker
+
+
 # --- FUNGSI BARU UNTUK OTENTIKASI WEBSOCKET ---
 async def get_user_from_token(token: str, db: AsyncSession) -> User | None:
     """
