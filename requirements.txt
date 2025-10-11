@@ -96,4 +96,4 @@ mypy==1.8.0
 
 # Security
 bandit==1.7.5
-safety==3.0.1
+safety==2.3.5
