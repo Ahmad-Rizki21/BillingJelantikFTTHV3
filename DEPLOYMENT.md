@@ -1,359 +1,452 @@
-# 🚀 DEPLOYMENT GUIDE
-# ArtacomFTTHBilling_V2
+# Artacom FTTH Billing System - Deployment Guide
 
-## 📋 **Table of Contents**
-1. [Prerequisites](#prerequisites)
-2. [Environment Setup](#environment-setup)
-3. [Deployment Options](#deployment-options)
-4. [CI/CD Pipeline](#cicd-pipeline)
-5. [Manual Deployment](#manual-deployment)
-6. [Troubleshooting](#troubleshooting)
+## Overview
 
----
+This guide covers the complete deployment process for the Artacom FTTH Billing System using enterprise-grade CI/CD pipeline with staging and production environments.
 
-## 🔧 **PREREQUISITES**
+## Architecture Overview
 
-### **Server Requirements:**
-- **OS:** Ubuntu 20.04+ or CentOS 8+
-- **RAM:** Minimum 4GB
-- **Storage:** 20GB+
-- **Node.js:** v18+
-- **Python:** 3.10+
-- **PostgreSQL:** 13+
-- **Redis:** 6+
-
-### **Development Tools:**
-- **Git:** v2.30+
-- **Android Studio:** Latest
-- **VS Code:** Latest
-
----
-
-## 🔧 **ENVIRONMENT SETUP**
-
-### **Backend Configuration:**
-```bash
-# Clone repository
-git clone https://github.com/your-username/ArtacomFTTHBilling_V2.git
-cd ArtacomFTTHBilling_V2
-
-# Setup Python environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Copy environment files
-cp .env.example .env
-# Edit .env dengan konfigurasi yang sesuai
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   GitHub Repo   │───▶│  CI/CD Pipeline │───▶│  Staging Env    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Developers    │───▶│  Manual Approvals│───▶│ Production Env  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-### **Environment Variables (.env):**
+## Prerequisites
+
+### System Requirements
+
+**Minimum Staging Environment:**
+- CPU: 2 cores
+- RAM: 4GB
+- Storage: 20GB SSD
+- Network: 100Mbps
+
+**Minimum Production Environment:**
+- CPU: 4 cores
+- RAM: 8GB
+- Storage: 50GB SSD
+- Network: 1Gbps
+- High availability setup recommended
+
+### Software Requirements
+
+- Docker & Docker Compose
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+- Git
+- SSL certificates (for production)
+
+## Environment Setup
+
+### 1. Repository Setup
+
 ```bash
-# Database Configuration
-DATABASE_URL=postgresql://user:password@localhost:5432/artacom_billing
-REDIS_URL=redis://localhost:6379/0
+# Clone the repository
+git clone https://github.com/Ahmad-Rizki21/BillingFtthV2.git
+cd BillingFtthV2
+
+# Create feature branches
+git checkout -b feature/new-feature
+git checkout main-bersih  # For staging
+git checkout main          # For production
+```
+
+### 2. Environment Configuration
+
+#### Staging Environment
+
+```bash
+# Copy environment template
+cp .env.staging.example .env.staging
+
+# Edit with actual values
+nano .env.staging
+```
+
+**Required Staging Variables:**
+```bash
+# Database
+STAGING_DB_NAME=billing_staging
+STAGING_DB_USER=staging_user
+STAGING_DB_PASSWORD=your_secure_password
+
+# Redis
+STAGING_REDIS_PASSWORD=your_redis_password
 
 # Security
-SECRET_KEY=your-secret-key-here
-CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+STAGING_SECRET_KEY=your_32_character_secret_key
+STAGING_ENCRYPTION_KEY=your_32_character_encryption_key
 
-# Production Settings
-DEBUG=False
-ENVIRONMENT=production
-LOG_LEVEL=INFO
+# Xendit
+STAGING_XENDIT_CALLBACK_TOKEN_ARTACOMINDO=your_staging_token
+STAGING_XENDIT_CALLBACK_TOKEN_JELANTIK=your_staging_token
+STAGING_XENDIT_API_KEY_JAKINET=your_staging_api_key
+STAGING_XENDIT_API_KEY_JELANTIK=your_staging_api_key
 ```
 
----
+#### Production Environment
 
-## 🚀 **DEPLOYMENT OPTIONS**
-
-### **Option 1: Docker Container (Recommended)**
 ```bash
-# Build Docker image
-docker build -t artacom-billing:latest .
+# Copy environment template
+cp .env.prod.example .env.prod
 
-# Run with Docker Compose
-docker-compose up -d
+# Edit with production values
+nano .env.prod
 ```
 
-### **Option 2: Traditional Server Deployment**
+**Required Production Variables:**
 ```bash
-# Start backend
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Database (use strong passwords)
+PROD_DB_NAME=billing_prod
+PROD_DB_USER=prod_user
+PROD_DB_PASSWORD=very_strong_prod_password
 
-# Start frontend (nginx terintegrasi)
-# Serve dari dist/ dengan nginx
+# Redis
+PROD_REDIS_PASSWORD=very_strong_redis_password
+
+# Security (use cryptographically secure keys)
+PROD_SECRET_KEY=cryptographically_secure_32_char_key
+PROD_ENCRYPTION_KEY=generated_32_char_encryption_key
+
+# Xendit Production
+PROD_XENDIT_CALLBACK_TOKEN_ARTACOMINDO=prod_token
+PROD_XENDIT_CALLBACK_TOKEN_JELANTIK=prod_token
+PROD_XENDIT_API_KEY_JAKINET=prod_api_key
+PROD_XENDIT_API_KEY_JELANTIK=prod_api_key
 ```
 
-### **Option 3: Cloud Platform**
-- **AWS EC2** dengan Docker
-- **Google Cloud Platform**
-- **DigitalOcean** Droplets
-- **Vercel** (frontend)
+### 3. GitHub Secrets Setup
 
----
+See `.github/workflows/secrets-setup.md` for detailed instructions.
 
-## 🔄 **CI/CD PIPELINE**
-
-### **Automated Build & Deploy:**
-1. **Push ke main branch** → Otomatis build
-2. **Pull Request** → Run tests → Build APK
-3. **Deployment** → Upload APK ke artifacts
-4. **Optional deployment** → Deploy ke server
-
-### **CI/CD Features:**
-- ✅ **Type checking** (Vue.js + TypeScript)
-- ✅ **Unit testing** (frontend & backend)
-- ✅ **Security scanning**
-- ✅ **APK build** (Debug & Release)
-- ✅ **Artifact management**
-- ✅ **Multi-environment support**
-
----
-
-## 📦 **MANUAL DEPLOYMENT**
-
-### **Backend Deployment:**
+**Quick Setup:**
 ```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Setup database
-createdb artacom_billing
-psql -U postgres -d artacom_billing < database/schema.sql
-
-# 3. Run migrations
-alembic upgrade head
-
-# 4. Start application
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Install GitHub CLI
+# Then set secrets:
+gh secret set STAGING_DB_PASSWORD --body "your_staging_db_password"
+gh secret set PROD_DB_PASSWORD --body "your_prod_db_password"
+gh secret set PROD_SECRET_KEY --body "your_prod_secret_key"
+# ... set all other required secrets
 ```
 
-### **Frontend Deployment:**
+## Deployment Process
+
+### Automated CI/CD Pipeline
+
+The system uses GitHub Actions for automated deployment:
+
+#### Branch Strategy
+
+- **main-bersih**: Auto-deploy to staging
+- **main**: Requires approval, deploys to production
+- **feature branches**: Run tests only, no deployment
+
+#### Pipeline Stages
+
+1. **Code Quality & Security**
+   - Linting (flake8, ESLint)
+   - Type checking (mypy, TypeScript)
+   - Security scanning (bandit, safety)
+   - Code formatting (black, isort, prettier)
+
+2. **Testing**
+   - Unit tests with 80%+ coverage requirement
+   - Integration tests
+   - API tests
+
+3. **Build & Push**
+   - Build Docker images
+   - Push to container registry
+   - Multi-platform builds (amd64, arm64)
+
+4. **Deployment**
+   - Staging: Automatic
+   - Production: Manual approval required
+
+### Manual Deployment
+
+#### Staging Deployment
+
 ```bash
-# 1. Build production version
-cd frontend
-npm run build
+# Deploy to staging
+docker-compose -f docker-compose.staging.yml up -d
 
-# 2. Configure web server (nginx)
-sudo cp -r dist/* /var/www/html/
+# Check deployment status
+docker-compose -f docker-compose.staging.yml ps
 
-# 3. Start nginx
-sudo systemctl start nginx
+# View logs
+docker-compose -f docker-compose.staging.yml logs -f
 ```
 
-### **Android APK Deployment:**
+#### Production Deployment
+
 ```bash
-# 1. Install ADB
-# Download dan install Android SDK
+# Deploy to production (requires approval)
+docker-compose -f docker-compose.prod.yml up -d
 
-# 2. Enable USB debugging
-# Enable Developer Options pada Android device
+# Check deployment status
+docker-compose -f docker-compose.prod.yml ps
 
-# 3. Install APK
-adb install frontend/android/app/build/outputs/apk/release/app-release.apk
-
-# 4. Testing
-# Buka aplikasi dan uji semua fitur
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
 ```
 
----
+### Database Management
 
-## 🔍 **TROUBLESHOOTING**
+#### Migrations
 
-### **Build Errors:**
 ```bash
-# Clean build cache
-npm run clean && npm run build
+# For staging
+docker-compose -f docker-compose.staging.yml exec backend alembic upgrade head
 
-# Reinstall dependencies
-rm -rf node_modules && npm install
+# For production
+docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
 ```
 
-### **APK Installation Errors:**
+#### Backups
+
 ```bash
-# Enable USB debugging pada device
-# Buka Developer Options → USB Debugging
+# Create backup
+docker-compose -f docker-compose.prod.yml exec postgres-master pg_dump -U prod_user billing_prod > backup.sql
 
-# Check Android version compatibility
-adb devices
-adb shell getprop ro.build.version.sdk
+# Restore backup
+docker-compose -f docker-compose.prod.yml exec -T postgres-master psql -U prod_user billing_prod < backup.sql
 ```
 
-### **Database Connection Errors:**
+## Monitoring & Logging
+
+### Access Monitoring Tools
+
+#### Staging Environment
+
+- **Application**: http://staging-domain:8001
+- **Frontend**: http://staging-domain:3001
+- **Grafana**: http://staging-domain:3002
+- **Prometheus**: http://staging-domain:9091
+
+#### Production Environment
+
+- **Application**: https://your-domain.com
+- **Grafana**: https://your-domain.com:3000
+- **Prometheus**: https://your-domain.com:9090
+
+### Log Locations
+
+- **Application logs**: `./logs/{env}/`
+- **Nginx logs**: `./logs/nginx-{env}/`
+- **Database logs**: Docker container logs
+
+### Health Checks
+
 ```bash
-# Check database status
-sudo systemctl status postgresql
+# Check application health
+curl https://your-domain.com/health
 
-# Test connection
-psql -h localhost -U postgres -d artacom_billing
+# Check database connection
+curl https://your-domain.com/health/db
+
+# Check external services
+curl https://your-domain.com/health/services
 ```
 
-### **API Connection Issues:**
+## SSL/TLS Setup
+
+### For Production
+
+1. **Obtain SSL Certificates**
+   ```bash
+   # Using Let's Encrypt
+   certbot certonly --standalone -d your-domain.com
+   ```
+
+2. **Configure Nginx**
+   ```bash
+   # Copy certificates
+   sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem ./ssl/prod/cert.pem
+   sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem ./ssl/prod/key.pem
+   ```
+
+3. **Update Environment**
+   ```bash
+   # Add to .env.prod
+   PROD_SSL_CERT_PATH=/etc/nginx/ssl/cert.pem
+   PROD_SSL_KEY_PATH=/etc/nginx/ssl/key.pem
+   ```
+
+## Scaling & Performance
+
+### Horizontal Scaling
+
 ```bash
-# Test backend API
-curl -X GET http://localhost:8000/api/status
+# Scale backend services
+docker-compose -f docker-compose.prod.yml up -d --scale backend-prod=3
 
-# Test frontend routing
-curl -I http://localhost:5173
+# Scale frontend services
+docker-compose -f docker-compose.prod.yml up -d --scale frontend-prod=2
 ```
 
----
+### Performance Tuning
 
-## 📱 **MONITORING & LOGS**
+1. **Database Optimization**
+   - Configure connection pooling
+   - Add appropriate indexes
+   - Enable query caching
 
-### **Application Logs:**
-```bash
-# Backend logs
-tail -f logs/app.log
+2. **Redis Optimization**
+   - Configure memory limits
+   - Enable persistence
+   - Set up replication
 
-# Access logs via mobile
-curl http://your-domain.com/logs
-```
+3. **Application Tuning**
+   - Adjust worker processes
+   - Configure rate limiting
+   - Enable response caching
 
-### **Database Monitoring:**
-```sql
--- Check active connections
-SELECT * FROM pg_stat_activity;
+## Security Considerations
 
--- Monitor slow queries
-SELECT * FROM pg_stat_statements WHERE mean_exec_time > 1000;
-```
+### Network Security
 
-### **API Monitoring:**
-- Application Performance Monitoring (APM)
-- Error tracking and alerting
-- Uptime monitoring
+- Use firewall to restrict access
+- Enable VPN for admin access
+- Configure security groups
 
----
+### Application Security
 
-## 📊 **PERFORMANCE OPTIMIZATION**
+- Regular security updates
+- Monitor for vulnerabilities
+- Use WAF (Web Application Firewall)
+- Enable DDoS protection
 
-### **Backend:**
-- Database connection pooling
-- Query optimization
-- Caching strategy
-- Load balancing
+### Data Security
 
-### **Frontend:**
-- Bundle size optimization
-- Lazy loading
-- Service Worker for caching
-- CDN integration
-
-### **Mobile:**
-- APK size optimization
-- Resource compression
-- Network request optimization
-- Local storage caching
-
----
-
-## 🔄 **UPDATE STRATEGY**
-
-### **Rollback Plan:**
-1. Backup current version
-2. Keep previous build
-3. Revert jika diperlukan
-
-### **Blue-Green Deployment:**
-1. Deploy ke staging environment
-2. Run smoke tests
-3. Gradual production rollout
-
-### **Zero-Downtime:**
-- Load balancer configuration
-- Health checks
-- Graceful shutdown
-- Auto-scaling
-
----
-
-## 🔐 **SECURITY CONSIDERATIONS**
-
-### **Production Security:**
-- HTTPS enforcement
-- API rate limiting
-- Input validation
-- SQL injection prevention
-- CORS configuration
-- Security headers
-
-### **Mobile Security:**
-- APK signing
-- Certificate pinning
-- Root detection
-- Data encryption
-- Secure storage
-
-### **Data Protection:**
-- Database encryption
-- Backup strategy
-- Access control
+- Encrypt sensitive data
+- Regular backups
+- Access control management
 - Audit logging
-- Data retention policy
 
----
+## Troubleshooting
 
-## 📞 **BACKUP STRATEGY**
+### Common Issues
 
-### **Database Backups:**
+#### Deployment Fails
+
 ```bash
-# Automated daily backups
-pg_dump artacom_billing > backup_$(date +%Y%m%d).sql
+# Check logs
+docker-compose logs
 
-# Incremental backups
-pg_basebackup artacom_billing /backups/incremental/
+# Check resource usage
+docker stats
+
+# Check disk space
+df -h
 ```
 
-### **Application Backups:**
-```bash
-# Code repositories
-git archive --format zip -9 ../backup/frontend-$(date +%Y%m%d).zip
+#### Database Connection Issues
 
-# Configuration files
-tar -czf ../backup/config-$(date +%Y%m%d).tar.gz .env
+```bash
+# Test database connection
+docker-compose exec postgres psql -U user -d database
+
+# Check database logs
+docker-compose logs postgres
 ```
 
-### **APK Backups:**
+#### Application Errors
+
 ```bash
-# Versioned APK storage
-mkdir -p releases/
-cp *.apk releases/v$(date +%Y%m%d)/
+# Check application logs
+docker-compose logs backend
+
+# Check health status
+curl http://localhost:8000/health
 ```
 
+### Emergency Procedures
+
+#### Rollback Deployment
+
+```bash
+# Get previous image tag
+docker images | grep billing-app
+
+# Rollback to previous version
+docker-compose -f docker-compose.prod.yml up -d --force-recreate \
+  backend-prod:tag_name \
+  frontend-prod:tag_name
+```
+
+#### Database Recovery
+
+```bash
+# Stop application
+docker-compose -f docker-compose.prod.yml stop backend-prod
+
+# Restore from backup
+docker-compose -f docker-compose.prod.yml exec -T postgres-master \
+  psql -U prod_user billing_prod < backup.sql
+
+# Start application
+docker-compose -f docker-compose.prod.yml start backend-prod
+```
+
+## Maintenance
+
+### Regular Tasks
+
+- **Daily**: Check logs, monitor performance
+- **Weekly**: Update dependencies, security scans
+- **Monthly**: Database maintenance, backup verification
+- **Quarterly**: Security audit, performance review
+
+### Updates
+
+#### Application Updates
+
+```bash
+# Pull latest code
+git pull origin main
+
+# Deploy
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+#### System Updates
+
+```bash
+# Update Docker images
+docker-compose -f docker-compose.prod.yml pull
+
+# Restart services
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## Support
+
+For deployment issues:
+
+1. Check logs and error messages
+2. Review this documentation
+3. Check GitHub Actions workflow status
+4. Contact the development team
+
+## Best Practices
+
+1. **Always test in staging first**
+2. **Keep secrets secure**
+3. **Monitor deployments closely**
+4. **Have rollback procedures ready**
+5. **Document any custom configurations**
+6. **Regular security updates**
+7. **Performance monitoring**
+8. **Backup verification**
+
 ---
 
-## 📞 **NEXT STEPS**
-
-1. **Testing Phase:**
-   - Install APK di test device
-   - Uji semua fitur utama
-   - Validasi API integration
-
-2. **Staging Deployment:**
-   - Deploy ke staging environment
-   - Load testing
-   - Performance monitoring
-
-3. **Production Release:**
-   - Generate signed APK
-   - Deploy ke production server
-   - Monitor performance
-
-4. **Post-Deployment:**
-   - Monitor logs
-   - Collect user feedback
-   - Plan improvements
-
----
-
-**🚀 Your ArtacomFTTHBilling_V2 is now fully automated and production-ready with CI/CD pipeline!** 🎯
-
----
-
-*Last Updated: October 11, 2025*
-*Version: 1.0*
+*This documentation is maintained by the Artacom Development Team. For updates and questions, please contact the development team or create an issue in the repository.*
