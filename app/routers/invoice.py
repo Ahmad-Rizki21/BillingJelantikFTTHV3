@@ -55,12 +55,13 @@ async def get_all_invoices(
 ):
     """Mengambil semua data invoice dengan filter."""
     query = (
-        select(InvoiceModel)
-        .join(InvoiceModel.pelanggan)
+        select(InvoiceModel).join(InvoiceModel.pelanggan)
         # PERBAIKAN: Eager load relasi turunan untuk mencegah N+1 query
         # saat skema respons membutuhkan data dari relasi ini (misal: nama brand).
         .options(
-            selectinload(InvoiceModel.pelanggan).selectinload(PelangganModel.harga_layanan)
+            selectinload(InvoiceModel.pelanggan).selectinload(
+                PelangganModel.harga_layanan
+            )
         )
     )
 
@@ -119,7 +120,7 @@ async def _process_successful_payment(
 
     # Cek apakah langganan sebelumnya berstatus 'Suspended'
     is_suspended_or_inactive = langganan.status == "Suspended" or not langganan.status
-    
+
     # Update status invoice (tetap)
     invoice.status_invoice = "Lunas"
     if payload:
@@ -216,7 +217,9 @@ async def _process_successful_payment(
                 data_teknis.mikrotik_sync_pending = True
                 db.add(data_teknis)
     else:
-        logger.info(f"Langganan ID {langganan.id} sudah Aktif. Mikrotik update dilewati.")
+        logger.info(
+            f"Langganan ID {langganan.id} sudah Aktif. Mikrotik update dilewati."
+        )
 
     # Notif ke frontend
     try:
@@ -295,6 +298,7 @@ async def _process_successful_payment(
 #             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid callback token"
 #         )
 
+
 @router.post("/xendit-callback", status_code=status.HTTP_200_OK)
 async def handle_xendit_callback(
     request: Request,
@@ -324,20 +328,26 @@ async def handle_xendit_callback(
     if artacom_token and x_callback_token == artacom_token:
         logger.info("Validating with ARTACOMINDO callback token.")
         # Cek apakah brand_prefix (jika ada) sesuai dengan token ini
-        if brand_prefix and brand_prefix.lower() not in ["jakinet", "nagrak", "artacom"]:
-             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid brand for this token"
+        if brand_prefix and brand_prefix.lower() not in [
+            "jakinet",
+            "nagrak",
+            "artacom",
+        ]:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid brand for this token",
             )
         correct_token = artacom_token
-    
+
     # 2. Coba validasi dengan token JELANTIK
     jelantik_token = settings.XENDIT_CALLBACK_TOKENS.get("JELANTIK")
     if jelantik_token and x_callback_token == jelantik_token:
         logger.info("Validating with JELANTIK callback token.")
         # Cek apakah brand_prefix (jika ada) sesuai dengan token ini
         if brand_prefix and brand_prefix.lower() != "jelantik":
-             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid brand for this token"
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid brand for this token",
             )
         correct_token = jelantik_token
 
@@ -357,7 +367,9 @@ async def handle_xendit_callback(
         .options(
             selectinload(InvoiceModel.pelanggan).options(
                 selectinload(PelangganModel.harga_layanan),
-                selectinload(PelangganModel.langganan).selectinload(LanggananModel.paket_layanan),
+                selectinload(PelangganModel.langganan).selectinload(
+                    LanggananModel.paket_layanan
+                ),
                 selectinload(PelangganModel.data_teknis),
             )
         )
@@ -394,9 +406,10 @@ async def handle_xendit_callback(
     return {"message": "Callback processed successfully"}
 
 
-@router.post("/generate", 
+@router.post(
+    "/generate",
     response_model=InvoiceSchema,
-    status_code=status.HTTP_201_CREATED, 
+    status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(has_permission("create_invoices"))],
 )
 async def generate_manual_invoice(
@@ -559,7 +572,11 @@ async def generate_manual_invoice(
     return db_invoice
 
 
-@router.post("/{invoice_id}/mark-as-paid", response_model=InvoiceSchema, dependencies=[Depends(has_permission("edit_invoices"))])
+@router.post(
+    "/{invoice_id}/mark-as-paid",
+    response_model=InvoiceSchema,
+    dependencies=[Depends(has_permission("edit_invoices"))],
+)
 async def mark_invoice_as_paid(
     invoice_id: int, payload: MarkAsPaidRequest, db: AsyncSession = Depends(get_db)
 ):
@@ -572,7 +589,9 @@ async def mark_invoice_as_paid(
         .options(
             selectinload(InvoiceModel.pelanggan).options(
                 selectinload(PelangganModel.harga_layanan),
-                selectinload(PelangganModel.langganan).selectinload(LanggananModel.paket_layanan),
+                selectinload(PelangganModel.langganan).selectinload(
+                    LanggananModel.paket_layanan
+                ),
                 selectinload(PelangganModel.data_teknis),
             )
         )
@@ -599,7 +618,11 @@ async def mark_invoice_as_paid(
     return invoice
 
 
-@router.delete("/{invoice_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(has_permission("delete_invoices"))],)
+@router.delete(
+    "/{invoice_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(has_permission("delete_invoices"))],
+)
 async def delete_invoice(invoice_id: int, db: AsyncSession = Depends(get_db)):
     """Menghapus satu invoice berdasarkan ID-nya."""
 
@@ -644,8 +667,7 @@ async def update_overdue_invoices(db: AsyncSession = Depends(get_db)):
                 selectinload(PelangganModel.langganan),
                 selectinload(PelangganModel.data_teknis),
             )
-        )
-        .where(
+        ).where(
             and_(
                 InvoiceModel.status_invoice == "Belum Dibayar",
                 InvoiceModel.tgl_jatuh_tempo < overdue_threshold_date,
@@ -675,7 +697,7 @@ async def update_overdue_invoices(db: AsyncSession = Depends(get_db)):
                 if langganan_pelanggan.status != "Suspended":
                     langganan_pelanggan.status = "Suspended"
                     db.add(langganan_pelanggan)
-                    
+
                     # PERBAIKAN: Panggil trigger_mikrotik_update dengan argumen yang benar.
                     data_teknis = pelanggan.data_teknis
                     if data_teknis:
@@ -690,7 +712,9 @@ async def update_overdue_invoices(db: AsyncSession = Depends(get_db)):
                             f"Layanan untuk {pelanggan.nama} (Invoice: {invoice.invoice_number}) telah di-suspend."
                         )
                     else:
-                        logger.error(f"Data Teknis tidak ditemukan untuk pelanggan {pelanggan.nama}, suspend di Mikrotik dilewati.")
+                        logger.error(
+                            f"Data Teknis tidak ditemukan untuk pelanggan {pelanggan.nama}, suspend di Mikrotik dilewati."
+                        )
         except Exception as e:
             logger.error(
                 f"Gagal men-suspend layanan untuk invoice {invoice.invoice_number}: {e}"

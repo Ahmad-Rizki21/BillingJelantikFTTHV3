@@ -49,7 +49,7 @@ async def get_revenue_report(
     summary_query = (
         select(
             func.coalesce(func.sum(InvoiceModel.total_harga), 0.0),
-            func.count(InvoiceModel.id)
+            func.count(InvoiceModel.id),
         )
         .join(InvoiceModel.pelanggan)
         .where(and_(*filter_conditions))

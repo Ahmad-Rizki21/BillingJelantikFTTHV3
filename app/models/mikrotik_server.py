@@ -52,4 +52,6 @@ class MikrotikServer(Base):
     # -----------------------------------
     olts: Mapped[List["OLT"]] = relationship(back_populates="mikrotik_server")
 
-    pelanggan: Mapped[list["Pelanggan"]] = relationship(back_populates="mikrotik_server")
+    pelanggan: Mapped[list["Pelanggan"]] = relationship(
+        back_populates="mikrotik_server"
+    )

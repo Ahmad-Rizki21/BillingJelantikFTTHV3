@@ -24,6 +24,7 @@ class ChartData(BaseModel):
     labels: List[str]
     data: List[int | float]
 
+
 # --- Skema Pydantic untuk respons Statistik Utama ---
 class MainStats(BaseModel):
     pelanggan_aktif: int
@@ -31,6 +32,7 @@ class MainStats(BaseModel):
     pelanggan_berhenti_bulan_ini: int
     pelanggan_jakinet_aktif: int
     pendapatan_jakinet_bulan_ini: float
+
 
 # --- Skema Pydantic untuk respons Dashboard Pelanggan yang Terpadu ---
 class DashboardPelangganData(BaseModel):
@@ -49,6 +51,7 @@ logger = logging.getLogger(__name__)
 
 # --- Helper Functions (Logika dari endpoint lama yang di-refactor) ---
 
+
 async def _get_main_statistics(db: AsyncSession) -> MainStats:
     """
     Menyediakan data utama untuk kartu statistik di dashboard pelanggan.
@@ -61,9 +64,9 @@ async def _get_main_statistics(db: AsyncSession) -> MainStats:
     jakinet_stats_stmt = (
         select(
             func.count(LanggananModel.id).label("total_langganan"),
-            func.sum(
-                case((LanggananModel.status == "Aktif", 1), else_=0)
-            ).label("pelanggan_aktif"),
+            func.sum(case((LanggananModel.status == "Aktif", 1), else_=0)).label(
+                "pelanggan_aktif"
+            ),
             func.sum(
                 case(
                     (LanggananModel.tgl_mulai_langganan >= first_day_of_month, 1),
@@ -113,7 +116,8 @@ async def _get_main_statistics(db: AsyncSession) -> MainStats:
     return MainStats(
         pelanggan_aktif=jakinet_stats_result.pelanggan_aktif or 0,
         pelanggan_baru_bulan_ini=jakinet_stats_result.pelanggan_baru_bulan_ini or 0,
-        pelanggan_berhenti_bulan_ini=jakinet_stats_result.pelanggan_berhenti_bulan_ini or 0,
+        pelanggan_berhenti_bulan_ini=jakinet_stats_result.pelanggan_berhenti_bulan_ini
+        or 0,
         pelanggan_jakinet_aktif=jakinet_stats_result.pelanggan_aktif or 0,
         pendapatan_jakinet_bulan_ini=float(pendapatan_jakinet_bulan_ini),
     )
@@ -222,6 +226,7 @@ async def _get_jakinet_revenue_trend(
 
 # --- ENDPOINT UTAMA YANG SUDAH DIOPTIMALKAN ---
 
+
 @router.get("/", response_model=DashboardPelangganData)
 async def get_dashboard_pelanggan_data(
     timespan: str = "6m", db: AsyncSession = Depends(get_db)
@@ -236,21 +241,27 @@ async def get_dashboard_pelanggan_data(
     revenue_task = asyncio.create_task(_get_jakinet_revenue_trend(timespan, db))
 
     # Jalankan semua tugas secara bersamaan
-    results = await asyncio.gather(stats_task, growth_task, revenue_task, return_exceptions=True)
+    results = await asyncio.gather(
+        stats_task, growth_task, revenue_task, return_exceptions=True
+    )
 
     # Cek jika ada error saat menjalankan tugas
     for i, result in enumerate(results):
         if isinstance(result, Exception):
             # Log traceback lengkap untuk debugging di sisi server
-            tb_str = traceback.format_exception(type(result), result, result.__traceback__)
+            tb_str = traceback.format_exception(
+                type(result), result, result.__traceback__
+            )
             logger.error(f"Error in dashboard_pelanggan task {i+1}: {''.join(tb_str)}")
-            
+
             # Kirim respons error yang jelas ke client
             raise HTTPException(
-                status_code=500, 
-                detail=f"Gagal mengambil data untuk bagian ke-{i+1} dari dashboard: {str(result)}"
+                status_code=500,
+                detail=f"Gagal mengambil data untuk bagian ke-{i+1} dari dashboard: {str(result)}",
             )
 
     # Susun respons
-    response = DashboardPelangganData(main_stats=results[0], growth_chart=results[1], revenue_chart=results[2])
+    response = DashboardPelangganData(
+        main_stats=results[0], growth_chart=results[1], revenue_chart=results[2]
+    )
     return response

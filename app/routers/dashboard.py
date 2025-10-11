@@ -51,14 +51,10 @@ async def _get_revenue_summary(db: AsyncSession) -> RevenueSummary:
     """Helper untuk mengambil ringkasan pendapatan bulanan."""
     now = datetime.now()
     revenue_stmt = (
-        select(
-            HargaLayanan.brand, func.sum(Invoice.total_harga).label("total_revenue")
-        )
+        select(HargaLayanan.brand, func.sum(Invoice.total_harga).label("total_revenue"))
         .select_from(Invoice)
         .join(Pelanggan, Invoice.pelanggan_id == Pelanggan.id, isouter=True)
-        .join(
-            HargaLayanan, Pelanggan.id_brand == HargaLayanan.id_brand, isouter=True
-        )
+        .join(HargaLayanan, Pelanggan.id_brand == HargaLayanan.id_brand, isouter=True)
         .where(
             Invoice.status_invoice == "Lunas",
             HargaLayanan.brand.is_not(None),
@@ -122,11 +118,39 @@ async def _get_loyalty_chart(db: AsyncSession) -> ChartData:
         .where(Invoice.paid_at > Invoice.tgl_jatuh_tempo)
         .distinct()
     )
-    categorization_stmt = select(
-        func.sum(case((Langganan.pelanggan_id.in_(outstanding_payers_sq), 1), else_=0)).label("count_menunggak"),
-        func.sum(case((and_(not_(Langganan.pelanggan_id.in_(outstanding_payers_sq)), Langganan.pelanggan_id.in_(ever_late_payers_sq)), 1), else_=0)).label("count_lunas_telat"),
-        func.sum(case((and_(not_(Langganan.pelanggan_id.in_(outstanding_payers_sq)), not_(Langganan.pelanggan_id.in_(ever_late_payers_sq))), 1), else_=0)).label("count_setia"),
-    ).select_from(Langganan).where(Langganan.status == "Aktif")
+    categorization_stmt = (
+        select(
+            func.sum(
+                case((Langganan.pelanggan_id.in_(outstanding_payers_sq), 1), else_=0)
+            ).label("count_menunggak"),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            not_(Langganan.pelanggan_id.in_(outstanding_payers_sq)),
+                            Langganan.pelanggan_id.in_(ever_late_payers_sq),
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("count_lunas_telat"),
+            func.sum(
+                case(
+                    (
+                        and_(
+                            not_(Langganan.pelanggan_id.in_(outstanding_payers_sq)),
+                            not_(Langganan.pelanggan_id.in_(ever_late_payers_sq)),
+                        ),
+                        1,
+                    ),
+                    else_=0,
+                )
+            ).label("count_setia"),
+        )
+        .select_from(Langganan)
+        .where(Langganan.status == "Aktif")
+    )
 
     loyalty_counts = (await db.execute(categorization_stmt)).first()
     if loyalty_counts:
@@ -149,13 +173,20 @@ async def _get_mikrotik_status_counts(db: AsyncSession) -> dict:
 
     async def check_status(server):
         loop = asyncio.get_event_loop()
-        api, conn = await loop.run_in_executor(None, mikrotik_service.get_api_connection, server)
-        if conn: conn.disconnect()
+        api, conn = await loop.run_in_executor(
+            None, mikrotik_service.get_api_connection, server
+        )
+        if conn:
+            conn.disconnect()
         return bool(api)
 
     results = await asyncio.gather(*(check_status(server) for server in all_servers))
     online_count = sum(1 for res in results if res)
-    return {"online": online_count, "offline": len(all_servers) - online_count, "total": len(all_servers)}
+    return {
+        "online": online_count,
+        "offline": len(all_servers) - online_count,
+        "total": len(all_servers),
+    }
 
 
 class MikrotikStatus(BaseModel):
@@ -185,36 +216,56 @@ async def get_dashboard_data(
     tasks = {}
 
     if "view_widget_pendapatan_bulanan" in user_permissions:
-        tasks['revenue_summary'] = asyncio.create_task(_get_revenue_summary(db))
+        tasks["revenue_summary"] = asyncio.create_task(_get_revenue_summary(db))
 
     if "view_widget_statistik_pelanggan" in user_permissions:
-        tasks['pelanggan_stats'] = asyncio.create_task(_get_pelanggan_stat_cards(db))
-        tasks['loyalty_chart'] = asyncio.create_task(_get_loyalty_chart(db))
+        tasks["pelanggan_stats"] = asyncio.create_task(_get_pelanggan_stat_cards(db))
+        tasks["loyalty_chart"] = asyncio.create_task(_get_loyalty_chart(db))
 
     if "view_widget_statistik_server" in user_permissions:
-        tasks['server_stats'] = asyncio.create_task(_get_mikrotik_status_counts(db))
+        tasks["server_stats"] = asyncio.create_task(_get_mikrotik_status_counts(db))
 
     # Jalankan semua task yang sudah dikumpulkan
     results = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results_map = dict(zip(tasks.keys(), results))
 
     # --- Proses hasil dari task yang sudah selesai ---
-    if 'revenue_summary' in results_map and not isinstance(results_map['revenue_summary'], Exception):
-        dashboard_response.revenue_summary = results_map['revenue_summary']
+    if "revenue_summary" in results_map and not isinstance(
+        results_map["revenue_summary"], Exception
+    ):
+        dashboard_response.revenue_summary = results_map["revenue_summary"]
 
     temp_stat_cards = []
-    if 'pelanggan_stats' in results_map and not isinstance(results_map['pelanggan_stats'], Exception):
-        temp_stat_cards.extend(results_map['pelanggan_stats'])
+    if "pelanggan_stats" in results_map and not isinstance(
+        results_map["pelanggan_stats"], Exception
+    ):
+        temp_stat_cards.extend(results_map["pelanggan_stats"])
 
-    if 'loyalty_chart' in results_map and not isinstance(results_map['loyalty_chart'], Exception):
-        dashboard_response.loyalitas_pembayaran_chart = results_map['loyalty_chart']
+    if "loyalty_chart" in results_map and not isinstance(
+        results_map["loyalty_chart"], Exception
+    ):
+        dashboard_response.loyalitas_pembayaran_chart = results_map["loyalty_chart"]
 
-    if 'server_stats' in results_map and not isinstance(results_map['server_stats'], Exception):
-        server_counts = results_map['server_stats']
+    if "server_stats" in results_map and not isinstance(
+        results_map["server_stats"], Exception
+    ):
+        server_counts = results_map["server_stats"]
         server_stats = [
-            StatCard(title="Total Servers", value=server_counts['total'], description="Total Mikrotik servers"),
-            StatCard(title="Online Servers", value=server_counts['online'], description="Servers currently online"),
-            StatCard(title="Offline Servers", value=server_counts['offline'], description="Servers currently offline"),
+            StatCard(
+                title="Total Servers",
+                value=server_counts["total"],
+                description="Total Mikrotik servers",
+            ),
+            StatCard(
+                title="Online Servers",
+                value=server_counts["online"],
+                description="Servers currently online",
+            ),
+            StatCard(
+                title="Offline Servers",
+                value=server_counts["offline"],
+                description="Servers currently offline",
+            ),
         ]
         temp_stat_cards.extend(server_stats)
 
@@ -380,8 +431,8 @@ async def get_loyalty_users_by_segment(segmen: str, db: AsyncSession = Depends(g
             .distinct()
         )
         outstanding_payer_ids = (
-            await db.execute(outstanding_payers_stmt)
-        ).scalars().all()
+            (await db.execute(outstanding_payers_stmt)).scalars().all()
+        )
         outstanding_payer_ids_set = set(outstanding_payer_ids)
 
         # 3. Get IDs of customers who have ever paid late
@@ -424,9 +475,9 @@ async def get_loyalty_users_by_segment(segmen: str, db: AsyncSession = Depends(g
             {
                 "id": p.id,
                 "nama": p.nama,
-                "id_pelanggan": p.data_teknis.id_pelanggan
-                if p.data_teknis
-                else f"PLG-{p.id:04d}",
+                "id_pelanggan": (
+                    p.data_teknis.id_pelanggan if p.data_teknis else f"PLG-{p.id:04d}"
+                ),
                 "alamat": p.alamat or "Alamat tidak tersedia",
                 "no_telp": p.no_telp or "Nomor tidak tersedia",
             }

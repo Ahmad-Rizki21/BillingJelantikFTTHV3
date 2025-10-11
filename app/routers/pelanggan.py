@@ -103,8 +103,9 @@ async def read_all_pelanggan(
     # menggunakan selectinload untuk menghindari error "MissingGreenlet"
     # akibat lazy loading.
     query = select(PelangganModel).options(
-        selectinload(PelangganModel.data_teknis), 
-        selectinload(PelangganModel.harga_layanan))
+        selectinload(PelangganModel.data_teknis),
+        selectinload(PelangganModel.harga_layanan),
+    )
 
     # Terapkan filter pencarian umum (nama, email, no_telp)
     if search:
@@ -146,7 +147,10 @@ async def read_pelanggan_by_id(pelanggan_id: int, db: AsyncSession = Depends(get
     query = (
         select(PelangganModel)
         .where(PelangganModel.id == pelanggan_id)
-        .options(selectinload(PelangganModel.harga_layanan), selectinload(PelangganModel.data_teknis))
+        .options(
+            selectinload(PelangganModel.harga_layanan),
+            selectinload(PelangganModel.data_teknis),
+        )
     )
     result = await db.execute(query)
     db_pelanggan = result.scalar_one_or_none()
@@ -170,7 +174,10 @@ async def update_pelanggan(
     query = (
         select(PelangganModel)
         .where(PelangganModel.id == pelanggan_id)
-        .options(selectinload(PelangganModel.harga_layanan), selectinload(PelangganModel.data_teknis))
+        .options(
+            selectinload(PelangganModel.harga_layanan),
+            selectinload(PelangganModel.data_teknis),
+        )
     )
     result = await db.execute(query)
     db_pelanggan = result.scalar_one_or_none()

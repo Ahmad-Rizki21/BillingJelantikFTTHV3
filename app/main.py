@@ -15,6 +15,7 @@ from .models.activity_log import ActivityLog
 from .models.user import User as UserModel
 from .models.system_setting import SystemSetting as SettingModel
 from .config import settings
+
 # --- AKHIR TAMBAHAN IMPORT ---
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -81,8 +82,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # --- Middleware Backend to FrontEnd ---
 # ==========================================================
 origins = [
-    "https://billingftth.my.id", # <-- AKTIFKAN INI untuk akses via browser
-    "wss://billingftth.my.id",   # <-- AKTIFKAN INI untuk WebSocket di produksi
+    "https://billingftth.my.id",  # <-- AKTIFKAN INI untuk akses via browser
+    "wss://billingftth.my.id",  # <-- AKTIFKAN INI untuk WebSocket di produksi
     # "http://192.168.222.20",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -98,6 +99,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # ==========================================================
 # --- Middleware untuk Mode Maintenance ---
 # ==========================================================
@@ -105,10 +107,10 @@ app.add_middleware(
 async def maintenance_mode_middleware(request: Request, call_next):
     # Daftar path yang diizinkan selama maintenance
     allowed_paths = [
-        "/api/users/token", # Izinkan login
-        "/api/settings/maintenance", # Izinkan admin mengubah status maintenance
-        "/docs", # Izinkan akses dokumentasi API
-        "/openapi.json"
+        "/api/users/token",  # Izinkan login
+        "/api/settings/maintenance",  # Izinkan admin mengubah status maintenance
+        "/docs",  # Izinkan akses dokumentasi API
+        "/openapi.json",
     ]
 
     # Jika path request ada di daftar yang diizinkan, lewati pengecekan
@@ -117,32 +119,50 @@ async def maintenance_mode_middleware(request: Request, call_next):
 
     async with AsyncSessionLocal() as db:
         # Ambil status maintenance dari database dengan query berdasarkan key
-        stmt_active = select(SettingModel).where(SettingModel.setting_key == "maintenance_active")
-        maintenance_active_setting = (await db.execute(stmt_active)).scalar_one_or_none()
-        is_active = maintenance_active_setting and maintenance_active_setting.setting_value.lower() == 'true'
+        stmt_active = select(SettingModel).where(
+            SettingModel.setting_key == "maintenance_active"
+        )
+        maintenance_active_setting = (
+            await db.execute(stmt_active)
+        ).scalar_one_or_none()
+        is_active = (
+            maintenance_active_setting
+            and maintenance_active_setting.setting_value.lower() == "true"
+        )
 
         if is_active:
             # Jika maintenance aktif, ambil pesannya
-            stmt_message = select(SettingModel).where(SettingModel.setting_key == "maintenance_message")
-            maintenance_message_setting = (await db.execute(stmt_message)).scalar_one_or_none()
-            message = maintenance_message_setting.setting_value if maintenance_message_setting else "Sistem sedang dalam perbaikan. Silakan coba lagi nanti."
-            
+            stmt_message = select(SettingModel).where(
+                SettingModel.setting_key == "maintenance_message"
+            )
+            maintenance_message_setting = (
+                await db.execute(stmt_message)
+            ).scalar_one_or_none()
+            message = (
+                maintenance_message_setting.setting_value
+                if maintenance_message_setting
+                else "Sistem sedang dalam perbaikan. Silakan coba lagi nanti."
+            )
+
             # Kembalikan response 503 Service Unavailable
             return JSONResponse(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                content={"detail": message}
+                content={"detail": message},
             )
 
     # Jika tidak maintenance, lanjutkan ke request berikutnya
     response = await call_next(request)
     return response
 
+
 # Pastikan middleware ini ada SEBELUM middleware logging agar request yang diblok tidak tercatat sebagai aktivitas
 # ==========================================================
 
 
 # --- FUNGSI BANTU UNTUK MENDAPATKAN USER DARI TOKEN (VERSI AMAN UNTUK LOGGING) ---
-async def get_user_from_token_for_logging(token: str, db: AsyncSession) -> UserModel | None:
+async def get_user_from_token_for_logging(
+    token: str, db: AsyncSession
+) -> UserModel | None:
     """
     Mendekode token dan mengambil data user untuk keperluan logging.
     Fungsi ini aman dan akan mengembalikan None jika terjadi error, tanpa menghentikan aplikasi.
@@ -150,7 +170,9 @@ async def get_user_from_token_for_logging(token: str, db: AsyncSession) -> UserM
     if not token:
         return None
     try:
-        payload = jwt.decode(token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM])
+        payload = jwt.decode(
+            token, config.settings.SECRET_KEY, algorithms=[config.settings.ALGORITHM]
+        )
         user_id: str | None = payload.get("sub")
         if user_id is None:
             return None
@@ -194,7 +216,10 @@ async def log_requests_and_activity(request: Request, call_next):
     logger.info(f"Response status: {response.status_code} in {process_time:.2f}s")
 
     # --- LOGIKA BARU: SIMPAN ACTIVITY LOG KE DATABASE ---
-    if request.method in ["POST", "PATCH", "DELETE"] and 200 <= response.status_code < 300:
+    if (
+        request.method in ["POST", "PATCH", "DELETE"]
+        and 200 <= response.status_code < 300
+    ):
         if "/token" not in str(request.url) and "/login" not in str(request.url):
             async with AsyncSessionLocal() as db:
                 try:
@@ -209,10 +234,16 @@ async def log_requests_and_activity(request: Request, call_next):
                             except json.JSONDecodeError:
                                 # Jika bukan JSON (misal: file upload), catat placeholder
                                 details = f"[Data non-JSON, Content-Type: {request.headers.get('content-type')}]"
-                        log_entry = ActivityLog(user_id=user.id, action=f"{request.method} {request.url.path}", details=details)
+                        log_entry = ActivityLog(
+                            user_id=user.id,
+                            action=f"{request.method} {request.url.path}",
+                            details=details,
+                        )
                         db.add(log_entry)
                         await db.commit()
-                        logger.info(f"Activity logged for user {user.email}: {log_entry.action}")
+                        logger.info(
+                            f"Activity logged for user {user.email}: {log_entry.action}"
+                        )
                 except Exception as e:
                     logger.error(f"Failed to log activity: {e}", exc_info=True)
 
@@ -299,21 +330,21 @@ async def startup_event():
     # 2. Tambahkan tugas-tugas terjadwal
     # Setiap job diberi 'id' unik untuk mencegah duplikasi penjadwalan.
     # 'replace_existing=True' memastikan jika server restart, job lama akan diganti.
-    
+
     # Membuat invoice baru setiap hari jam 1 pagi untuk H-5 jatuh tempo.
-    #scheduler.add_job(job_generate_invoices, 'cron', hour=1, minute=0, timezone='Asia/Jakarta', id="generate_invoices_job", replace_existing=True)
-    
+    # scheduler.add_job(job_generate_invoices, 'cron', hour=1, minute=0, timezone='Asia/Jakarta', id="generate_invoices_job", replace_existing=True)
+
     # Menonaktifkan layanan yang telat bayar setiap hari jam 2 pagi.
-    #scheduler.add_job(job_suspend_services, 'cron', hour=2, minute=0, timezone='Asia/Jakarta', id="suspend_services_job", replace_existing=True)
-    
+    # scheduler.add_job(job_suspend_services, 'cron', hour=2, minute=0, timezone='Asia/Jakarta', id="suspend_services_job", replace_existing=True)
+
     # Mengirim pengingat pembayaran setiap hari jam 8 pagi.
-    #scheduler.add_job(job_send_payment_reminders, 'cron', hour=8, minute=0, timezone='Asia/Jakarta', id="send_reminders_job", replace_existing=True)
-    
+    # scheduler.add_job(job_send_payment_reminders, 'cron', hour=8, minute=0, timezone='Asia/Jakarta', id="send_reminders_job", replace_existing=True)
+
     # Memverifikasi pembayaran yang mungkin terlewat setiap 15 menit.
-    #scheduler.add_job(job_verify_payments, 'interval', minutes=15, id="verify_payments_job", replace_existing=True)
-    
+    # scheduler.add_job(job_verify_payments, 'interval', minutes=15, id="verify_payments_job", replace_existing=True)
+
     # Mencoba ulang sinkronisasi Mikrotik yang gagal setiap 5 menit.
-    #scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job", replace_existing=True)
+    # scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job", replace_existing=True)
 
     # 3. Mulai scheduler
     scheduler.start()

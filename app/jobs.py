@@ -233,14 +233,17 @@ async def job_suspend_services():
                 base_stmt = (
                     select(LanggananModel)
                     .join(
-                        InvoiceModel, LanggananModel.pelanggan_id == InvoiceModel.pelanggan_id
+                        InvoiceModel,
+                        LanggananModel.pelanggan_id == InvoiceModel.pelanggan_id,
                     )
                     .where(
                         InvoiceModel.tgl_jatuh_tempo <= overdue_date_threshold,
                         LanggananModel.status == "Aktif",
                         InvoiceModel.status_invoice == "Belum Dibayar",
                     )
-                    .distinct(LanggananModel.id) # <-- TAMBAHAN: Pastikan setiap langganan hanya diproses sekali
+                    .distinct(
+                        LanggananModel.id
+                    )  # <-- TAMBAHAN: Pastikan setiap langganan hanya diproses sekali
                     .options(
                         selectinload(LanggananModel.pelanggan).selectinload(
                             PelangganModel.data_teknis
@@ -407,7 +410,9 @@ async def job_verify_payments():
                     )
                 )
             )
-            invoices_to_process = (await db.execute(unprocessed_stmt)).scalars().unique().all()
+            invoices_to_process = (
+                (await db.execute(unprocessed_stmt)).scalars().unique().all()
+            )
 
             processed_count = 0
             if invoices_to_process:

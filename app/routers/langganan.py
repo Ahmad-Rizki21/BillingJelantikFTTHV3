@@ -125,7 +125,7 @@ async def get_all_langganan(
     for_invoice_selection: bool = False,
     skip: int = 0,
     # PERUBAHAN UTAMA: Jadikan 'limit' opsional agar desktop bisa memuat semua
-    limit: Optional[int] = None, 
+    limit: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Mengambil semua langganan dengan opsi filter dan paginasi."""
@@ -135,7 +135,7 @@ async def get_all_langganan(
         .options(
             selectinload(LanggananModel.pelanggan).options(
                 selectinload(PelangganModel.langganan),
-                selectinload(PelangganModel.harga_layanan)
+                selectinload(PelangganModel.harga_layanan),
             ),
             selectinload(LanggananModel.paket_layanan),
         )
@@ -146,7 +146,7 @@ async def get_all_langganan(
 
     if search:
         query = query.where(PelangganModel.nama.ilike(f"%{search}%"))
-    if alamat: 
+    if alamat:
         # Mencari di kolom alamat pada tabel PelangganModel
         query = query.where(PelangganModel.alamat.ilike(f"%{alamat}%"))
     if paket_layanan_id:
@@ -161,12 +161,14 @@ async def get_all_langganan(
 
     result = await db.execute(final_query)
     langganan_list = result.scalars().all()
-    
+
     # ... sisa kode tidak perlu diubah ...
     if for_invoice_selection and langganan_list:
         pelanggan_ids = {l.pelanggan_id for l in langganan_list}
         invoice_counts_stmt = (
-            select(InvoiceModel.pelanggan_id, func.count(InvoiceModel.id).label("count"))
+            select(
+                InvoiceModel.pelanggan_id, func.count(InvoiceModel.id).label("count")
+            )
             .where(InvoiceModel.pelanggan_id.in_(pelanggan_ids))
             .group_by(InvoiceModel.pelanggan_id)
         )
@@ -176,16 +178,14 @@ async def get_all_langganan(
         for langganan in langganan_list:
             pelanggan = langganan.pelanggan
             is_new_user = False
-            
+
             if pelanggan and len(pelanggan.langganan) == 1:
                 if invoice_counts_map.get(pelanggan.id, 0) == 0:
                     is_new_user = True
-            
+
             langganan.is_new_user = is_new_user
 
     return langganan_list
-
-
 
 
 @router.patch("/{langganan_id}", response_model=LanggananSchema)
@@ -412,23 +412,41 @@ async def import_from_csv_langganan(
     errors = []
     langganan_to_create = []
 
-    emails_to_find = {row.get("email_pelanggan", "").lower().strip() for row in reader if row.get("email_pelanggan")}
-    paket_names_to_find = {row.get("nama_paket_layanan", "").lower().strip() for row in reader if row.get("nama_paket_layanan")}
-    brand_ids_to_find = {row.get("id_brand", "").strip() for row in reader if row.get("id_brand")}
+    emails_to_find = {
+        row.get("email_pelanggan", "").lower().strip()
+        for row in reader
+        if row.get("email_pelanggan")
+    }
+    paket_names_to_find = {
+        row.get("nama_paket_layanan", "").lower().strip()
+        for row in reader
+        if row.get("nama_paket_layanan")
+    }
+    brand_ids_to_find = {
+        row.get("id_brand", "").strip() for row in reader if row.get("id_brand")
+    }
 
-    pelanggan_q = await db.execute(select(PelangganModel).where(func.lower(PelangganModel.email).in_(emails_to_find)))
+    pelanggan_q = await db.execute(
+        select(PelangganModel).where(
+            func.lower(PelangganModel.email).in_(emails_to_find)
+        )
+    )
     pelanggan_map = {p.email.lower(): p for p in pelanggan_q.scalars().all()}
 
     paket_q = await db.execute(
         select(PaketLayananModel).where(
             func.lower(PaketLayananModel.nama_paket).in_(paket_names_to_find),
-            PaketLayananModel.id_brand.in_(brand_ids_to_find)
+            PaketLayananModel.id_brand.in_(brand_ids_to_find),
         )
     )
     paket_map = {(p.nama_paket.lower(), p.id_brand): p for p in paket_q.scalars().all()}
 
     pelanggan_ids_found = [p.id for p in pelanggan_map.values()]
-    existing_langganan_q = await db.execute(select(LanggananModel.pelanggan_id).where(LanggananModel.pelanggan_id.in_(pelanggan_ids_found)))
+    existing_langganan_q = await db.execute(
+        select(LanggananModel.pelanggan_id).where(
+            LanggananModel.pelanggan_id.in_(pelanggan_ids_found)
+        )
+    )
     subscribed_pelanggan_ids = set(existing_langganan_q.scalars().all())
 
     for row_num, row in enumerate(reader, start=2):
@@ -567,7 +585,7 @@ async def get_all_pelanggan_with_status(db: AsyncSession = Depends(get_db)):
         .order_by(PelangganModel.nama)
     )
     pelanggan = result.scalars().unique().all()
-    
+
     for p in pelanggan:
         p.has_subscription = len(p.langganan) > 0
 

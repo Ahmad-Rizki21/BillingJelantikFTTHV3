@@ -197,6 +197,7 @@ class Pelanggan(PelangganCreate):
     id: int
     harga_layanan: Optional[HargaLayananSchema] = None
 
+
 class PelangganInLangganan(BaseModel):
     id: int
     nama: str

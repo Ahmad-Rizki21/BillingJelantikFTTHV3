@@ -17,11 +17,13 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
+
 # --- Schemas ---
 class UserSimple(BaseModel):
     id: int
     name: str
     email: str
+
 
 class ActivityLogSchema(BaseModel):
     id: int
@@ -32,22 +34,24 @@ class ActivityLogSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class PaginatedActivityLogResponse(BaseModel):
     items: List[ActivityLogSchema]
     total: int
 
+
 # --- Endpoint ---
 @router.get("/", response_model=PaginatedActivityLogResponse)
 async def get_activity_logs(
-    skip: int = 0,
-    limit: int = 10,
-    db: AsyncSession = Depends(get_db)
+    skip: int = 0, limit: int = 10, db: AsyncSession = Depends(get_db)
 ):
     """Mengambil daftar log aktivitas dengan paginasi."""
-    
+
     # Query untuk mengambil total item
     total_query = select(ActivityLogModel)
-    total_result = await db.execute(select(func.count()).select_from(total_query.subquery()))
+    total_result = await db.execute(
+        select(func.count()).select_from(total_query.subquery())
+    )
     total = total_result.scalar_one()
 
     # Query untuk mengambil item dengan paginasi dan relasi
@@ -58,8 +62,8 @@ async def get_activity_logs(
         .offset(skip)
         .limit(limit)
     )
-    
+
     result = await db.execute(items_query)
     items = result.scalars().all()
-    
+
     return {"items": items, "total": total}
