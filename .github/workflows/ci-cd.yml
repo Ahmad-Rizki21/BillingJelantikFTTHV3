@@ -244,7 +244,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main-bersih' && github.event_name == 'push'
-    environment: staging
+    environment: 
+      name: staging
+      url: https://staging.artacom-billing.com
 
     steps:
     - name: Checkout code
@@ -270,9 +272,9 @@ jobs:
       if: always()
       with:
         status: ${{ job.status }}
-        channel: '#deployments'
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        message: |
+        channel: ${{ secrets.SLACK_CHANNEL }}
+        webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+        text: |
           🧪 *Staging Deployment*
           Branch: `${{ github.ref_name }}`
           Commit: `${{ github.sha }}`
@@ -284,7 +286,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, deploy-staging]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
+    environment: 
+      name: production
+      url: https://artacom-billing.com
 
     steps:
     - name: Checkout code
@@ -315,9 +319,9 @@ jobs:
       if: always()
       with:
         status: ${{ job.status }}
-        channel: '#deployments'
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        message: |
+        channel: ${{ secrets.SLACK_CHANNEL }}
+        webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+        text: |
           🎉 *Production Deployment*
           Branch: `${{ github.ref_name }}`
           Commit: `${{ github.sha }}`
