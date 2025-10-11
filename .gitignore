@@ -24,6 +24,7 @@ node_modules/
 
 # Build files
 dist/
+frontend/release/
 
 # Android build files (untuk keamanan)
 /frontend/android/app/build/
@@ -48,6 +49,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+DATABASE-EXISTING/
 
 # Log files
 logs/
