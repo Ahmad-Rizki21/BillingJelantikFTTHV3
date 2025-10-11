@@ -25,6 +25,15 @@ node_modules/
 # Build files
 dist/
 frontend/release/
+frontend/release/
+frontend/release/win-unpacked/
+frontend/release/linux-unpacked/
+frontend/release/mac/
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.AppImage
 
 # Android build files (untuk keamanan)
 /frontend/android/app/build/
