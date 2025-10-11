@@ -1,89 +1,165 @@
 <template>
   <v-container fluid class="pa-sm-6 pa-4">
-    <div class="d-flex align-center mb-6 page-header">
-      <div class="d-flex align-center">
-        <v-avatar class="me-3" color="primary" size="40">
-          <v-icon color="white">mdi-wifi-star</v-icon>
-        </v-avatar>
-        <div>
-          <h1 class="text-h4 font-weight-bold text-primary">Manajemen Langganan</h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-0">Kelola semua langganan pelanggan</p>
+    <div class="header-card mb-4 mb-md-6">
+      <div class="d-flex flex-column align-center gap-4">
+        <div class="d-flex align-center header-info">
+          <div class="header-avatar-wrapper">
+            <v-avatar class="header-avatar" color="transparent" size="50">
+              <v-icon color="white" size="28">mdi-wifi-star</v-icon>
+            </v-avatar>
+          </div>
+          <div class="ml-4">
+            <h1 class="header-title">Manajemen Langganan</h1>
+            <p class="header-subtitle">Kelola semua langganan pelanggan dengan mudah</p>
+          </div>
+        </div>
+
+        <!-- Mobile Action Buttons -->
+        <div class="action-buttons-container">
+          <v-btn
+            color="success"
+            @click="dialogImport = true"
+            prepend-icon="mdi-file-upload-outline"
+            :loading="importing"
+            class="action-btn text-none mobile-btn"
+            size="default"
+            block
+          >
+            Import
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="exportLangganan"
+            :loading="exporting"
+            prepend-icon="mdi-file-download-outline"
+            class="action-btn text-none mobile-btn"
+            size="default"
+            block
+          >
+            Export
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="openDialog()"
+            prepend-icon="mdi-plus-circle"
+            class="primary-btn text-none mobile-btn"
+            size="default"
+            block
+            elevation="3"
+          >
+            Tambah Langganan
+          </v-btn>
         </div>
       </div>
-      <v-spacer class="d-none d-md-block"></v-spacer>
-      
-      <!-- Enhanced Action Buttons -->
-      <div class="header-actions">
-        <v-btn 
-          class="import-btn" 
-          @click="dialogImport = true" 
-          prepend-icon="mdi-file-upload-outline"
-          size="default"
-        >
-          Import
-        </v-btn>
-        <v-btn 
-          class="export-btn" 
-          @click="exportLangganan" 
-          prepend-icon="mdi-file-download-outline"
-          size="default"
-        >
-          Export
-        </v-btn>
-        <v-btn 
-          class="add-subscription-btn"
-          size="default"
-          @click="openDialog()"
-          prepend-icon="mdi-plus-circle"
-        >
-          Tambah Langganan
-        </v-btn>
-      </div> 
     </div>
-        <v-dialog v-model="dialogImport" max-width="600px" persistent>
-      <v-card class="import-dialog">
-        <v-card-title class="import-dialog-header">Import Langganan</v-card-title>
-        <v-card-text class="import-dialog-content">
-          <v-alert 
-            type="info" 
-            variant="tonal" 
-            class="import-info-alert"
+    <!-- Import Dialog -->
+    <v-dialog v-model="dialogImport" max-width="800px" :fullscreen="$vuetify.display.mobile" persistent class="import-dialog">
+      <v-card class="import-card">
+        <div class="import-header">
+          <v-icon class="mr-3">mdi-upload</v-icon>
+          <span class="import-title">Import Langganan dari CSV</span>
+          <v-spacer></v-spacer>
+          <v-btn
+            icon
+            variant="text"
+            @click="closeImportDialog"
+            size="small"
+          >
+            <v-icon color="white">mdi-close</v-icon>
+          </v-btn>
+        </div>
+
+        <v-card-text class="import-content">
+          <v-alert
+            type="info"
+            variant="tonal"
+            icon="mdi-information-outline"
+            class="mb-6"
+            border="start"
           >
             Gunakan <strong>Email Pelanggan</strong> dan <strong>Nama Paket Layanan</strong> sebagai kunci pencocokan.
             <a :href="`${apiClient.defaults.baseURL}/langganan/template/csv`" download>Unduh template di sini</a>.
           </v-alert>
-          
-          <v-alert 
-            v-if="importErrors.length" 
-            type="error" 
-            closable 
-            @update:model-value="importErrors = []"
-            class="import-error-alert"
-          >
-            <ul>
-              <li v-for="(err, i) in importErrors" :key="i">{{ err }}</li>
-            </ul>
-          </v-alert>
-          
-          <v-file-input
-            :model-value="fileToImport"
-            @update:model-value="handleFileSelection"
-            label="Pilih file CSV"
-            accept=".csv"
-            variant="outlined"
-            class="import-file-input"
-          ></v-file-input>
+
+          <div class="mb-4">
+            <h6 class="text-h6 mb-3 d-flex align-center upload-title">
+              <v-icon class="mr-2">mdi-cloud-upload</v-icon>
+              Unggah File CSV
+            </h6>
+            <v-file-input
+              :model-value="fileToImport"
+              @update:model-value="handleFileSelection"
+              label="Pilih file .csv"
+              accept=".csv"
+              variant="outlined"
+              prepend-icon=""
+              prepend-inner-icon="mdi-paperclip"
+              show-size
+              clearable
+              hide-details="auto"
+              class="file-input"
+              density="comfortable"
+            >
+            </v-file-input>
+          </div>
+
+          <v-expand-transition>
+            <div v-if="importErrors.length > 0" class="mt-4">
+              <v-alert
+                type="error"
+                variant="tonal"
+                prominent
+                border="start"
+                class="error-alert"
+              >
+                <template v-slot:title>
+                  <div class="d-flex justify-space-between align-center">
+                    <span>Import Gagal</span>
+                    <v-chip color="error" size="small">
+                      {{ importErrors.length }} Kesalahan
+                    </v-chip>
+                  </div>
+                </template>
+
+                <p class="mb-3">Mohon perbaiki kesalahan berikut di file CSV Anda dan coba lagi.</p>
+                <v-divider class="mb-3"></v-divider>
+
+                <div class="error-list">
+                  <div
+                    v-for="(error, i) in importErrors"
+                    :key="i"
+                    class="error-item d-flex align-start mb-2"
+                  >
+                    <v-icon size="small" color="error" class="mr-2 mt-1">mdi-alert-circle</v-icon>
+                    <span class="text-body-2">{{ error }}</span>
+                  </div>
+                </div>
+              </v-alert>
+            </div>
+          </v-expand-transition>
         </v-card-text>
-        <v-card-actions class="import-dialog-actions">
+
+        <v-divider></v-divider>
+
+        <v-card-actions class="import-actions">
           <v-spacer></v-spacer>
-          <v-btn class="import-cancel-btn" @click="closeImportDialog">Batal</v-btn>
-          <v-btn 
-            class="import-upload-btn" 
-            @click="importFromCsv" 
-            :loading="importing" 
-            :disabled="!fileToImport.length"
+          <v-btn
+            variant="text"
+            @click="closeImportDialog"
+            class="nav-btn"
           >
-            Unggah
+            Batal
+          </v-btn>
+          <v-btn
+            color="success"
+            variant="elevated"
+            @click="importFromCsv"
+            :loading="importing"
+            :disabled="fileToImport.length === 0"
+            prepend-icon="mdi-upload"
+            class="import-btn"
+          >
+            Import Sekarang
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -118,7 +194,7 @@
 
     <v-select
       v-model="selectedPaket"
-      :items="paketLayananSelectList"
+      :items="uniquePaketLayananOptions"
       item-title="nama_paket"
       item-value="id"
       label="Filter Paket Layanan"
@@ -307,7 +383,7 @@
 
           <template v-slot:item.pelanggan.alamat="{ item }: { item: Langganan }">
             <div class="text-caption" style="max-width: 200px; white-space: normal;">
-              {{ item.pelanggan.alamat }}
+              {{ getPelangganAlamat(item.pelanggan_id) }}
             </div>
           </template>
 
@@ -360,6 +436,15 @@
             </div>
           </template>
         </v-data-table>
+        
+        <!-- Footer with total count aligned with pagination controls -->
+        <div class="d-flex align-center pa-2 ml-4" style="position: relative; top: -55px;">
+          <v-chip variant="outlined" color="primary" size="large">
+            Total: {{ totalLanggananCount }} Langganan di server
+            </v-chip>
+              <v-spacer></v-spacer>
+            </div>
+        
       </div>
     </v-card>
 
@@ -654,7 +739,7 @@
           <h2 class="text-h5 font-weight-bold text-error mb-2">Konfirmasi Hapus</h2>
           <p class="text-body-1 text-medium-emphasis mb-0">
             Apakah Anda yakin ingin menghapus langganan untuk pelanggan 
-            <strong class="text-primary">{{ getPelangganName(itemToDelete?.pelanggan_id) }}</strong>?
+            <strong class="text-primary">{{ itemToDelete?.pelanggan?.nama || '...' }}</strong>?
           </p>
           <v-alert variant="tonal" color="warning" class="mt-4 text-start">
             <v-icon start>mdi-alert-triangle</v-icon>
@@ -771,6 +856,7 @@ interface PelangganSelectItem {
   id: number;
   nama: string;
   id_brand: string;
+  alamat?: string; // Optional karena mungkin tidak ada di semua API calls
 }
 
 interface PaketLayananSelectItem {
@@ -802,6 +888,7 @@ const dialogBulkDelete = ref(false);
 
 const dialogImport = ref(false);
 const importing = ref(false);
+const exporting = ref(false);
 const fileToImport = ref<File[]>([]);
 const importErrors = ref<string[]>([]);
 
@@ -814,6 +901,9 @@ const statusOptions = ref(['Aktif', 'Suspended', 'Berhenti']);
 const isProratePlusFull = ref<boolean>(false);
 const hargaProrate = ref<number>(0);
 const hargaNormal = ref<number>(0);
+
+// --- State for Total Count ---
+const totalLanggananCount = ref(0);
 
 
 function handleFileSelection(newFiles: File | File[]) {
@@ -871,13 +961,14 @@ const headers = [
 
 // --- Computed Properties ---
 const formTitle = computed(() => (editedIndex.value === -1 ? 'Tambah Langganan Baru' : 'Edit Langganan'));
-const isFormValid = computed(() => !!(editedItem.value.pelanggan_id && editedItem.value.paket_layanan_id && editedItem.value.status && editedItem.value.harga_awal! > 0));
+const isFormValid = computed(() => !!(editedItem.value.pelanggan_id && editedItem.value.paket_layanan_id && editedItem.value.status));
 
 // --- Lifecycle ---
 onMounted(() => {
   fetchLangganan();
   fetchPelangganForSelect();
   fetchPaketLayananForSelect();
+  fetchTotalCount();
 
   window.addEventListener('new-notification', handleNewNotification);
 
@@ -1066,7 +1157,23 @@ async function fetchLangganan(isLoadMore = false) {
     }
     
     const response = await apiClient.get<Langganan[]>(`/langganan/?${params.toString()}`);
-    const newData = response.data;
+    let newData = response.data;
+
+    // If a package is selected, we need to filter the results to include all packages with the same name
+    if (selectedPaket.value) {
+      const selectedPackage = paketLayananSelectList.value.find(p => p.id === selectedPaket.value);
+      if (selectedPackage) {
+        // Find all package IDs with the same name as the selected package
+        const allSameNamePackageIds = paketLayananSelectList.value
+          .filter(p => p.nama_paket === selectedPackage.nama_paket)
+          .map(p => p.id);
+        
+        // Filter the response data to include all packages with any of these IDs
+        newData = newData.filter(item => 
+          allSameNamePackageIds.includes(item.paket_layanan_id)
+        );
+      }
+    }
 
     if (isLoadMore) {
       langgananList.value.push(...newData); // Tambahkan data baru ke list yang ada
@@ -1134,8 +1241,26 @@ const alamatOptions = computed(() => {
   if (!langgananList.value || langgananList.value.length === 0) {
     return [];
   }
-  const allAlamat = langgananList.value.map(item => item.pelanggan.alamat);
+  const allAlamat = langgananList.value.map(item => item.pelanggan?.alamat || '').filter(alamat => alamat.trim() !== '');
   return [...new Set(allAlamat)].sort();
+});
+
+const uniquePaketLayananOptions = computed(() => {
+  if (!paketLayananSelectList.value || paketLayananSelectList.value.length === 0) {
+    return [];
+  }
+  // Create a Set to store unique package names
+  const uniqueNames = new Set<string>();
+  const uniquePackages: PaketLayananSelectItem[] = [];
+
+  paketLayananSelectList.value.forEach(item => {
+    if (!uniqueNames.has(item.nama_paket)) {
+      uniqueNames.add(item.nama_paket);
+      uniquePackages.push(item);
+    }
+  });
+
+  return uniquePackages;
 });
 
 // Fungsi untuk mereset semua filter
@@ -1162,10 +1287,19 @@ const eligiblePelangganForSelect = computed(() => {
 
 async function fetchPelangganForSelect() {
   try {
-    const response = await apiClient.get<PelangganSelectItem[]>('/pelanggan/');
-    pelangganSelectList.value = response.data;
+    // Load semua pelanggan tanpa limit untuk dropdown select
+    // Gunakan for_invoice_selection=true untuk menghilangkan limit
+    const response = await apiClient.get<{ data: PelangganSelectItem[] }>('/pelanggan/?for_invoice_selection=true');
+
+    if (response.data && Array.isArray(response.data.data)) {
+      pelangganSelectList.value = response.data.data;
+    } else {
+      console.error("Struktur data pelanggan dari API tidak sesuai. Properti 'data' tidak ditemukan atau bukan array:", response.data);
+      pelangganSelectList.value = [];
+    }
   } catch (error) {
     console.error("Gagal mengambil data pelanggan untuk select:", error);
+    pelangganSelectList.value = [];
   }
 }
 
@@ -1266,18 +1400,55 @@ async function confirmDelete() {
 }
 
 function isPelangganExisting(pelangganId: number): boolean {
-  return langgananList.value.some(l => l.pelanggan_id === pelangganId);
+  // Cari apakah pelanggan sudah pernah memiliki langganan sebelumnya
+  // yang sudah disimpan (memiliki ID dan bukan item yang sedang diedit)
+  return langgananList.value.some(l =>
+    l.pelanggan_id === pelangganId &&
+    l.id !== editedItem.value.id // Exclude current editing item
+  );
 }
 
 // --- Helper Methods ---
 function getPelangganName(pelangganId: number | undefined): string {
   if (!pelangganId) return 'N/A';
+
+  // Check if pelangganSelectList.value is an array before calling .find()
+  if (!Array.isArray(pelangganSelectList.value)) {
+    return `ID ${pelangganId}`;
+  }
   const pelanggan = pelangganSelectList.value.find(p => p.id === pelangganId);
   return pelanggan?.nama || `ID ${pelangganId}`;
 }
 
+function getPelangganAlamat(pelangganId: number | undefined): string {
+  if (!pelangganId) return 'Alamat tidak tersedia';
+
+  // Prioritaskan data dari backend yang sudah ter-load di langgananList
+  if (Array.isArray(langgananList.value)) {
+    const langganan = langgananList.value.find(l => l.pelanggan_id === pelangganId);
+    if (langganan?.pelanggan?.alamat) {
+      return langganan.pelanggan.alamat;
+    }
+  }
+
+  // Fallback: Cari dari pelangganSelectList jika tidak ada di backend
+  if (Array.isArray(pelangganSelectList.value)) {
+    const pelanggan = pelangganSelectList.value.find(p => p.id === pelangganId);
+    if (pelanggan?.alamat) {
+      return pelanggan.alamat;
+    }
+    return pelanggan ? 'Alamat tersedia' : 'Alamat tidak tersedia';
+  }
+
+  return 'Alamat tidak tersedia';
+}
+
 function getPaketName(paketId: number | undefined): string {
     if (!paketId) return 'N/A';
+    // Check if paketLayananSelectList.value is an array before calling .find()
+    if (!Array.isArray(paketLayananSelectList.value)) {
+      return `ID Paket ${paketId}`;
+    }
     const paket = paketLayananSelectList.value.find(p => p.id === paketId);
     return paket?.nama_paket || `ID Paket ${paketId}`;
 }
@@ -1313,8 +1484,26 @@ function formatDate(dateString: string | Date | null | undefined): string {
 
 
 async function exportLangganan() {
+  exporting.value = true;
   try {
-    const response = await apiClient.get('/langganan/export/csv', { responseType: 'blob' });
+    const params = new URLSearchParams();
+    if (searchQuery.value) {
+      params.append('search', searchQuery.value);
+    }
+    if (selectedAlamat.value) {
+      params.append('alamat', selectedAlamat.value);
+    }
+    if (selectedPaket.value) {
+      params.append('paket_layanan_id', String(selectedPaket.value));
+    }
+    if (selectedStatus.value) {
+      params.append('status', selectedStatus.value);
+    }
+    
+    const queryString = params.toString();
+    const exportUrl = `/langganan/export/csv${queryString ? '?' + queryString : ''}`;
+
+    const response = await apiClient.get(exportUrl, { responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -1324,8 +1513,11 @@ async function exportLangganan() {
     link.remove();
   } catch (error) {
     console.error("Gagal mengekspor data langganan:", error);
+  } finally {
+    exporting.value = false;
   }
 }
+
 
 async function importFromCsv() {
   const file = fileToImport.value[0];
@@ -1354,64 +1546,254 @@ async function importFromCsv() {
   }
 }
 
-
-
-
+async function fetchTotalCount() {
+  try {
+    const response = await apiClient.get('/langganan/count');
+    totalLanggananCount.value = response.data;
+  } catch (error) {
+    console.error('Gagal mengambil total langganan:', error);
+  }
+}
 
 </script>
 
 <style scoped>
+/* ============================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ============================================ */
 
-:root {
-  /* Light Theme Colors */
-  --light-bg-primary: #ffffff;
-  --light-bg-secondary: #f8fafc;
-  --light-bg-tertiary: #f1f5f9;
-  --light-surface: #ffffff;
-  --light-surface-variant: #f8fafc;
-  --light-border: rgba(0, 0, 0, 0.12);
-  --light-border-hover: rgba(0, 0, 0, 0.24);
-  --light-text-primary: #1a202c;
-  --light-text-secondary: #4a5568;
-  --light-text-tertiary: #718096;
-  --light-shadow: rgba(0, 0, 0, 0.1);
-  --light-shadow-hover: rgba(0, 0, 0, 0.15);
-  
-  /* Dark Theme Colors */
-  --dark-bg-primary: #1a1a1a;
-  --dark-bg-secondary: #242424;
-  --dark-bg-tertiary: #2d2d2d;
-  --dark-surface: #1e1e1e;
-  --dark-surface-variant: #2a2a2a;
-  --dark-border: rgba(255, 255, 255, 0.12);
-  --dark-border-hover: rgba(255, 255, 255, 0.24);
-  --dark-text-primary: #ffffff;
-  --dark-text-secondary: #e2e8f0;
-  --dark-text-tertiary: #a0aec0;
-  --dark-shadow: rgba(0, 0, 0, 0.3);
-  --dark-shadow-hover: rgba(0, 0, 0, 0.4);
-  
-  /* Primary Colors */
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
-  --primary-700: #4338ca;
-  --primary-50: #eef2ff;
-  --primary-100: #e0e7ff;
-  
-  /* Success Colors */
-  --success-500: #22c55e;
-  --success-600: #16a34a;
-  --success-50: #f0fdf4;
-  
-  /* Info Colors */
-  --info-500: #3b82f6;
-  --info-600: #2563eb;
-  --info-50: #eff6ff;
-  
-  /* Error Colors */
-  --error-500: #ef4444;
-  --error-600: #dc2626;
-  --error-50: #fef2f2;
+/* Header Card - Mobile Optimized with Fixed Positioning */
+.header-card {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  border-radius: 20px;
+  padding: 24px;
+  color: rgb(var(--v-theme-on-primary));
+  box-shadow: 0 8px 32px rgba(var(--v-theme-primary), 0.25);
+  position: relative;
+}
+
+.header-card .d-flex.flex-column {
+  align-items: stretch !important;
+}
+
+.header-info {
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+.header-avatar-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* Action Buttons Container - Fixed Positioning */
+.action-buttons-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: flex-end;
+}
+
+.mobile-btn {
+  border-radius: 14px;
+  font-weight: 600;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+}
+
+.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+.primary-btn {
+  background: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+/* Import Dialog */
+.import-header {
+  background: rgb(var(--v-theme-success));
+  color: rgb(var(--v-theme-on-success));
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.import-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.import-content {
+  padding: 28px !important;
+}
+
+.upload-title {
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.file-input :deep(.v-field) {
+  border: 2px dashed rgb(var(--v-theme-outline-variant)) !important;
+  background: rgb(var(--v-theme-surface)) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.file-input :deep(.v-field:hover) {
+  border-color: rgb(var(--v-theme-success)) !important;
+  background: rgba(var(--v-theme-success), 0.05) !important;
+}
+
+.error-alert {
+  border-radius: 12px;
+}
+
+.error-item {
+  background: rgba(var(--v-theme-error), 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.import-actions {
+  padding: 16px 24px !important;
+  background: rgb(var(--v-theme-surface));
+  border-top: 1px solid rgb(var(--v-theme-outline-variant));
+}
+
+.import-btn {
+  background: rgb(var(--v-theme-success)) !important;
+  color: rgb(var(--v-theme-on-success)) !important;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.nav-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS - FIXED POSITIONING
+   ============================================ */
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .header-card {
+    padding: 32px;
+    border-radius: 24px;
+  }
+
+  .header-card .d-flex.flex-column {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .header-info {
+    flex: 1;
+    margin-right: 24px;
+  }
+
+  .header-title {
+    font-size: 2.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .action-buttons-container {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 16px;
+    width: auto;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .mobile-btn {
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+/* Large Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .action-buttons-container {
+    gap: 20px;
+  }
+
+  .mobile-btn {
+    min-width: 160px;
+    height: 52px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile Specific Adjustments */
+@media (max-width: 767px) {
+  .v-container {
+    padding: 12px !important;
+  }
+
+  .header-card .d-flex.flex-column {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px;
+  }
+
+  .header-info {
+    margin-right: 0;
+  }
+
+  .header-card {
+    margin-bottom: 16px;
+  }
+}
+
+/* Dark Theme Adjustments */
+.v-theme--dark .header-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.v-theme--dark .import-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.v-theme--dark .error-item {
+  background: rgba(var(--v-theme-error), 0.1);
 }
 
 /* ============================================
@@ -3204,817 +3586,6 @@ async function importFromCsv() {
 
 /* ============================================
    STYLING BARU UNTUK FILTER CARD
-   ============================================ */
-
-.filter-card {
-  border-radius: 20px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.12);
-  background: linear-gradient(145deg, 
-    rgba(var(--v-theme-surface), 0.95) 0%, 
-    rgba(var(--v-theme-background), 0.98) 100%);
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 20px rgba(var(--v-theme-shadow), 0.08),
-    0 1px 3px rgba(var(--v-theme-shadow), 0.12);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.filter-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 30px rgba(var(--v-theme-shadow), 0.12),
-    0 2px 6px rgba(var(--v-theme-shadow), 0.16);
-  border-color: rgba(var(--v-theme-primary), 0.2);
-}
-
-.filter-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(var(--v-theme-primary), 0.6) 50%, 
-    transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.filter-card:hover::before {
-  opacity: 1;
-}
-
-/* Styling untuk input field di dalam filter card */
-.filter-card :deep(.v-field) {
-  background: rgba(var(--v-theme-surface), 0.8) !important;
-  border: 2px solid rgba(var(--v-theme-outline-variant), 0.3) !important;
-  border-radius: 16px !important;
-  box-shadow: inset 0 2px 4px rgba(var(--v-theme-shadow), 0.06);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.filter-card :deep(.v-field:hover) {
-  border-color: rgba(var(--v-theme-primary), 0.4) !important;
-  background: rgba(var(--v-theme-surface), 1) !important;
-  transform: translateY(-1px);
-  box-shadow: 
-    inset 0 2px 4px rgba(var(--v-theme-shadow), 0.06),
-    0 4px 12px rgba(var(--v-theme-primary), 0.1);
-}
-
-.filter-card :deep(.v-field--focused) {
-  border-color: rgb(var(--v-theme-primary)) !important;
-  background: rgba(var(--v-theme-surface), 1) !important;
-  box-shadow: 
-    inset 0 2px 4px rgba(var(--v-theme-shadow), 0.06),
-    0 0 0 3px rgba(var(--v-theme-primary), 0.12);
-}
-
-.filter-card .v-btn[variant="text"] {
-  border-radius: 14px !important;
-  font-weight: 600 !important;
-  color: rgba(var(--v-theme-primary), 0.8) !important;
-  background: rgba(var(--v-theme-primary), 0.08) !important;
-  border: 1px solid rgba(var(--v-theme-primary), 0.2) !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.filter-card .v-btn[variant="text"]:hover {
-  background: rgba(var(--v-theme-primary), 0.12) !important;
-  color: rgb(var(--v-theme-primary)) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.2);
-}
-
-
-/* ============================================
-   ENHANCED FORM DIALOG STYLING
-   ============================================ */
-
-.subscription-form-dialog {
-  border-radius: 24px !important;
-  overflow: hidden;
-  max-width: 900px !important;
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.15),
-    0 15px 40px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Enhanced form header with better gradient and animations */
-.enhanced-form-header {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%) !important;
-  position: relative;
-  overflow: hidden;
-  padding: 32px !important;
-}
-
-.enhanced-form-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 200px;
-  height: 200%;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
-  transform: rotate(25deg);
-  transition: all 0.5s ease;
-}
-
-.enhanced-form-header:hover::before {
-  right: -10%;
-  transform: rotate(25deg) scale(1.1);
-}
-
-.enhanced-form-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 20%,
-    rgba(255, 255, 255, 0.5) 50%,
-    rgba(255, 255, 255, 0.3) 80%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-.enhanced-form-header .form-header-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.enhanced-form-header .form-icon-wrapper {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 16px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.enhanced-form-header .form-icon-wrapper .v-avatar {
-  background: white !important;
-  color: #6366f1 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Form Title di Dialog Header */
-.enhanced-form-header .form-title {
-  color: white;
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  margin-bottom: 8px !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.5px !important;
-  line-height: 1.2 !important;
-}
-
-.enhanced-form-header .form-subtitle {
-  line-height: 1.4; /* Perbaiki juga line-height untuk subjudul */
-}
-
-.enhanced-form-header .form-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem !important;
-  font-weight: 400 !important;
-  margin: 0 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  line-height: 1.4 !important;
-  letter-spacing: 0.2px !important;
-}
-
-/* Enhanced step indicator */
-.enhanced-step-indicator {
-  padding: 32px 0 !important;
-  position: relative;
-}
-
-.enhanced-step-indicator::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 20%;
-  right: 20%;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    rgba(99, 102, 241, 0.2) 25%,
-    rgba(99, 102, 241, 0.6) 50%,
-    rgba(99, 102, 241, 0.2) 75%,
-    transparent 100%
-  );
-  transform: translateY(-50%);
-}
-
-.enhanced-step-indicator .step-badge {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-  color: white !important;
-  padding: 12px 24px !important;
-  border-radius: 50px !important;
-  font-weight: 700 !important;
-  font-size: 0.95rem !important;
-  letter-spacing: 0.5px !important;
-  text-transform: none !important;
-  border: 3px solid white !important;
-  box-shadow: 
-    0 6px 20px rgba(99, 102, 241, 0.3),
-    0 0 0 4px rgba(99, 102, 241, 0.1) !important;
-  position: relative;
-  z-index: 2;
-}
-
-
-/* Tablet and small desktop */
-@media (max-width: 960px) {
-  .add-subscription-btn {
-    font-size: 0.95rem !important;
-    padding: 12px 24px !important;
-    min-height: 44px !important;
-  }
-
-  .enhanced-form-header .form-title {
-    font-size: 1.75rem !important;
-  }
-
-  .enhanced-form-header .form-subtitle {
-    font-size: 1rem !important;
-  }
-
-  .enhanced-section-header .section-title {
-    font-size: 1.1rem !important;
-    letter-spacing: 0.6px !important;
-  }
-}
-
-/* Mobile phones */
-@media (max-width: 600px) {
-  .add-subscription-btn {
-    font-size: 0.9rem !important;
-    padding: 12px 20px !important;
-    min-height: 42px !important;
-    letter-spacing: 0.2px !important;
-  }
-
-  .enhanced-form-header .form-title {
-    font-size: 1.5rem !important;
-    line-height: 1.3 !important;
-    word-break: break-word;
-    text-align: center;
-  }
-
-  .enhanced-form-header .form-subtitle {
-    font-size: 0.95rem !important;
-    line-height: 1.5 !important;
-    text-align: center;
-  }
-
-  .enhanced-section-header .section-title {
-    font-size: 1rem !important;
-    letter-spacing: 0.4px !important;
-  }
-
-  .enhanced-save-btn {
-    font-size: 0.95rem !important;
-    padding: 12px 24px !important;
-    min-height: 44px !important;
-  }
-
-  .step-badge {
-    font-size: 0.85rem !important;
-    padding: 10px 20px !important;
-    letter-spacing: 0.3px !important;
-  }
-}
-
-/* Extra small phones */
-@media (max-width: 480px) {
-  .add-subscription-btn {
-    font-size: 0.85rem !important;
-    padding: 10px 16px !important;
-    min-height: 40px !important;
-  }
-
-  .enhanced-form-header .form-title {
-    font-size: 1.3rem !important;
-    line-height: 1.2 !important;
-  }
-
-  .enhanced-form-header .form-subtitle {
-    font-size: 0.9rem !important;
-  }
-
-  .enhanced-save-btn {
-    font-size: 0.9rem !important;
-    padding: 10px 20px !important;
-    min-height: 42px !important;
-  }
-}
-
-/* ============================================
-   TEXT CONTRAST AND READABILITY ENHANCEMENTS
-   ============================================ */
-
-/* Ensure proper contrast for all text */
-.add-subscription-btn,
-.enhanced-save-btn,
-.step-badge {
-  color: white !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
-}
-
-/* Loading state text visibility */
-.add-subscription-btn[loading="true"] .v-btn__content,
-.enhanced-save-btn[loading="true"] .v-btn__content {
-  opacity: 0.8;
-}
-
-/* Disabled state text */
-.add-subscription-btn:disabled .v-btn__content,
-.enhanced-save-btn:disabled .v-btn__content {
-  opacity: 0.6;
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-/* Enhanced form sections */
-.enhanced-form-section {
-  margin-bottom: 40px !important;
-  position: relative;
-}
-
-.enhanced-section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px !important;
-  padding: 16px 0;
-  position: relative;
-}
-
-.enhanced-section-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 40px;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    rgba(99, 102, 241, 0.3) 0%,
-    rgba(99, 102, 241, 0.1) 50%,
-    transparent 100%
-  );
-}
-
-/* Dark mode section title */
-.v-theme--dark .enhanced-section-header .section-title {
-  color: #e5e7eb !important;
-}
-
-.enhanced-section-header .section-title {
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.8px !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.enhanced-section-header .section-title {
-  font-size: 1.3rem !important;
-  font-weight: 700 !important;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Enhanced section cards */
-.enhanced-section-card {
-  border-radius: 20px !important;
-  padding: 32px !important;
-  border: 1px solid rgba(99, 102, 241, 0.1) !important;
-  background: linear-gradient(145deg, 
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(249, 250, 251, 0.8) 100%
-  ) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.05),
-    0 4px 10px rgba(99, 102, 241, 0.1) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  position: relative;
-  overflow: hidden;
-}
-
-.enhanced-section-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #6366f1, #4f46e5, #4338ca);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.enhanced-section-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.1),
-    0 8px 20px rgba(99, 102, 241, 0.2) !important;
-  border-color: rgba(99, 102, 241, 0.3) !important;
-}
-
-.enhanced-section-card:hover::before {
-  opacity: 1;
-}
-
-/* Enhanced form fields */
-.enhanced-form-field .v-field {
-  border-radius: 16px !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 2px solid rgba(99, 102, 241, 0.1) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-}
-
-.enhanced-form-field .v-field:hover {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(99, 102, 241, 0.3) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.1) !important;
-}
-
-.enhanced-form-field .v-field--focused {
-  background: white !important;
-  border-color: #6366f1 !important;
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 25px rgba(99, 102, 241, 0.15),
-    0 0 0 4px rgba(99, 102, 241, 0.1) !important;
-}
-
-.enhanced-form-field .v-field__input {
-  padding: 16px 20px !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-}
-
-.enhanced-form-field .v-field__prepend-inner .v-icon {
-  color: rgba(99, 102, 241, 0.7) !important;
-  font-size: 1.2rem !important;
-  margin-right: 12px !important;
-}
-
-.enhanced-form-field .v-field--focused .v-field__prepend-inner .v-icon {
-  color: #6366f1 !important;
-  transform: scale(1.1);
-}
-
-/* Special styling for price field */
-.enhanced-price-field .v-field {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
-  border-color: rgba(14, 165, 233, 0.3) !important;
-  font-weight: 700 !important;
-}
-
-.enhanced-price-field .v-field:hover {
-  border-color: rgba(14, 165, 233, 0.5) !important;
-}
-
-.enhanced-price-field .v-field--focused {
-  border-color: #0ea5e9 !important;
-  box-shadow: 
-    0 8px 25px rgba(14, 165, 233, 0.15),
-    0 0 0 4px rgba(14, 165, 233, 0.1) !important;
-}
-
-.enhanced-price-field .v-field__input {
-  color: #0369a1 !important;
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
-}
-
-/* Enhanced action footer */
-.enhanced-action-footer {
-  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 32px !important;
-}
-
-.enhanced-action-footer .action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 16px;
-}
-
-.enhanced-cancel-btn {
-  color: #6b7280 !important;
-  background: rgba(107, 114, 128, 0.1) !important;
-  border: 1px solid rgba(107, 114, 128, 0.2) !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  text-transform: none !important;
-  padding: 14px 24px !important;
-  transition: all 0.3s ease !important;
-}
-
-.enhanced-cancel-btn:hover {
-  background: rgba(107, 114, 128, 0.15) !important;
-  color: #374151 !important;
-  border-color: rgba(107, 114, 128, 0.3) !important;
-}
-
-.enhanced-save-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 12px !important;
-  font-weight: 700 !important;
-  text-transform: none !important;
-  padding: 14px 32px !important;
-  font-size: 1rem !important;
-  letter-spacing: 0.3px !important;
-  box-shadow: 
-    0 6px 20px rgba(99, 102, 241, 0.3),
-    0 3px 10px rgba(99, 102, 241, 0.2) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  position: relative;
-  overflow: hidden;
-  min-height: 48px !important;
-}
-
-.enhanced-save-btn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-  transform: translateY(-2px);
-  box-shadow: 
-    0 8px 30px rgba(99, 102, 241, 0.4),
-    0 5px 15px rgba(99, 102, 241, 0.3) !important;
-}
-
-.enhanced-save-btn:active {
-  transform: translateY(0);
-  transition: all 0.1s ease;
-}
-
-.enhanced-save-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transition: width 0.6s ease, height 0.6s ease;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-}
-
-.enhanced-save-btn:active::before {
-  width: 300px;
-  height: 300px;
-}
-
-.enhanced-save-btn .v-btn__content {
-  position: relative;
-  z-index: 1;
-  font-weight: 700 !important;
-  letter-spacing: 0.3px !important;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ============================================
-   RESPONSIVE ENHANCEMENTS
-   ============================================ */
-
-@media (max-width: 768px) {
-  .header-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 8px;
-  }
-  
-  .import-btn,
-  .export-btn,
-  .add-subscription-btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .subscription-form-dialog {
-    margin: 16px !important;
-    max-width: calc(100vw - 32px) !important;
-    border-radius: 16px !important;
-  }
-  
-  .enhanced-form-header {
-    padding: 24px !important;
-  }
-  
-  .enhanced-form-header .form-title {
-  font-size: 1.4rem !important;  /* Sedikit kita kecilkan lagi agar pas */
-  line-height: 1.3 !important; /* Kita rapatkan jarak antar baris */
-  word-break: break-word;     /* Memastikan kata panjang tidak akan keluar dari container */
-  }
-  
-  .enhanced-section-card {
-    padding: 20px !important;
-    margin: 0 -4px !important;
-  }
-  
-  .enhanced-action-footer {
-    padding: 20px !important;
-  }
-  
-  .enhanced-action-footer .action-buttons {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .enhanced-cancel-btn,
-  .enhanced-save-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .import-dialog-content {
-    padding: 20px !important;
-  }
-  
-  .import-dialog-header {
-    padding: 20px !important;
-  }
-  
-  .import-dialog-actions {
-    padding: 16px 20px !important;
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .import-upload-btn,
-  .import-cancel-btn {
-    width: 100%;
-  }
-}
-
-/* Page Header Adjustments */
-.page-header {
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-/* Filter Card Layout */
-/* Filter Card Layout */
-.filter-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
-}
-
-.filter-item {
-  flex-grow: 1;
-  flex-basis: 200px;
-}
-
-/* Data Table Wrapper */
-.table-responsive-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.v-data-table {
-  min-width: 1200px;
-}
-
-/* --- MOBILE OVERRIDES (Following DefaultLayout.vue pattern) --- */
-
-/* Medium screens and down (tablets, large phones) */
-@media (max-width: 960px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
-  }
-
-  .header-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .header-actions > .v-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* FIX: Refined filter container for mobile */
-  .filter-container {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 20px;
-    gap: 12px; /* Reduced gap for a tighter look */
-  }
-
-  /* FIX: Specific styling for the reset button on mobile */
-  .reset-filter-btn {
-    align-self: center; /* Center the button */
-    margin-top: 8px; /* Add some space above it */
-    flex-grow: 0; /* Prevent it from growing */
-    width: auto; /* Let it size to its content */
-    padding: 0 24px !important;
-  }
-
-  .enhanced-form-header {
-    padding: 24px !important;
-  }
-
-  .enhanced-form-header .form-title {
-    font-size: 1.75rem !important;
-  }
-  
-  /* FIX: Reduced margin between form sections on mobile */
-  .enhanced-form-section {
-    margin-bottom: 24px !important;
-  }
-}
-
-/* Small screens (standard mobile phones) */
-@media (max-width: 600px) {
-  .text-h4 {
-    font-size: 1.5rem !important;
-  }
-
-  .v-dialog .v-card {
-    margin: 16px !important;
-    max-width: calc(100vw - 32px) !important;
-  }
-
-  .subscription-form-dialog .v-card-text {
-    padding: 0 !important;
-  }
-  
-  .subscription-form-dialog .v-container {
-    padding: 24px 16px !important;
-  }
-
-  .enhanced-section-card {
-    padding: 16px !important;
-  }
-
-  .enhanced-action-footer {
-    padding: 16px !important;
-  }
-  
-  .enhanced-action-footer .action-buttons {
-    flex-direction: column;
-    width: 100%;
-    gap: 12px;
-  }
-  
-  .enhanced-cancel-btn,
-  .enhanced-save-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .delete-header {
-    padding: 24px 16px !important;
-  }
-}
-
-
-
-/* ============================================
-   ENHANCED FILTER CARD STYLING
    ============================================ */
 
 .filter-card {

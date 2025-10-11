@@ -124,7 +124,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="charts-row">
         <div v-if="growthChartData" id="growth-chart-container" class="chart-card growth-chart">
           <div class="chart-header">
@@ -264,10 +264,10 @@
                 </div>
                 <h3 class="section-title">Distribusi Lokasi</h3>
               </div>
-              
+
               <div class="items-grid">
-                <div 
-                  v-for="item in selectedPaketDetail.breakdown_lokasi" 
+                <div
+                  v-for="item in selectedPaketDetail.breakdown_lokasi"
                   :key="item.nama"
                   class="detail-item location-item"
                 >
@@ -281,8 +281,8 @@
                     </div>
                   </div>
                   <div class="item-value">
-                    <v-chip 
-                      color="info" 
+                    <v-chip
+                      color="info"
                       variant="flat"
                       size="small"
                       class="value-chip"
@@ -301,10 +301,10 @@
                 </div>
                 <h3 class="section-title">Distribusi Brand</h3>
               </div>
-              
+
               <div class="items-grid">
-                <div 
-                  v-for="item in selectedPaketDetail.breakdown_brand" 
+                <div
+                  v-for="item in selectedPaketDetail.breakdown_brand"
                   :key="item.nama"
                   class="detail-item brand-item"
                 >
@@ -318,8 +318,8 @@
                     </div>
                   </div>
                   <div class="item-value">
-                    <v-chip 
-                      color="success" 
+                    <v-chip
+                      color="success"
                       variant="flat"
                       size="small"
                       class="value-chip"
@@ -407,18 +407,18 @@
                     </div>
                     <h3 class="section-title">Detail Pelanggan</h3>
                   </div>
-                  
+
                   <!-- Empty State -->
                   <div v-if="loyalitasUserList.length === 0" class="empty-state">
                     <v-icon size="64" color="grey">mdi-account-off</v-icon>
                     <h3>Tidak ada data</h3>
                     <p>Tidak ada pelanggan dalam kategori ini</p>
                   </div>
-                  
+
                   <!-- User Cards -->
                   <div v-else class="users-grid">
-                    <div 
-                      v-for="(user, index) in loyalitasUserList" 
+                    <div
+                      v-for="(user, index) in loyalitasUserList"
                       :key="user.id || index"
                       class="user-card"
                     >
@@ -443,8 +443,8 @@
                         </div>
                       </div>
                       <div class="user-badge">
-                        <v-chip 
-                          :color="getLoyaltyColor(selectedLoyalitasSegmen)" 
+                        <v-chip
+                          :color="getLoyaltyColor(selectedLoyalitasSegmen)"
                           variant="flat"
                           size="small"
                           class="status-chip"
@@ -473,7 +473,7 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-    
+
   </div>
 </template>
 
@@ -483,17 +483,17 @@ import { ref, computed, onMounted } from 'vue';
 import { Chart } from 'vue-chartjs';
 import html2canvas from 'html2canvas';
 import {
-  Chart as ChartJS, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  BarElement, 
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
   BarController,
   LineElement,
   LineController,
   PointElement,
-  CategoryScale, 
-  LinearScale, 
+  CategoryScale,
+  LinearScale,
   Filler,
   ChartOptions,
   DoughnutController,
@@ -504,7 +504,7 @@ import { useTheme } from 'vuetify';
 import apiClient from '@/services/api';
 
 ChartJS.register(
-  Title, Tooltip, Legend, BarElement, BarController, LineElement, LineController, 
+  Title, Tooltip, Legend, BarElement, BarController, LineElement, LineController,
   PointElement, CategoryScale, LinearScale, Filler, DoughnutController, ArcElement, PieController
 );
 
@@ -543,10 +543,10 @@ const loadingLoyalitasDetail = ref(false);
 const selectedLoyalitasSegmen = ref('');
 
 // --- Computed Properties ---
-const customerStats = computed(() => 
+const customerStats = computed(() =>
   allStats.value.filter(s => s.title.toLowerCase().includes('pelanggan'))
 );
-const serverStats = computed(() => 
+const serverStats = computed(() =>
   allStats.value.filter(s => s.title.toLowerCase().includes('server'))
 );
 const totalSubscriptions = computed(() => {
@@ -614,7 +614,7 @@ async function handleLoyalitasChartClick(_event: any, elements: any[]) {
     selectedLoyalitasSegmen.value = label;
     loyalitasUserList.value = [];
     loadingLoyalitasDetail.value = true;
-    
+
     // Buka dialog dulu
     dialogLoyalitas.value = true;
 
@@ -623,7 +623,7 @@ async function handleLoyalitasChartClick(_event: any, elements: any[]) {
 
     // API call
     const response = await apiClient.get(`/dashboard/loyalitas-users-by-segment?segmen=${encodeURIComponent(label)}`);
-    
+
     // Pastikan response data sesuai dengan interface
     loyalitasUserList.value = response.data.map((user: any) => ({
       id: user.id,
@@ -657,8 +657,21 @@ function getShortLabel(segmen: string): string {
 }
 
 // PERBAIKAN: Chart options dengan tipe yang benar
-const chartAxisColor = computed(() => theme.global.current.value.dark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)');
-const chartGridColor = computed(() => theme.global.current.value.dark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)');
+const chartAxisColor = computed(() => {
+  if (theme.global.current.value.dark) {
+    return 'rgba(255, 255, 255, 0.9)';
+  } else {
+    return 'rgba(0, 0, 0, 0.8)';
+  }
+});
+
+const chartGridColor = computed(() => {
+  if (theme.global.current.value.dark) {
+    return 'rgba(255, 255, 255, 0.08)';
+  } else {
+    return 'rgba(0, 0, 0, 0.06)';
+  }
+});
 
 // PERBAIKAN: Loyalitas donut options dengan tipe yang tepat
 const loyalitasDonutOptions = computed((): ChartOptions<'doughnut'> => ({
@@ -666,15 +679,15 @@ const loyalitasDonutOptions = computed((): ChartOptions<'doughnut'> => ({
   maintainAspectRatio: false,
   cutout: '70%',
   onClick: handleLoyalitasChartClick,
-  plugins: { 
-    legend: { 
+  plugins: {
+    legend: {
       position: 'bottom' as const, // PERBAIKAN: Explicit as const
-      labels: { 
-        color: chartAxisColor.value, 
-        usePointStyle: true, 
+      labels: {
+        color: chartAxisColor.value,
+        usePointStyle: true,
         pointStyle: 'circle' as const, // PERBAIKAN: Explicit as const
         padding: 20,
-        font: { size: 12, weight: 'bold' as const } 
+        font: { size: 12, weight: 'bold' as const }
       }
     }
   },
@@ -685,26 +698,59 @@ const chartOptions = computed((): ChartOptions<'bar'> => ({
   responsive: true,
   maintainAspectRatio: false,
   onClick: handlePaketChartClick,
-  plugins: { 
+  plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-      titleColor: chartAxisColor.value,
-      bodyColor: chartAxisColor.value,
-      borderColor: chartGridColor.value,
-      borderWidth: 1,
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      borderColor: 'rgb(99, 102, 241)',
+      borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
       cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
     }
   },
   scales: {
-    y: { 
-      beginAtZero: true, 
-      grid: { color: chartGridColor.value },
-      ticks: { color: chartAxisColor.value, font: { size: 12, weight: 'normal' as const } }
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: chartGridColor.value,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8
+      },
+      title: {
+        display: true,
+        text: 'Jumlah Pelanggan',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 0, bottom: 10 }
+      }
     },
-    x: { 
-      grid: { display: false },
-      ticks: { color: chartAxisColor.value, font: { size: 12, weight: 'normal' as const } }
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8,
+        maxRotation: 45,
+        minRotation: 0
+      },
+      title: {
+        display: true,
+        text: 'Kategori',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 10, bottom: 0 }
+      }
     },
   },
 }));
@@ -712,24 +758,38 @@ const chartOptions = computed((): ChartOptions<'bar'> => ({
 const pieChartOptions = computed((): ChartOptions<'pie'> => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { 
-    legend: { 
-      position: 'bottom' as const, 
-      labels: { 
-        color: chartAxisColor.value, 
-        usePointStyle: true, 
-        pointStyle: 'circle' as const, 
+  plugins: {
+    legend: {
+      position: 'bottom' as const,
+      labels: {
+        color: chartAxisColor.value,
+        usePointStyle: true,
+        pointStyle: 'circle' as const,
         padding: 20,
-        font: { size: 12, weight: 'bold' as const } 
+        font: { size: 12, weight: 'bold' },
       }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-      titleColor: chartAxisColor.value,
-      bodyColor: chartAxisColor.value,
-      borderColor: chartGridColor.value,
-      borderWidth: 1,
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      borderColor: 'rgb(99, 102, 241)',
+      borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
       cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
+      callbacks: {
+        label: function(context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percentage}%)`;
+        }
+      }
     }
   },
 }));
@@ -738,15 +798,37 @@ const donutChartOptions = computed((): ChartOptions<'doughnut'> => ({
   responsive: true,
   maintainAspectRatio: false,
   cutout: '70%',
-  plugins: { 
-    legend: { 
-      position: 'bottom' as const, 
-      labels: { 
-        color: chartAxisColor.value, 
-        usePointStyle: true, 
-        pointStyle: 'circle' as const, 
+  plugins: {
+    legend: {
+      position: 'bottom' as const,
+      labels: {
+        color: chartAxisColor.value,
+        usePointStyle: true,
+        pointStyle: 'circle' as const,
         padding: 20,
-        font: { size: 12, weight: 'bold' as const } 
+        font: { size: 12, weight: 'bold' },
+      }
+    },
+    tooltip: {
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      borderColor: 'rgb(99, 102, 241)',
+      borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
+      callbacks: {
+        label: function(context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percentage}%)`;
+        }
       }
     }
   },
@@ -756,28 +838,62 @@ const growthChartOptions = computed((): ChartOptions<'line'> => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: { intersect: false, mode: 'index' as const },
-  plugins: { 
-    legend: { 
+  plugins: {
+    legend: {
       display: true, position: 'top' as const,
-      labels: { color: chartAxisColor.value, usePointStyle: true, pointStyle: 'circle' as const, font: { size: 12, weight: 'bold' as const } }
+      labels: { color: chartAxisColor.value, usePointStyle: true, pointStyle: 'circle' as const, font: { size: 12, weight: 'bold' } }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
       borderColor: 'rgb(236, 72, 153)',
       borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
     }
   },
   scales: {
-    y: { 
-      beginAtZero: true, 
-      grid: { color: chartGridColor.value },
-      ticks: { color: chartAxisColor.value },
-      title: { display: true, text: 'Jumlah Pelanggan Baru', color: chartAxisColor.value }
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: chartGridColor.value,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8
+      },
+      title: {
+        display: true,
+        text: 'Jumlah Pelanggan Baru',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 0, bottom: 10 }
+      }
     },
-    x: { 
-      grid: { display: false },
-      ticks: { color: chartAxisColor.value },
-      title: { display: true, text: 'Periode', color: chartAxisColor.value }
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8,
+        maxRotation: 45,
+        minRotation: 0
+      },
+      title: {
+        display: true,
+        text: 'Periode',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 10, bottom: 0 }
+      }
     },
   },
 }));
@@ -785,23 +901,86 @@ const growthChartOptions = computed((): ChartOptions<'line'> => ({
 const invoiceChartOptions = computed((): ChartOptions<'bar'> => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { 
-    legend: { 
-      position: 'top' as const, 
-      labels: { color: chartAxisColor.value, usePointStyle: true, pointStyle: 'circle' as const, font: { size: 12, weight: 'bold' as const } }
+  interaction: {
+    mode: 'index' as const,
+    intersect: false,
+  },
+  plugins: {
+    legend: {
+      position: 'top' as const,
+      labels: {
+        color: chartAxisColor.value,
+        usePointStyle: true,
+        pointStyle: 'circle' as const,
+        font: { size: 12, weight: 'bold' },
+        padding: 15,
+      }
     },
+    tooltip: {
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      borderColor: 'rgb(99, 102, 241)',
+      borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
+      callbacks: {
+        label: function(context) {
+          let label = context.dataset.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed.y !== null) {
+            label += context.parsed.y + ' Invoice';
+          }
+          return label;
+        }
+      }
+    }
   },
   scales: {
-    y: { 
-      stacked: true, 
-      beginAtZero: true, 
-      grid: { color: chartGridColor.value },
-      ticks: { color: chartAxisColor.value }
+    y: {
+      stacked: true,
+      beginAtZero: true,
+      grid: {
+        color: chartGridColor.value,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8,
+      },
+      title: {
+        display: true,
+        text: 'Jumlah Invoice',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 0, bottom: 10 }
+      }
     },
-    x: { 
-      stacked: true, 
-      grid: { display: false },
-      ticks: { color: chartAxisColor.value }
+    x: {
+      stacked: true,
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: chartAxisColor.value,
+        font: { size: 11, weight: 'normal' },
+        padding: 8,
+        maxRotation: 45,
+        minRotation: 0
+      },
+      title: {
+        display: true,
+        text: 'Periode',
+        color: chartAxisColor.value,
+        font: { size: 12, weight: 'bold' },
+        padding: { top: 10, bottom: 0 }
+      }
     },
   },
 }));
@@ -850,18 +1029,19 @@ function downloadAsPNG(elementId: string, filename: string) {
 // onMounted tetap sama seperti sebelumnya
 onMounted(async () => {
   loading.value = true;
+  let data: any = null; // Deklarasi data di luar try-catch
   try {
     const response = await apiClient.get('/dashboard/');
-    const data = response.data;
+    data = response.data;
 
     revenueData.value = data.revenue_summary;
-    
+
     allStats.value = (data.stat_cards || []).map((card: any) => ({
       ...card,
       icon: getIconForStat(card.title),
       color: getColorForStat(card.title)
     }));
-    
+
     // Setup chart data...
     if (data.lokasi_chart) {
       lokasiChartData.value = {
@@ -905,15 +1085,117 @@ onMounted(async () => {
       }]
     };
   }
-    
+
     if (data.invoice_summary_chart) {
+      console.log('Invoice chart data found:', data.invoice_summary_chart);
       invoiceChartData.value = {
         labels: data.invoice_summary_chart.labels,
         datasets: [
-            { type: 'line', label: 'Total Invoice', data: data.invoice_summary_chart.total, borderColor: 'rgb(168, 85, 247)', tension: 0.4, fill: true },
-            { type: 'bar', label: 'Lunas', data: data.invoice_summary_chart.lunas, backgroundColor: 'rgba(34, 197, 94, 0.8)', stack: 'Stack 0' },
-            { type: 'bar', label: 'Menunggu', data: data.invoice_summary_chart.menunggu, backgroundColor: 'rgba(251, 191, 36, 0.8)', stack: 'Stack 0' },
-            { type: 'bar', label: 'Kadaluarsa', data: data.invoice_summary_chart.kadaluarsa, backgroundColor: 'rgba(239, 68, 68, 0.8)', stack: 'Stack 0' },
+          {
+            type: 'line',
+            label: 'Total Invoice',
+            data: data.invoice_summary_chart.total,
+            borderColor: 'rgb(168, 85, 247)',
+            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: 'rgb(168, 85, 247)',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          },
+          {
+            type: 'bar',
+            label: 'Lunas',
+            data: data.invoice_summary_chart.lunas,
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            borderColor: 'rgb(34, 197, 94)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
+          {
+            type: 'bar',
+            label: 'Menunggu Pembayaran',
+            data: data.invoice_summary_chart.menunggu,
+            backgroundColor: 'rgba(251, 191, 36, 0.8)',
+            borderColor: 'rgb(251, 191, 36)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
+          {
+            type: 'bar',
+            label: 'Kadaluarsa',
+            data: data.invoice_summary_chart.kadaluarsa,
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderColor: 'rgb(239, 68, 68)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
+        ]
+      };
+    } else {
+      console.warn('Invoice summary chart data is null or undefined');
+      // Create empty chart with placeholder data to show the chart structure
+      const now = new Date();
+      const labels: string[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        labels.push(date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }));
+      }
+
+      invoiceChartData.value = {
+        labels: labels,
+        datasets: [
+          {
+            type: 'line',
+            label: 'Total Invoice',
+            data: [0, 0, 0, 0, 0, 0],
+            borderColor: 'rgb(168, 85, 247)',
+            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: 'rgb(168, 85, 247)',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          },
+          {
+            type: 'bar',
+            label: 'Lunas',
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            borderColor: 'rgb(34, 197, 94)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
+          {
+            type: 'bar',
+            label: 'Menunggu Pembayaran',
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(251, 191, 36, 0.8)',
+            borderColor: 'rgb(251, 191, 36)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
+          {
+            type: 'bar',
+            label: 'Kadaluarsa',
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+            borderColor: 'rgb(239, 68, 68)',
+            borderWidth: 2,
+            borderRadius: 6,
+            stack: 'Stack 0'
+          },
         ]
       };
     }
@@ -923,7 +1205,7 @@ onMounted(async () => {
         labels: data.status_langganan_chart.labels,
         datasets: [{
             data: data.status_langganan_chart.data,
-            backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'], 
+            backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'],
             borderColor: theme.global.current.value.dark ? '#1E1E1E' : '#FFFFFF',
             borderWidth: 4,
         }]
@@ -935,7 +1217,7 @@ onMounted(async () => {
         labels: data.loyalitas_pembayaran_chart.labels,
         datasets: [{
             data: data.loyalitas_pembayaran_chart.data,
-            backgroundColor: ['#22c55e', '#f97316', '#ef4444'], 
+            backgroundColor: ['#22c55e', '#f97316', '#ef4444'],
             borderColor: theme.global.current.value.dark ? '#1E1E1E' : '#FFFFFF',
             borderWidth: 4,
         }]
@@ -948,9 +1230,9 @@ onMounted(async () => {
         datasets: [{
             data: data.pelanggan_per_alamat_chart.data,
             backgroundColor: [
-              '#6366f1', '#22c55e', '#f97316', '#3b82f6', 
+              '#6366f1', '#22c55e', '#f97316', '#3b82f6',
               '#ec4899', '#f59e0b', '#10b981'
-            ], 
+            ],
             borderColor: theme.global.current.value.dark ? '#1E1E1E' : '#FFFFFF',
             borderWidth: 4,
         }]
@@ -963,6 +1245,10 @@ onMounted(async () => {
     console.error("Failed to fetch dashboard data:", error);
   } finally {
     loading.value = false;
+    // Simple debug log
+    if (data && !data.invoice_summary_chart) {
+      console.warn('Invoice chart data is null or undefined');
+    }
   }
 });
 </script>
@@ -970,10 +1256,26 @@ onMounted(async () => {
 <style scoped>
 /* Base Styling */
 .dashboard-container {
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(34, 197, 94, 0.02) 100%);
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(34, 197, 94, 0.03) 50%, rgba(236, 72, 153, 0.03) 100%);
   min-height: 100vh;
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.8s ease-out;
+  position: relative;
+}
+
+.dashboard-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* === STYLING BARU UNTUK LAYOUT ATAS === */
@@ -994,13 +1296,14 @@ onMounted(async () => {
 
 .revenue-card {
   position: relative;
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
   color: white;
-  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
-  transition: all 0.3s ease-in-out;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .donut-container {
@@ -1074,49 +1377,84 @@ onMounted(async () => {
 }
 
 .breakdown-title {
-  font-size: 0.9rem; /* Sedikit lebih kecil */
+  font-size: 0.9rem;
   font-weight: 600;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .breakdown-icon {
-  opacity: 0.8;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .breakdown-value {
-  font-size: 1.5rem; /* Lebih kecil dari total utama */
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
   margin: 0.25rem 0;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
+
 .revenue-breakdown {
-  justify-content: center; /* Mengubah dari space-around agar lebih rapi */
-  gap: 0.5rem; /* Menambahkan sedikit jarak */
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .breakdown-value {
-  font-size: 1.35rem; /* Sedikit lebih kecil agar muat */
+  font-size: 1.35rem;
 }
 
 .breakdown-title {
-  font-size: 0.85rem; /* Sedikit lebih kecil agar muat */
+  font-size: 0.85rem;
 }
+
 .breakdown-period {
-  font-size: 0.7rem; /* Sangat kecil */
+  font-size: 0.7rem;
   font-weight: 500;
-  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.8);
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 
-.revenue-card:hover { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(59, 130, 246, 0.3); }
+.revenue-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.35), 0 8px 16px rgba(0, 0, 0, 0.15);
+}
 
 .revenue-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-.revenue-title { font-size: 1rem; font-weight: 600; opacity: 0.9; }
-.revenue-icon-wrapper { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.2); }
+.revenue-title {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.95);
+}
+.revenue-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 .revenue-body { text-align: left; }
-.revenue-value { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin: 0 0 0.25rem 0; }
-.revenue-period { font-size: 0.875rem; font-weight: 500; opacity: 0.8; }
+.revenue-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 0.25rem 0;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.revenue-period {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
+}
 
 .stats-subgrid {
   display: grid;
@@ -1126,13 +1464,15 @@ onMounted(async () => {
 
 /* Header Section - Improved Responsive Layout */
 .dashboard-header {
-  margin-bottom: 1.5rem;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  border-radius: 24px;
+  padding: 1.5rem 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .header-content {
@@ -1140,6 +1480,19 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 50%, rgba(236, 72, 153, 0.05) 100%);
+  z-index: 1;
 }
 
 .title-section {
@@ -1155,19 +1508,35 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: linear-gradient(135deg, #6366f1 0%, #22c55e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
   line-height: 1.2;
 }
 
-.title-icon {
-  background: linear-gradient(135deg, #6366f1 0%, #22c55e 100%);
+.v-theme--light .dashboard-title {
+  color: #1e293b;
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.v-theme--dark .dashboard-title {
+  color: #f8fafc;
+  background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.title-icon {
   flex-shrink: 0;
+}
+
+.v-theme--light .title-icon {
+  color: #3b82f6;
+}
+
+.v-theme--dark .title-icon {
+  color: #60a5fa;
 }
 
 .dashboard-subtitle {
@@ -1175,6 +1544,14 @@ onMounted(async () => {
   font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.4;
+}
+
+.v-theme--light .dashboard-subtitle {
+  color: #64748b;
+}
+
+.v-theme--dark .dashboard-subtitle {
+  color: #94a3b8;
 }
 
 /* Header Actions - Improved Layout */
@@ -1221,42 +1598,93 @@ onMounted(async () => {
 }
 
 
-.growth-chart .chart-container canvas {
-  filter: contrast(1.2) saturate(1.1);
-}
-
-/* Alternatif: Jika masih tidak terlihat, tambahkan styling khusus untuk growth chart */
-.v-theme--light .growth-chart .chart-container {
-  background: rgba(248, 250, 252, 0.3);
+/* Improved Chart Styling for Better Visibility */
+.chart-container {
+  position: relative;
+  background: transparent;
   border-radius: 8px;
   padding: 0.5rem;
 }
 
-/* Pastikan grid lines terlihat dengan baik di light mode */
-.v-theme--light .growth-chart .chart-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px),
-              linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px);
-  background-size: 20px 20px;
-  pointer-events: none;
-  border-radius: 8px;
+/* Light Mode Chart Improvements */
+.v-theme--light .chart-container {
+  background: rgba(248, 250, 252, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
+.v-theme--light .growth-chart .chart-container {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.7), rgba(241, 245, 249, 0.5));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.v-theme--light .invoice-chart .chart-container {
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.7), rgba(241, 245, 249, 0.5));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark Mode Chart Improvements */
+.v-theme--dark .chart-container {
+  background: rgba(30, 41, 59, 0.3);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Chart Canvas Enhancements */
+.chart-container canvas {
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.v-theme--light .chart-container:hover canvas {
+  filter: brightness(1.02) contrast(1.05);
+}
+
+.v-theme--dark .chart-container:hover canvas {
+  filter: brightness(1.1) contrast(1.1);
+}
+
+/* Growth Chart Specific Enhancements */
+.growth-chart .chart-container canvas {
+  filter: contrast(1.1) saturate(1.05);
+}
+
+.v-theme--light .growth-chart .chart-container canvas {
+  filter: contrast(1.15) saturate(1.1) brightness(1.02);
+}
+
+/* Invoice Chart Specific Enhancements */
+.invoice-chart .chart-container canvas {
+  filter: contrast(1.05) saturate(1.02);
+}
+
+.v-theme--light .invoice-chart .chart-container canvas {
+  filter: contrast(1.1) saturate(1.05) brightness(1.02);
+}
+
+/* Chart Card Hover Effects */
+.chart-card:hover .chart-container {
+  transform: translateY(-1px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.v-theme--light .chart-card:hover .chart-container {
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.v-theme--dark .chart-card:hover .chart-container {
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 
 
 /* Stat Cards */
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(25px);
+  border-radius: 20px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
@@ -1268,7 +1696,42 @@ onMounted(async () => {
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--card-gradient-start), var(--card-gradient-end));
+}
+
+.stat-card.card-0 {
+  --card-gradient-start: #6366f1;
+  --card-gradient-end: #8b5cf6;
+}
+
+.stat-card.card-1 {
+  --card-gradient-start: #22c55e;
+  --card-gradient-end: #10b981;
+}
+
+.stat-card.card-2 {
+  --card-gradient-start: #f59e0b;
+  --card-gradient-end: #f97316;
+}
+
+.stat-card.card-3 {
+  --card-gradient-start: #ef4444;
+  --card-gradient-end: #ec4899;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -20px;
+  transform: translateY(-50%);
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  opacity: 0.05;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .stat-card.card-0::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
@@ -1277,9 +1740,9 @@ onMounted(async () => {
 .stat-card.card-3::before { background: linear-gradient(90deg, #ef4444, #ec4899); }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 .stat-card-content {
@@ -1294,24 +1757,58 @@ onMounted(async () => {
 }
 
 .stat-icon-container {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
-  transition: all 0.2s ease;
+  background: linear-gradient(135deg, var(--icon-gradient-start), var(--icon-gradient-end));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-icon-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: 14px;
 }
 
 .stat-card:hover .stat-icon-container {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(5deg);
 }
 
-.stat-icon-container.icon-0 { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.05)); }
-.stat-icon-container.icon-1 { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.05)); }
-.stat-icon-container.icon-2 { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(249, 115, 22, 0.05)); }
-.stat-icon-container.icon-3 { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(236, 72, 153, 0.05)); }
+.stat-icon-container .v-icon {
+  color: white !important;
+  font-size: 22px !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.stat-icon-container.icon-0 {
+  --icon-gradient-start: #6366f1;
+  --icon-gradient-end: #8b5cf6;
+}
+
+.stat-icon-container.icon-1 {
+  --icon-gradient-start: #22c55e;
+  --icon-gradient-end: #10b981;
+}
+
+.stat-icon-container.icon-2 {
+  --icon-gradient-start: #f59e0b;
+  --icon-gradient-end: #f97316;
+}
+
+.stat-icon-container.icon-3 {
+  --icon-gradient-start: #ef4444;
+  --icon-gradient-end: #ec4899;
+}
 
 .stat-body {
   margin-bottom: 1rem;
@@ -1325,6 +1822,14 @@ onMounted(async () => {
   margin-bottom: 0.5rem;
 }
 
+.v-theme--light .stat-value {
+  color: #1e293b;
+}
+
+.v-theme--dark .stat-value {
+  color: #f8fafc;
+}
+
 .stat-title {
   font-size: 0.85rem;
   color: rgb(var(--v-theme-on-surface));
@@ -1332,10 +1837,26 @@ onMounted(async () => {
   margin-bottom: 0.25rem;
 }
 
+.v-theme--light .stat-title {
+  color: #475569;
+}
+
+.v-theme--dark .stat-title {
+  color: #e2e8f0;
+}
+
 .stat-description {
   font-size: 0.75rem;
   color: rgba(var(--v-theme-on-surface), 0.6);
   line-height: 1.4;
+}
+
+.v-theme--light .stat-description {
+  color: #64748b;
+}
+
+.v-theme--dark .stat-description {
+  color: #94a3b8;
 }
 
 .progress-bar {
@@ -1362,7 +1883,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 3rem;
-  margin-bottom: 2rem; 
+  margin-bottom: 2rem;
 }
 
 .charts-row {
@@ -1372,18 +1893,51 @@ onMounted(async () => {
 }
 
 .chart-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(25px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .chart-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+  opacity: 0.8;
+}
+
+.chart-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(139, 92, 246, 0.02), rgba(236, 72, 153, 0.01));
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chart-card .chart-header,
+.chart-card .chart-container {
+  position: relative;
+  z-index: 2;
 }
 
 .chart-header {
@@ -1407,6 +1961,14 @@ onMounted(async () => {
   gap: 0.5rem;
 }
 
+.v-theme--light .chart-title {
+  color: #1e293b;
+}
+
+.v-theme--dark .chart-title {
+  color: #f8fafc;
+}
+
 .chart-icon-wrapper {
   width: 32px;
   height: 32px;
@@ -1418,13 +1980,28 @@ onMounted(async () => {
   transition: all 0.2s ease;
 }
 
+.v-theme--light .chart-icon-wrapper {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.08));
+}
+
+.v-theme--dark .chart-icon-wrapper {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15), rgba(96, 165, 250, 0.08));
+}
+
 .chart-card:hover .chart-icon-wrapper {
   transform: scale(1.1);
 }
 
 .chart-icon {
-  color: rgb(var(--v-theme-primary));
   font-size: 16px;
+}
+
+.v-theme--light .chart-icon {
+  color: #3b82f6;
+}
+
+.v-theme--dark .chart-icon {
+  color: #60a5fa;
 }
 
 .chart-subtitle {
@@ -1433,9 +2010,20 @@ onMounted(async () => {
   font-weight: 500;
 }
 
+.v-theme--light .chart-subtitle {
+  color: #64748b;
+}
+
+.v-theme--dark .chart-subtitle {
+  color: #94a3b8;
+}
+
 .chart-container {
   height: 250px;
   position: relative;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .large-chart {
@@ -1444,12 +2032,12 @@ onMounted(async () => {
 
 /* Animations */
 @keyframes fadeIn {
-  from { 
-    opacity: 0; 
+  from {
+    opacity: 0;
     transform: translateY(20px);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -1502,34 +2090,34 @@ onMounted(async () => {
   .dashboard-container {
     padding: 1rem;
   }
-  
+
   .dashboard-header {
     padding: 1rem;
   }
-  
+
   .header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .header-actions {
     align-self: flex-end;
   }
-  
+
   .dashboard-title {
     font-size: 1.75rem;
   }
-  
+
   .dashboard-subtitle {
     font-size: 0.9rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 0.875rem;
   }
-  
+
   .charts-row {
     grid-template-columns: 1fr;
     gap: 1rem;
@@ -1540,34 +2128,34 @@ onMounted(async () => {
   .dashboard-container {
     padding: 0.75rem;
   }
-  
+
   .dashboard-header {
     padding: 0.875rem;
     margin-bottom: 1rem;
   }
-  
+
   .dashboard-title {
     font-size: 1.5rem;
     gap: 0.5rem;
   }
-  
+
   .dashboard-subtitle {
     font-size: 0.85rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
-  
+
   .stat-card-content {
     padding: 1rem;
   }
-  
+
   .chart-card {
     padding: 1rem;
   }
-  
+
   .status-chip {
     font-size: 0.7rem;
     height: 28px;
@@ -1578,15 +2166,15 @@ onMounted(async () => {
   .header-content {
     gap: 0.75rem;
   }
-  
+
   .dashboard-title {
     font-size: 1.375rem;
   }
-  
+
   .dashboard-subtitle {
     font-size: 0.8rem;
   }
-  
+
   .status-chip {
     font-size: 0.65rem;
     height: 26px;
@@ -1598,12 +2186,12 @@ onMounted(async () => {
   .header-content {
     align-items: stretch;
   }
-  
+
   .header-actions {
     margin-top: 0.5rem;
     justify-content: flex-end;
   }
-  
+
   .status-chip {
     align-self: flex-start;
   }
@@ -1804,6 +2392,14 @@ onMounted(async () => {
   margin: 0;
 }
 
+.v-theme--light .section-title {
+  color: #1e293b;
+}
+
+.v-theme--dark .section-title {
+  color: #f8fafc;
+}
+
 /* Items Grid */
 .items-grid {
   display: flex;
@@ -1858,12 +2454,28 @@ onMounted(async () => {
   margin-bottom: 0.125rem;
 }
 
+.v-theme--light .item-name {
+  color: #374151;
+}
+
+.v-theme--dark .item-name {
+  color: #f9fafb;
+}
+
 .item-subtitle {
   font-size: 0.75rem;
   color: rgba(var(--v-theme-on-surface), 0.6);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.v-theme--light .item-subtitle {
+  color: #9ca3af;
+}
+
+.v-theme--dark .item-subtitle {
+  color: #6b7280;
 }
 
 .item-value {
@@ -2081,6 +2693,14 @@ onMounted(async () => {
   margin: 0;
 }
 
+.v-theme--light .section-title {
+  color: #1e293b;
+}
+
+.v-theme--dark .section-title {
+  color: #f8fafc;
+}
+
 /* Empty State */
 .empty-state {
   display: flex;
@@ -2143,6 +2763,14 @@ onMounted(async () => {
   line-height: 1.2;
 }
 
+.v-theme--light .user-name {
+  color: #1f2937;
+}
+
+.v-theme--dark .user-name {
+  color: #f9fafb;
+}
+
 .user-details {
   display: flex;
   flex-direction: column;
@@ -2155,6 +2783,14 @@ onMounted(async () => {
   gap: 0.5rem;
   font-size: 0.85rem;
   color: rgba(var(--v-theme-on-surface), 0.7);
+}
+
+.v-theme--light .detail-row {
+  color: #6b7280;
+}
+
+.v-theme--dark .detail-row {
+  color: #9ca3af;
 }
 
 .user-badge {
@@ -2194,7 +2830,7 @@ onMounted(async () => {
   .user-badge {
     align-self: flex-end;
   }
-  
+
   .users-grid {
     gap: 0.75rem;
   }

@@ -11,6 +11,7 @@ from ..database import Base
 if TYPE_CHECKING:
     from .inventory_item_type import InventoryItemType
     from .inventory_status import InventoryStatus
+    from .pelanggan import Pelanggan
 
 
 class InventoryItem(Base):
@@ -29,4 +30,6 @@ class InventoryItem(Base):
     # --- 3. TAMBAHKAN DUA BARIS RELATIONSHIP INI ▼▼▼ ---
     item_type: Mapped["InventoryItemType"] = relationship()
     status: Mapped["InventoryStatus"] = relationship()
+    # Tambahkan relasi ke pelanggan
+    pelanggan: Mapped["Pelanggan"] = relationship(back_populates="inventory_items")
     # --- AKHIR BLOK TAMBAHAN ▲▲▲

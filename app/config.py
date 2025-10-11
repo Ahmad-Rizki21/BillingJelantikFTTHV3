@@ -4,7 +4,13 @@ from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 from typing import List
 
-load_dotenv()
+# Get the absolute path to the project root
+# This makes the .env file path robust regardless of where the app is run from
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_FILE_PATH = os.path.join(PROJECT_ROOT, ".env")
+
+# Force override to ensure .env file takes precedence over system variables
+load_dotenv(dotenv_path=ENV_FILE_PATH, override=True)
 
 
 class Settings(BaseSettings):
@@ -23,8 +29,8 @@ class Settings(BaseSettings):
         "Permissions",
         "S&K",
         "Simulasi Harga",
-        "Kelola S&K", # Tetap
-        "inventory", # Ubah "Manajemen Inventaris" menjadi "inventory"
+        "Kelola S&K",  # Tetap
+        "inventory",  # Ubah "Manajemen Inventaris" menjadi "inventory"
         "Dashboard Pelanggan",
         "Activity Log",
         "olt",
@@ -54,17 +60,17 @@ class Settings(BaseSettings):
     ]
     # ---------------------
 
-    DATABASE_URL: str
-    XENDIT_CALLBACK_TOKEN_ARTACOMINDO: str
-    XENDIT_CALLBACK_TOKEN_JELANTIK: str
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    XENDIT_API_KEY_JAKINET: str
-    XENDIT_API_KEY_JELANTIK: str
+    DATABASE_URL: str = "sqlite:///./billing.db"
+    XENDIT_CALLBACK_TOKEN_ARTACOMINDO: str = "default_callback_token_artacom"
+    XENDIT_CALLBACK_TOKEN_JELANTIK: str = "default_callback_token_jelantik"
+    SECRET_KEY: str = "default_secret_key_change_in_production"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    XENDIT_API_KEY_JAKINET: str = "default_api_key_jakinet"
+    XENDIT_API_KEY_JELANTIK: str = "default_api_key_jelantik"
     XENDIT_API_URL: str = "https://api.xendit.co/v2/invoices"
 
-    ENCRYPTION_KEY: str
+    ENCRYPTION_KEY: str = "default_encryption_key_change_in_production"
 
     @property
     def XENDIT_API_KEYS(self) -> dict:
@@ -81,8 +87,10 @@ class Settings(BaseSettings):
         }
 
     class Config:
-        env_file = ".env"
-        extra = "ignore"  # <-- TAMBAHKAN BARIS INI
+        # Be explicit about the .env file path and encoding
+        env_file = ENV_FILE_PATH
+        env_file_encoding = 'utf-8'
+        extra = "ignore"
 
 
 settings = Settings()

@@ -2,13 +2,18 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, Text, DateTime, func, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship # <-- Tambahkan relationship
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)  # <-- Tambahkan relationship
 from ..database import Base
 from datetime import datetime
 
 # --- 2. Tambahkan blok TYPE_CHECKING untuk type hint ---
 if TYPE_CHECKING:
     from .user import User
+
 
 class ActivityLog(Base):
     __tablename__ = "activity_logs"

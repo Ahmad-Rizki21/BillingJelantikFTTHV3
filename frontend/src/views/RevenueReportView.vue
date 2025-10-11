@@ -133,7 +133,7 @@
     </v-card>
 
     <!-- Loading State -->
-    <div v-if="isReportLoading" class="text-center pa-10 pa-md-16">
+    <div v-if="isLoading" class="text-center pa-10 pa-md-16">
       <div class="loading-container">
         <v-progress-circular 
           indeterminate 
@@ -262,7 +262,7 @@
             :items="invoiceDetails"
             :items-length="reportSummary?.total_invoices || 0"
             :loading="isDetailsLoading"
-            @update:options="fetchInvoiceDetails"
+            @update:options="handleTableOptionsUpdate"
             class="modern-table"
             :no-data-text="'Tidak ada data invoice untuk periode ini'"
           >
@@ -346,6 +346,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed} from 'vue';
+import { debounce } from 'lodash-es';
 import apiClient from '@/services/api';
 import * as XLSX from 'xlsx';
 
@@ -367,6 +368,7 @@ const menuStart = ref(false);
 const menuEnd = ref(false);
 const isReportLoading = ref(false);
 const isDetailsLoading = ref(false);
+const isLoading = computed(() => isReportLoading.value || isDetailsLoading.value);
 // --- PERBAIKAN STATE: Pisahkan summary dan details ---
 const reportSummary = ref<{
   total_pendapatan: number;
@@ -527,6 +529,7 @@ async function fetchReport() {
   isReportLoading.value = true;
   reportSummary.value = null;
   invoiceDetails.value = []; // Kosongkan detail saat filter baru
+  currentPage.value = 1; // Reset pagination
   try {
     const params = {
       start_date: toISODateString(startDate.value),
@@ -545,31 +548,60 @@ async function fetchReport() {
   }
 }
 
-async function fetchInvoiceDetails(options: { page: number, itemsPerPage: number, sortBy: any[] }) {
-  // Jangan fetch jika summary belum ada, KECUALI saat fetchReport baru saja selesai.
-  // Saat fetchReport selesai, reportSummary sudah ada nilainya, jadi fetchInvoiceDetails akan jalan.
-  // Saat user ganti halaman/sort, reportSummary sudah ada, jadi akan jalan juga.
-  // Ini mencegah @update:options terpanggil sebelum reportSummary siap.
-  if (!reportSummary.value?.total_invoices && reportSummary.value?.total_invoices !== 0) return;
+// State untuk mencegah permintaan berulang saat loading
+const lastParams = ref({});
+
+// Debounced version untuk mencegah multiple rapid calls
+const debouncedFetchInvoiceDetails = debounce(async (options: { page: number, itemsPerPage: number, sortBy: any[] }) => {
+  // Jangan fetch jika summary belum ada atau tidak ada data sama sekali
+  if (!reportSummary.value) return;
+
+  // Jangan fetch jika total_invoices adalah 0 (tidak ada data)
+  if (reportSummary.value.total_invoices === 0) return;
+
+  // Buat parameter untuk cek duplikat
+  const params = {
+    start_date: toISODateString(startDate.value),
+    end_date: toISODateString(endDate.value),
+    alamat: selectedLocation.value || undefined,
+    id_brand: selectedBrand.value || undefined,
+    skip: (options.page - 1) * options.itemsPerPage,
+    limit: options.itemsPerPage,
+  };
+
+  // Cek apakah ini permintaan duplikat
+  const paramsKey = JSON.stringify(params);
+  if (paramsKey === JSON.stringify(lastParams.value) && invoiceDetails.value.length > 0) {
+    return; // Jangan kirim permintaan yang sama jika data sudah dimuat
+  }
+
+  // Simpan parameter terakhir
+  lastParams.value = { ...params };
 
   isDetailsLoading.value = true;
   try {
-    const params = {
-      start_date: toISODateString(startDate.value),
-      end_date: toISODateString(endDate.value),
-      alamat: selectedLocation.value || undefined,
-      id_brand: selectedBrand.value || undefined,
-      skip: (options.page - 1) * options.itemsPerPage,
-      limit: options.itemsPerPage,
-    };
     const response = await apiClient.get('/reports/revenue/details', { params });
     currentPage.value = options.page;
     itemsPerPage.value = options.itemsPerPage;
     invoiceDetails.value = response.data;
   } catch (error) {
     console.error("Gagal mengambil rincian invoice:", error);
+    // Reset lastParams jika terjadi error agar bisa dicoba lagi
+    lastParams.value = {};
   } finally {
     isDetailsLoading.value = false;
+  }
+}, 300); // 300ms debounce
+
+async function fetchInvoiceDetails(options: { page: number, itemsPerPage: number, sortBy: any[] }) {
+  await debouncedFetchInvoiceDetails(options);
+}
+
+// Fungsi baru untuk menangani perubahan opsi tabel dengan cek tambahan
+async function handleTableOptionsUpdate(options: { page: number, itemsPerPage: number, sortBy: any[] }) {
+  // Hanya panggil jika tidak sedang loading dan report summary tersedia
+  if (!isDetailsLoading.value && reportSummary.value) {
+    await fetchInvoiceDetails(options);
   }
 }
 
@@ -583,11 +615,13 @@ const formatCurrency = (value: number) => {
 };
 
 // --- Lifecycle ---
-onMounted(() => {
-  fetchLocations();
-  fetchBrandOptions();
-  // Panggil fetchReport saat komponen pertama kali dimuat
-  fetchReport();
+onMounted(async () => {
+  // Load semua data secara paralel untuk faster initial load
+  await Promise.all([
+    fetchLocations(),
+    fetchBrandOptions(),
+    fetchReport()
+  ]);
 });
 </script>
 

@@ -1,9 +1,9 @@
-# app/routers/inventory.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from typing import List
+import logging
 
 from ..database import get_db
 
@@ -21,74 +21,131 @@ from ..schemas.inventory import (
     InventoryStatus as InventoryStatusSchema,
 )
 
+# Setup logger
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
 
 
-@router.post("/", response_model=InventoryItemResponse)
+@router.post(
+    "/", response_model=InventoryItemResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_inventory_item(
     item: InventoryItemCreate, db: AsyncSession = Depends(get_db)
 ):
-    db_item = InventoryItemModel(**item.model_dump())
-    db.add(db_item)
-    await db.commit()
-    # Muat relasi secara eksplisit setelah commit
-    await db.refresh(db_item, ["item_type", "status"])
-    return db_item
+    try:
+        db_item = InventoryItemModel(**item.model_dump())
+        db.add(db_item)
+        await db.commit()
+        # Muat relasi secara eksplisit setelah commit
+        await db.refresh(db_item, ["item_type", "status"])
+        logger.info(f"Created inventory item with ID: {db_item.id}")
+        return db_item
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error creating inventory item: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create inventory item: {str(e)}",
+        )
 
 
 @router.get("/", response_model=List[InventoryItemResponse])
 async def get_inventory_items(db: AsyncSession = Depends(get_db)):
-    query = (
-        select(InventoryItemModel)
-        .options(
-            selectinload(InventoryItemModel.item_type),
-            selectinload(InventoryItemModel.status),
+    try:
+        query = (
+            select(InventoryItemModel)
+            .options(
+                selectinload(InventoryItemModel.item_type),
+                selectinload(InventoryItemModel.status),
+            )
+            .order_by(InventoryItemModel.id)
         )
-        .order_by(InventoryItemModel.id)
-    )
-    result = await db.execute(query)
-    return result.scalars().all()
+        result = await db.execute(query)
+        return result.scalars().all()
+    except Exception as e:
+        logger.error(f"Error retrieving inventory items: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve inventory items: {str(e)}",
+        )
 
 
 @router.patch("/{item_id}", response_model=InventoryItemResponse)
 async def update_inventory_item(
     item_id: int, item_update: InventoryItemUpdate, db: AsyncSession = Depends(get_db)
 ):
-    db_item = await db.get(InventoryItemModel, item_id)
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
+    try:
+        db_item = await db.get(InventoryItemModel, item_id)
+        if not db_item:
+            raise HTTPException(status_code=404, detail="Item not found")
 
-    update_data = item_update.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_item, key, value)
+        update_data = item_update.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_item, key, value)
 
-    await db.commit()
-    await db.refresh(db_item, ["item_type", "status"])
-    return db_item
+        await db.commit()
+        await db.refresh(db_item, ["item_type", "status"])
+        logger.info(f"Updated inventory item with ID: {db_item.id}")
+        return db_item
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error updating inventory item {item_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update inventory item: {str(e)}",
+        )
 
 
-@router.delete("/{item_id}", status_code=204)
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_inventory_item(item_id: int, db: AsyncSession = Depends(get_db)):
-    db_item = await db.get(InventoryItemModel, item_id)
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    await db.delete(db_item)
-    await db.commit()
-    return
+    try:
+        db_item = await db.get(InventoryItemModel, item_id)
+        if not db_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        await db.delete(db_item)
+        await db.commit()
+        logger.info(f"Deleted inventory item with ID: {item_id}")
+        return
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error deleting inventory item {item_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete inventory item: {str(e)}",
+        )
 
 
 # Helper endpoints untuk dropdown
 @router.get("/types", response_model=List[InventoryItemTypeSchema])
 async def get_item_types(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(InventoryItemTypeModel).order_by(InventoryItemTypeModel.name)
-    )
-    return result.scalars().all()
+    try:
+        result = await db.execute(
+            select(InventoryItemTypeModel).order_by(InventoryItemTypeModel.name)
+        )
+        return result.scalars().all()
+    except Exception as e:
+        logger.error(f"Error retrieving item types: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve item types: {str(e)}",
+        )
 
 
 @router.get("/statuses", response_model=List[InventoryStatusSchema])
 async def get_statuses(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(InventoryStatusModel).order_by(InventoryStatusModel.name)
-    )
-    return result.scalars().all()
+    try:
+        result = await db.execute(
+            select(InventoryStatusModel).order_by(InventoryStatusModel.name)
+        )
+        return result.scalars().all()
+    except Exception as e:
+        logger.error(f"Error retrieving statuses: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve statuses: {str(e)}",
+        )

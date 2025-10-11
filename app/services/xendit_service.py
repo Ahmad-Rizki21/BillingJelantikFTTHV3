@@ -2,7 +2,9 @@
 
 import httpx
 from ..config import settings
-from ..models import Invoice, Pelanggan, PaketLayanan
+from ..models.invoice import Invoice as InvoiceModel
+from ..models.pelanggan import Pelanggan as PelangganModel
+from ..models.paket_layanan import PaketLayanan as PaketLayananModel
 import os
 from dateutil.relativedelta import relativedelta
 import base64
@@ -15,12 +17,12 @@ logger = logging.getLogger("app.services.xendit")
 
 
 async def create_xendit_invoice(
-    invoice: Invoice,
-    pelanggan: Pelanggan,
-    paket: PaketLayanan,
+    invoice: InvoiceModel,
+    pelanggan: PelangganModel,
+    paket: PaketLayananModel,
     deskripsi_xendit: str,
     pajak: float,
-    no_telp_xendit: str = None,
+    no_telp_xendit: str = "",
 ) -> dict:
     """Mengirim request ke Xendit untuk membuat invoice baru."""
     target_key_name = pelanggan.harga_layanan.xendit_key_name
@@ -35,7 +37,7 @@ async def create_xendit_invoice(
     }
 
     brand_info = pelanggan.harga_layanan
-    jatuh_tempo_str = invoice.tgl_jatuh_tempo.strftime("%d/%m/%Y")
+    jatuh_tempo_str = invoice.tgl_jatuh_tempo.strftime("%d/%m/%Y")  # type: ignore
 
     # Validasi data
     if not invoice.total_harga or invoice.total_harga <= 0:
@@ -86,7 +88,7 @@ async def create_xendit_invoice(
 
     # ▼▼▼ PERBAIKAN DI SINI ▼▼▼
     # Langsung format tanggal jatuh tempo dari invoice tanpa menambahkan bulan
-    bulan_tahun = invoice.tgl_jatuh_tempo.strftime("%B-%Y")
+    bulan_tahun = invoice.tgl_jatuh_tempo.strftime("%B-%Y")  # type: ignore
 
     payload["external_id"] = (
         f"{brand_prefix}/ftth/{nama_user}/{bulan_tahun}/{lokasi_singkat}/{invoice.id}"

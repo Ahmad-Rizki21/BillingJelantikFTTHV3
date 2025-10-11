@@ -95,7 +95,7 @@ async def update_role(
             PermissionModel.id.in_(role_update.permission_ids)
         )
         permissions = (await db.execute(query)).scalars().all()
-        db_role.permissions = permissions  # Ganti semua permission dengan yang baru
+        db_role.permissions = permissions  # Ganti semua permission dengan yang baru  # type: ignore
 
     db.add(db_role)
     await db.commit()

@@ -8,7 +8,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 // 1. Impor semua yang dibutuhkan
 import App from './App.vue'
 import router from './router'
-import 'vuetify/styles'
+// @ts-ignore - Vuetify CSS import
+import 'vuetify/dist/vuetify.min.css'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -77,14 +78,6 @@ async function startup() {
 
 startup()
 
-
-// 3. Buat aplikasi Vue
-const app = createApp(App)
-
-// 4. Pasang semua plugin (Pinia, Router, dan Vuetify)
-app.use(createPinia())
-app.use(router)
-app.use(vuetify)
-
-// 5. Mount aplikasi
-app.mount('#app')
+// NOTE: Double app mounting code di bawah ini telah dihapus untuk mencegah memory leak
+// dan warning Vue tentang multiple app instances
+// startup() function di atas sudah cukup untuk mounting aplikasi dengan benar

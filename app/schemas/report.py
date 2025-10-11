@@ -7,7 +7,7 @@ from datetime import date, datetime
 class InvoiceReportItem(BaseModel):
     invoice_number: str
     pelanggan_nama: str
-    paid_at: datetime
+    paid_at: Optional[datetime] = None
     total_harga: float
     metode_pembayaran: Optional[str] = None
     alamat: Optional[str] = None

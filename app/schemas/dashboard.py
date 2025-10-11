@@ -7,12 +7,26 @@ class BrandRevenueItem(BaseModel):
     brand: str
     revenue: float
 
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
+
 
 # Skema pendapatan yang diperbarui
+
+
 class RevenueSummary(BaseModel):
     total: float
     periode: str
     breakdown: List[BrandRevenueItem]  # Menggunakan list dinamis
+
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
 
 
 # (Sisa skema lain seperti StatCard, ChartData, dll. tetap sama)
@@ -21,10 +35,22 @@ class StatCard(BaseModel):
     value: str | int
     description: str
 
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
+
 
 class ChartData(BaseModel):
     labels: List[str]
     data: List[int]
+
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
 
 
 class InvoiceSummary(BaseModel):
@@ -34,10 +60,11 @@ class InvoiceSummary(BaseModel):
     menunggu: List[int]
     kadaluarsa: List[int]
 
-
-class ChartData(BaseModel):
-    labels: List[str]
-    data: List[int]
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
 
 
 class LoyalitasUserDetail(BaseModel):
@@ -46,6 +73,12 @@ class LoyalitasUserDetail(BaseModel):
     id_pelanggan: Optional[str] = None
     alamat: Optional[str] = None
     no_telp: Optional[str] = None
+
+    class Config:
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True
 
 
 # Skema utama yang menggabungkan semua data
@@ -62,3 +95,7 @@ class DashboardData(BaseModel):
 
     class Config:
         from_attributes = True
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True

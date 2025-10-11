@@ -12,25 +12,92 @@ from ..models.langganan import Langganan as LanggananModel
 from ..models.mikrotik_server import MikrotikServer as MikrotikServerModel
 from ..models.data_teknis import DataTeknis as DataTeknisModel
 
+# Import connection pooling
+from .mikrotik_connection_pool import mikrotik_pool
+
 # Setup logger
 logger = logging.getLogger(__name__)
 
 
-def get_api_connection(server_info: MikrotikServerModel):
-    """Membuka koneksi API ke server Mikrotik."""
+def perform_routeros_connection(device_details: dict):
+    """
+    Fungsi synchronous terpisah untuk menangani koneksi RouterOS API ke Mikrotik.
+    """
+    def connection_operation(api):
+        # Get system identity and version
+        identity_result = api.get_resource('/system/identity').get()
+        resource_result = api.get_resource('/system/resource').get()
+        
+        identity = identity_result[0]['name'] if identity_result else 'Unknown'
+        ros_version = resource_result[0]['version'] if resource_result else 'N/A'
+
+        return {
+            "status": "success",
+            "message": f"Koneksi ke {device_details.get('host', 'unknown')}:{device_details.get('port', 8728)} berhasil!",
+            "data": {
+                "identity": identity,
+                "ros_version": ros_version
+            }
+        }
+    
     try:
-        connection = routeros_api.RouterOsApiPool(
-            server_info.host_ip,
-            username=server_info.username,
-            password=server_info.password,
-            port=int(server_info.port),  # Pastikan port adalah integer
-            plaintext_login=True,
+        host = device_details.get('host', 'unknown')
+        port = int(device_details.get('port', 8728))
+        username = device_details.get('username', 'unknown')
+
+        # Gunakan connection pool dengan retry mechanism
+        result = mikrotik_pool.execute_with_retry(
+            host_ip=host,
+            port=port,
+            username=username,
+            password=device_details.get('password', ''),
+            operation_func=connection_operation,
+            max_retries=3,
+            retry_delay=2
         )
-        api = connection.get_api()
-        logger.info(f"Berhasil terhubung ke Mikrotik {server_info.name}")
+        return result
+
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"ROUTEROS API FAILED connecting to {device_details.get('host', 'unknown')}: {error_msg}")
+        
+        if "invalid user name or password" in error_msg.lower():
+            return {"status": "failure", "message": "Koneksi gagal: Username atau password salah."}
+        if "timed out" in error_msg.lower() or "timeout" in error_msg.lower():
+            return {"status": "failure", "message": "Koneksi gagal: Timeout."}
+        if "connection refused" in error_msg.lower():
+            return {"status": "failure", "message": "Koneksi ditolak oleh server."}
+        
+        return {"status": "failure", "message": f"Terjadi error: {error_msg}"}
+
+
+def get_api_connection(server_info: MikrotikServerModel):
+    """Membuka koneksi API ke server Mikrotik menggunakan connection pooling."""
+    try:
+        # Validasi parameter
+        if not server_info.host_ip or not server_info.username or not server_info.password or not server_info.port:
+            logger.error(f"Parameter koneksi Mikrotik tidak lengkap untuk server {server_info.name}")
+            return None, None
+            
+        # Validasi dan konversi port
+        try:
+            port = int(server_info.port)
+        except (ValueError, TypeError):
+            logger.error(f"Port tidak valid untuk Mikrotik {server_info.name}: {server_info.port}")
+            return None, None
+            
+        # Dapatkan koneksi dari pool
+        api, connection = mikrotik_pool.get_connection(
+            host_ip=server_info.host_ip,
+            port=port,
+            username=server_info.username,
+            password=server_info.password
+        )
+        
+        logger.info(f"Berhasil mendapatkan koneksi dari pool ke Mikrotik {server_info.name} ({server_info.host_ip}:{port})")
         return api, connection
     except Exception as e:
-        logger.error(f"Gagal terhubung ke Mikrotik {server_info.name}: {e}")
+        logger.error(f"Gagal mendapatkan koneksi dari pool ke Mikrotik {server_info.name} ({server_info.host_ip}:{port}): {e}")
         return None, None
 
 
@@ -161,7 +228,7 @@ async def trigger_mikrotik_update(
     finally:
         if connection:
             logger.info("Menutup koneksi Mikrotik.")
-            connection.disconnect()
+            mikrotik_pool.return_connection(connection, mikrotik_server_info.host_ip, int(mikrotik_server_info.port))
 
 
 def check_ip_in_secrets(api, ip_address: str) -> str | None:
@@ -267,7 +334,45 @@ async def trigger_mikrotik_create(db: AsyncSession, data_teknis: DataTeknisModel
     finally:
         if connection:
             logger.info("Menutup koneksi Mikrotik.")
-            connection.disconnect()
+            mikrotik_pool.return_connection(connection, mikrotik_server_info.host_ip, int(mikrotik_server_info.port))
+
+
+def get_all_ppp_secrets(api):
+    """Mengambil semua PPPoE Secrets dari Mikrotik."""
+    try:
+        ppp_secrets = api.get_resource("/ppp/secret")
+        secrets = ppp_secrets.get()
+        logger.info(f"Ditemukan {len(secrets)} PPPoE secret di Mikrotik.")
+        return secrets
+    except Exception as e:
+        logger.error(f"Gagal mengambil daftar PPPoE secrets: {e}")
+        raise e
+
+
+def delete_pppoe_secret(api, id_pelanggan: str):
+    """Menghapus PPPoE secret dari Mikrotik berdasarkan nama pelanggan."""
+    try:
+        ppp_secrets = api.get_resource("/ppp/secret")
+        
+        # Cari secret berdasarkan nama
+        target_secret = ppp_secrets.get(name=id_pelanggan)
+        
+        if not target_secret:
+            logger.warning(f"PPPoE secret untuk '{id_pelanggan}' tidak ditemukan di Mikrotik.")
+            return False  # Tidak ditemukan untuk dihapus
+        
+        # Ambil ID internal dari secret yang ditemukan
+        secret_id = target_secret[0]["id"]
+        
+        # Hapus secret dengan ID tersebut
+        ppp_secrets.remove(id=secret_id)
+        
+        logger.info(f"Berhasil menghapus PPPoE secret untuk '{id_pelanggan}' dari Mikrotik.")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Gagal menghapus PPPoE secret untuk '{id_pelanggan}': {e}")
+        raise e
 
 
 def get_all_ppp_profiles(api):

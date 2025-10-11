@@ -1,123 +1,55 @@
 <template>
   <v-container fluid class="pa-sm-6 pa-4">
-    <div class="d-flex flex-column flex-md-row align-start align-md-center mb-8 gap-4">
-      <div class="d-flex align-center">
-        <v-avatar 
-          class="me-4 gradient-avatar" 
-          size="56"
-          :style="{ 
-            background: 'linear-gradient(135deg, #00ACC1 0%, #006064 100%)',
-            boxShadow: '0 8px 24px rgba(0, 172, 193, 0.3)'
-          }"
-        >
-          <v-icon color="white" size="28">mdi-lan</v-icon>
-        </v-avatar>
-        <div>
-          <h1 class="text-h4 text-md-h3 font-weight-bold mb-1 header-gradient">
-            Data Teknis Pelanggan
-          </h1>
-          <p class="text-subtitle-1 text-medium-emphasis mb-0 opacity-80">
-            Kelola informasi teknis
-          </p>
+    <div class="header-card mb-4 mb-md-6">
+      <div class="d-flex flex-column align-center gap-4">
+        <div class="d-flex align-center header-info">
+          <div class="header-avatar-wrapper">
+            <v-avatar class="header-avatar" color="transparent" size="50">
+              <v-icon color="white" size="28">mdi-lan</v-icon>
+            </v-avatar>
+          </div>
+          <div class="ml-4">
+            <h1 class="header-title">Data Teknis Pelanggan</h1>
+            <p class="header-subtitle">Kelola informasi teknis pelanggan dengan mudah</p>
+          </div>
         </div>
-      </div>
-      <v-spacer class="d-none d-md-block"></v-spacer>
-      <div class="d-flex flex-column flex-sm-row gap-3 w-100 w-md-auto">
-        <v-btn 
-          variant="outlined" 
-          color="green" 
-          @click="dialogImport = true"
-          prepend-icon="mdi-file-upload"
-          class="text-none flex-grow-1"
-        >
-          Import
-        </v-btn>
 
-       <v-dialog v-model="dialogImport" max-width="600px" :fullscreen="$vuetify.display.smAndDown">
-          <v-card class="rounded-xl">
-            <v-card-title class="bg-green text-white">Import Data Teknis</v-card-title>
-            
-            <v-card-text class="pa-6">
-              <v-alert
-                variant="tonal" color="info" icon="mdi-information-outline" class="mb-6" border="start"
-              >
-                <p class="font-weight-bold mb-2">Petunjuk Import:</p>
-                <p class="mb-2">Gunakan <strong>Email Pelanggan</strong> sebagai kunci untuk mencocokkan data teknis dengan pelanggan yang ada.</p>
-                <v-list density="compact" class="bg-transparent">
-                  <v-list-item class="pa-0">1. Unduh <a :href="`${apiClient.defaults.baseURL}/data_teknis/template/csv`" download>template import</a>.</v-list-item>
-                  <v-list-item class="pa-0">2. Isi data teknis sesuai kolom, pastikan <strong>'email_pelanggan'</strong> sudah terdaftar di Data Pelanggan.</v-list-item>
-                  <v-list-item class="pa-0">3. Unggah file di bawah ini.</v-list-item>
-                </v-list>
-              </v-alert>
-
-              <v-alert
-                v-if="importErrors.length > 0"
-                type="error"
-                variant="tonal"
-                class="mb-6"
-                border="start"
-                closable
-                @update:modelValue="importErrors = []"
-              >
-                <p class="font-weight-bold mb-2">Detail Error:</p>
-                <ul class="pl-4">
-                  <li v-for="(err, i) in importErrors" :key="i" class="mb-1">{{ err }}</li>
-                </ul>
-              </v-alert>
-
-              <v-file-input
-                :model-value="fileToImport"
-                @update:model-value="handleFileSelection"
-                label="Pilih file CSV"
-                accept=".csv"
-                variant="outlined"
-                clearable
-              ></v-file-input>
-
-            </v-card-text>
-            
-            <v-card-actions class="pa-4 bg-grey-lighten-5">
-              <v-spacer></v-spacer>
-              <v-btn text @click="dialogImport = false">Batal</v-btn>
-              <v-btn 
-                color="green" 
-                @click="importData"
-                :loading="importing"
-                :disabled="!fileToImport || fileToImport.length === 0">
-                Unggah & Proses
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-
-        <v-btn 
-          variant="outlined" 
-          color="cyan-darken-1"
-          @click="exportData"
-          prepend-icon="mdi-file-excel"
-          class="text-none flex-grow-1"
-        >
-          Export
-        </v-btn>
-        <v-btn 
-          color="primary" 
-          elevation="8"
-          @click="openDialog()"
-          prepend-icon="mdi-plus-network"
-          class="text-none modern-btn flex-grow-1"
-          :style="{
-            background: 'linear-gradient(135deg, #00ACC1 0%, #006064 100%)',
-            borderRadius: '16px',
-            textTransform: 'none',
-            fontWeight: '600',
-            letterSpacing: '0.5px'
-          }"
-        >
-        <template v-slot:prepend>
-            <v-icon class="me-2 icon-bounce">mdi-plus-network</v-icon>
-          </template>
-          Tambah Data
-        </v-btn>
+        <!-- Mobile Action Buttons -->
+        <div class="action-buttons-container">
+          <v-btn
+            color="success"
+            @click="dialogImport = true"
+            prepend-icon="mdi-file-upload-outline"
+            :loading="importing"
+            class="header-action-btn action-btn text-none mobile-btn"
+            size="default"
+            block
+          >
+            Import
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="exportData"
+            :loading="exporting"
+            prepend-icon="mdi-file-download-outline"
+            class="header-action-btn action-btn text-none mobile-btn"
+            size="default"
+            block
+          >
+            Export
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="openDialog()"
+            prepend-icon="mdi-plus-network"
+            class="primary-btn text-none mobile-btn"
+            size="default"
+            block
+            elevation="3"
+          >
+            Tambah Data
+          </v-btn>
+        </div>
       </div>
     </div>
 
@@ -154,6 +86,28 @@
           Reset Filter
         </v-btn>
       </div>
+    </v-card>
+
+    <!-- VLAN Information Section -->
+    <v-card class="mb-6" elevation="2">
+      <v-card-title class="pa-3 py-2 d-flex align-center bg-grey-lighten-4">
+        <v-icon start>mdi-network</v-icon>
+        <span class="text-subtitle-1 font-weight-medium">Informasi VLAN Mikrotik</span>
+      </v-card-title>
+      <v-card-text class="pa-4">
+        <div class="d-flex flex-wrap gap-3 pa-2">
+          <v-chip 
+            v-for="info in mikrotikVlanInfo" 
+            :key="info.name"
+            variant="elevated"
+            color="primary"
+            size="large"
+          >
+            <v-icon start>mdi-server</v-icon>
+            <strong>{{ info.name }}:</strong> VLAN {{ info.vlan }}
+          </v-chip>
+        </div>
+      </v-card-text>
     </v-card>
 
     <v-row class="mb-6" no-gutters>
@@ -451,6 +405,14 @@
             </div>
           </template>
         </v-data-table>
+        
+        <!-- Footer with total count aligned with pagination controls -->
+        <div class="d-flex align-center pa-2 ml-4" style="position: relative; top: -55px;">
+          <v-chip variant="outlined" color="primary" size="large">
+            Total: {{ totalDataTeknisCount }} Data Teknis di server
+            </v-chip>
+              <v-spacer></v-spacer>
+            </div>
       </div>
 
       <!-- Tampilan Kartu untuk Mobile (Small ke bawah) -->
@@ -550,16 +512,16 @@
             <v-divider></v-divider>
 
             <!-- Card Actions -->
-            <v-card-actions class="justify-space-around pa-1">
-                <v-btn variant="text" color="primary" @click="openDialog(item)">
+            <div class="d-flex justify-space-around pa-1">
+                <v-btn variant="elevated" class="mobile-edit-btn" @click="openDialog(item)">
                   <v-icon start>mdi-pencil</v-icon>
                   Edit
                 </v-btn>
-                <v-btn variant="text" color="error" @click="openDeleteDialog(item)">
+                <v-btn variant="elevated" class="mobile-delete-btn" @click="openDeleteDialog(item)">
                    <v-icon start>mdi-delete</v-icon>
                    Hapus
                 </v-btn>
-            </v-card-actions>
+            </div>
           </v-card>
 
           <!-- Tombol Load More -->
@@ -648,7 +610,14 @@
                       </v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <v-text-field v-model="editedItem.password_pppoe" label="Password PPPoE" type="password" variant="outlined"></v-text-field>
+                      <v-text-field 
+                        v-model="editedItem.password_pppoe" 
+                        label="Password PPPoE" 
+                        :type="showPppoePassword ? 'text' : 'password'" 
+                        variant="outlined"
+                        :append-inner-icon="showPppoePassword ? 'mdi-eye-off' : 'mdi-eye'"
+                        @click:append-inner="showPppoePassword = !showPppoePassword"
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-text-field
@@ -663,7 +632,21 @@
                         <template v-slot:label>
                           IP Pelanggan <span class="text-error">*</span>
                         </template>
+                        <template v-slot:append-inner>
+                          <v-tooltip v-if="lastIpInfo.message" location="top" :text="lastIpInfo.message">
+                            <template v-slot:activator="{ props }">
+                              <v-icon v-bind="props" color="info">mdi-information</v-icon>
+                            </template>
+                          </v-tooltip>
+                        </template>
                       </v-text-field>
+                      <div v-if="lastIpInfo.message" class="mt-1 text-caption" :class="lastIpInfo.last_ip ? 'text-info' : 'text-grey'">
+                        <v-icon size="small">mdi-information</v-icon>
+                        {{ lastIpInfo.message }}
+                        <span v-if="lastIpInfo.source" class="ml-1 text-grey">
+                          (sumber: {{ lastIpInfo.source === 'mikrotik' ? 'Mikrotik' : 'Database' }})
+                        </span>
+                      </div>
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-select
@@ -745,7 +728,7 @@
 
                     <v-col cols="12" sm="3">
                       <v-text-field 
-                        v-model.number="editedItem.odp" 
+                        v-model.number="editedItem.port_odp" 
                         label="Port ODP" 
                         type="number" 
                         variant="outlined" 
@@ -871,6 +854,138 @@
       </v-card>
     </v-dialog>
   </v-container>
+
+    <!-- Import Dialog -->
+    <v-dialog v-model="dialogImport" max-width="800px" :fullscreen="$vuetify.display.mobile" persistent class="import-dialog">
+      <v-card class="import-card">
+        <div class="import-header">
+          <v-icon class="mr-3">mdi-upload</v-icon>
+          <span class="import-title">Import Data Teknis dari CSV</span>
+          <v-spacer></v-spacer>
+          <v-btn
+            icon
+            variant="text"
+            @click="closeImportDialog"
+            size="small"
+          >
+            <v-icon color="white">mdi-close</v-icon>
+          </v-btn>
+        </div>
+
+        <v-card-text class="import-content">
+          <v-sheet
+            border
+            rounded="lg"
+            class="template-card pa-4 mb-6"
+            color="surface-variant"
+          >
+            <div class="d-flex flex-column flex-sm-row align-center gap-4">
+              <div class="template-icon">
+                <v-icon color="success" size="32">mdi-file-document-outline</v-icon>
+              </div>
+              <div class="flex-grow-1 text-center text-sm-left">
+                <div class="template-title">Gunakan Template Kami</div>
+                <p class="template-subtitle">
+                  Unduh template CSV untuk memastikan format data sesuai dengan sistem.
+                </p>
+              </div>
+              <v-btn
+                color="success"
+                variant="elevated"
+                :href="`${apiClient.defaults.baseURL}/data_teknis/template/csv`"
+                download
+                prepend-icon="mdi-download"
+                class="template-btn"
+                :block="$vuetify.display.mobile"
+              >
+                Unduh Template
+              </v-btn>
+            </div>
+          </v-sheet>
+
+          <div class="mb-4">
+            <h6 class="text-h6 mb-3 d-flex align-center upload-title">
+              <v-icon class="mr-2">mdi-cloud-upload</v-icon>
+              Unggah File CSV
+            </h6>
+            <v-file-input
+              :model-value="fileToImport"
+              @update:model-value="handleFileSelection"
+              label="Pilih file .csv"
+              accept=".csv"
+              variant="outlined"
+              prepend-icon=""
+              prepend-inner-icon="mdi-paperclip"
+              show-size
+              clearable
+              hide-details="auto"
+              class="file-input"
+              density="comfortable"
+            >
+            </v-file-input>
+          </div>
+
+          <v-expand-transition>
+            <div v-if="importErrors.length > 0" class="mt-4">
+              <v-alert
+                type="error"
+                variant="tonal"
+                prominent
+                border="start"
+                class="error-alert"
+              >
+                <template v-slot:title>
+                  <div class="d-flex justify-space-between align-center">
+                    <span>Import Gagal</span>
+                    <v-chip color="error" size="small">
+                      {{ importErrors.length }} Kesalahan
+                    </v-chip>
+                  </div>
+                </template>
+
+                <p class="mb-3">Mohon perbaiki kesalahan berikut di file CSV Anda dan coba lagi.</p>
+                <v-divider class="mb-3"></v-divider>
+
+                <div class="error-list">
+                  <div
+                    v-for="(error, i) in importErrors"
+                    :key="i"
+                    class="error-item d-flex align-start mb-2"
+                  >
+                    <v-icon size="small" color="error" class="mr-2 mt-1">mdi-alert-circle</v-icon>
+                    <span class="text-body-2">{{ error }}</span>
+                  </div>
+                </div>
+              </v-alert>
+            </div>
+          </v-expand-transition>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions class="import-actions">
+          <v-spacer></v-spacer>
+          <v-btn
+            variant="text"
+            @click="closeImportDialog"
+            class="nav-btn"
+          >
+            Batal
+          </v-btn>
+          <v-btn
+            color="success"
+            variant="elevated"
+            @click="importData"
+            :loading="importing"
+            :disabled="fileToImport.length === 0"
+            prepend-icon="mdi-upload"
+            class="import-btn"
+          >
+            Import Sekarang
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -896,6 +1011,7 @@ interface DataTeknis {
   odc: number;
   odp_id?: number | null; // ID ODP (dari dropdown)
   odp: number;
+  port_odp?: number | null;  // Port ODP
   speedtest_proof?: string | null;
   onu_power: number;
   mikrotik_server_id: number;
@@ -943,8 +1059,10 @@ const dialogBulkDelete = ref(false);
 const fileToImport = ref<File[]>([]);
 const dialogImport = ref(false);
 const importing = ref(false);
+const exporting = ref(false);
 const snackbar = ref({ show: false, text: '', color: 'success' });
 const importErrors = ref<string[]>([]);
+const showPppoePassword = ref(false);
 
 // --- State Baru untuk Paginasi Mobile ---
 const mobilePage = ref(1);
@@ -953,11 +1071,25 @@ const hasMoreData = ref(true);
 const loadingMore = ref(false);
 const selectedOlt = ref<string | null>(null);
 
+// --- State for Total Count ---
+const totalDataTeknisCount = ref(0);
+
 const authStore = useAuthStore();
 
 // Ref untuk komponen file input
 const fileInputComponent = ref<any>(null);
 const expanded = ref<any[]>([]); // Ganti dari readonly
+
+// Data VLAN Mikrotik
+const mikrotikVlanInfo = ref([
+  { name: 'Tambun', vlan: '100' },
+  { name: 'Nagrak', vlan: '105' },
+  { name: 'Parama', vlan: '10' },
+  { name: 'Waringin', vlan: '10' },
+  { name: 'Pinus', vlan: '101/100' },
+  { name: 'Pulogebang', vlan: '103' },
+  { name: 'Tipar Cakung', vlan: '102' }
+]);
 
 // --- Computed Properties ---
 const isEditMode = computed(() => !!editedItem.value.id);
@@ -996,6 +1128,14 @@ const ipValidation = ref({
   loading: false,
   message: '',
   color: ''
+});
+
+const lastIpInfo = ref({
+  last_ip: null,
+  last_octet: 0,
+  message: '',
+  server_name: '',
+  source: ''
 });
 
 const pelangganForSelect = computed(() => {
@@ -1056,6 +1196,36 @@ function handleOltSelection(serverId: number) {
   const selectedServer = mikrotikServers.value.find(s => s.id === serverId);
   if (selectedServer) {
     editedItem.value.olt = selectedServer.name;
+    
+    // Ambil informasi IP terakhir untuk server ini
+    fetchLastUsedIp(serverId);
+  }
+}
+
+async function fetchLastUsedIp(serverId: number) {
+  if (!serverId) {
+    lastIpInfo.value = {
+      last_ip: null,
+      last_octet: 0,
+      message: '',
+      server_name: '',
+      source: ''
+    };
+    return;
+  }
+
+  try {
+    const response = await apiClient.get(`/data_teknis/last-ip/${serverId}`);
+    lastIpInfo.value = response.data;
+  } catch (error) {
+    console.error("Gagal mengambil informasi IP terakhir:", error);
+    lastIpInfo.value = {
+      last_ip: null,
+      last_octet: 0,
+      message: "Gagal mengambil informasi IP terakhir",
+      server_name: '',
+      source: ''
+    };
   }
 }
 
@@ -1093,12 +1263,13 @@ async function fetchDataTeknis(isLoadMore = false) {
     params.append('limit', String(itemsPerPage));
     
     const response = await apiClient.get(`/data_teknis/?${params.toString()}`);
-    const newData = response.data;
+    const { data: newData, total_count: newTotalCount } = response.data;
 
     if (isLoadMore) {
       dataTeknisList.value.push(...newData);
     } else {
       dataTeknisList.value = newData;
+      totalDataTeknisCount.value = newTotalCount;
     }
 
     // Cek apakah masih ada data untuk dimuat
@@ -1160,9 +1331,11 @@ async function fetchPelanggan() {
     // Ini tidak ideal, tapi untuk sementara bisa jalan.
     // Solusi idealnya adalah membuat endpoint khusus untuk mengambil nama berdasarkan ID.
     const response = await apiClient.get('/pelanggan/?limit=10000');
-    pelangganList.value = response.data;
+    // Response is paginated, so the actual data is in response.data.data
+    pelangganList.value = response.data.data || response.data;
     const newMap = new Map<number, Pelanggan>();
-    for (const pelanggan of response.data) {
+    const pelangganData = response.data.data || response.data;
+    for (const pelanggan of pelangganData) {
       newMap.set(pelanggan.id, pelanggan);
     }
     pelangganMap.value = newMap;
@@ -1181,9 +1354,22 @@ async function fetchPelanggan() {
 
 function openDialog(item?: DataTeknis) {
   ipValidation.value = { loading: false, message: '', color: '' };
+  // Reset informasi IP terakhir
+  lastIpInfo.value = {
+    last_ip: null,
+    last_octet: 0,
+    message: '',
+    server_name: '',
+    source: ''
+  };
+  
   if (item) {
     // Mode Edit: Gunakan data yang ada
     editedItem.value = { ...item };
+    // Jika dalam mode edit, ambil informasi IP terakhir untuk server yang dipilih
+    if (item.mikrotik_server_id) {
+      fetchLastUsedIp(item.mikrotik_server_id);
+    }
   } else {
     // Mode Tambah Baru: Set nilai default di sini
     editedItem.value = {
@@ -1206,6 +1392,14 @@ function closeDialog() {
   }
   editedItem.value = {};
   currentStep.value = 1;
+  // Reset informasi IP terakhir
+  lastIpInfo.value = {
+    last_ip: null,
+    last_octet: 0,
+    message: '',
+    server_name: '',
+    source: ''
+  };
 }
 
 const checkIpAvailability = debounce(async (ip: string) => {
@@ -1378,6 +1572,7 @@ function getUniqueOLTCount() {
 }
 
 async function exportData() {
+  exporting.value = true;
   try {
     const response = await apiClient.get('/data_teknis/export/csv', {
       responseType: 'blob',
@@ -1392,6 +1587,8 @@ async function exportData() {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Gagal mengunduh file:", error);
+  } finally {
+    exporting.value = false;
   }
 }
 async function importData() {
@@ -1408,10 +1605,10 @@ async function importData() {
 
   try {
     const response = await apiClient.post('/data_teknis/import/csv', formData);
-    showSnackbar(response.data.message || 'Impor berhasil!', 'success');
+    const message = response.data.message || 'Impor data teknis berhasil!';
+    showSnackbar(message, 'success');
     fetchDataTeknis();
-    dialogImport.value = false;
-    fileToImport.value = [];
+    closeImportDialog();
     
   } catch (error: any) {
     console.error("Gagal mengimpor data:", error);
@@ -1445,6 +1642,12 @@ function handleFileSelection(newFiles: File | File[]) {
   }
 }
 
+function closeImportDialog() {
+  dialogImport.value = false;
+  fileToImport.value = [];
+  importErrors.value = [];
+}
+
 function showSnackbar(text: string, color: string) {
   snackbar.value.text = text;
   snackbar.value.color = color;
@@ -1461,7 +1664,6 @@ watch(
     // Jika salah satu kosong, reset dan hentikan proses
     if (!newPelangganId || !newServerId) {
       profilesFromApi.value = [];
-      if (editedItem.value) editedItem.value.profile_pppoe = undefined;
       return;
     }
 
@@ -1474,7 +1676,6 @@ async function handleProfileFetch(pelangganId: number, serverId: number) {
   // Reset state yang relevan
   profilesLoading.value = true;
   profilesFromApi.value = [];
-  if (editedItem.value) editedItem.value.profile_pppoe = undefined;
 
   try {
     // 1. Ambil detail pelanggan untuk mengetahui paket layanan apa yang dia gunakan
@@ -1491,6 +1692,13 @@ async function handleProfileFetch(pelangganId: number, serverId: number) {
         // 3. Jika paket ditemukan, panggil API dengan SEMUA info yang dibutuhkan
         await fetchAvailableProfiles(paketTerkait.id, pelangganId, serverId);
       }
+    }
+    
+    // 4. Ambil informasi IP terakhir untuk server yang dipilih (tanpa memengaruhi fungsi utama)
+    try {
+      await fetchLastUsedIp(serverId);
+    } catch (error) {
+      console.warn("Gagal mengambil informasi IP terakhir (tidak memengaruhi fungsi utama):", error);
     }
   } catch (error) {
     console.error("Gagal mengambil data detail pelanggan:", error);
@@ -1534,6 +1742,268 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
 </script>
 
 <style scoped>
+/* ============================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ============================================ */
+
+/* Header Card - Mobile Optimized with Fixed Positioning */
+.header-card {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  border-radius: 20px;
+  padding: 24px;
+  color: rgb(var(--v-theme-on-primary));
+  box-shadow: 0 8px 32px rgba(var(--v-theme-primary), 0.25);
+  position: relative;
+}
+
+.header-card .d-flex.flex-column {
+  align-items: stretch !important;
+}
+
+.header-info {
+  width: 100%;
+  justify-content: flex-start;
+  margin-bottom: 0;
+}
+
+.header-avatar-wrapper {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.header-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  line-height: 1.3;
+}
+
+/* Action Buttons Container - Fixed Positioning */
+.action-buttons-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-self: flex-end;
+}
+
+.mobile-btn {
+  border-radius: 14px;
+  font-weight: 600;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+}
+
+.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+.primary-btn {
+  background: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+/* Import Dialog */
+.import-header {
+  background: rgb(var(--v-theme-success));
+  color: rgb(var(--v-theme-on-success));
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.import-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.import-content {
+  padding: 28px !important;
+}
+
+.template-card {
+  border: 2px dashed rgba(var(--v-theme-success), 0.3);
+  background: rgba(var(--v-theme-success), 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.template-card:hover {
+  border-color: rgb(var(--v-theme-success));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(var(--v-theme-success), 0.15);
+}
+
+.template-title, .upload-title {
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.template-subtitle {
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.file-input :deep(.v-field) {
+  border: 2px dashed rgb(var(--v-theme-outline-variant)) !important;
+  background: rgb(var(--v-theme-surface)) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.file-input :deep(.v-field:hover) {
+  border-color: rgb(var(--v-theme-success)) !important;
+  background: rgba(var(--v-theme-success), 0.05) !important;
+}
+
+.error-alert {
+  border-radius: 12px;
+}
+
+.error-item {
+  background: rgba(var(--v-theme-error), 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.import-actions {
+  padding: 16px 24px !important;
+  background: rgb(var(--v-theme-surface));
+  border-top: 1px solid rgb(var(--v-theme-outline-variant));
+}
+
+.import-btn {
+  background: rgb(var(--v-theme-success)) !important;
+  color: rgb(var(--v-theme-on-success)) !important;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.nav-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS - FIXED POSITIONING
+   ============================================ */
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .header-card {
+    padding: 32px;
+    border-radius: 24px;
+  }
+
+  .header-card .d-flex.flex-column {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .header-info {
+    flex: 1;
+    margin-right: 24px;
+  }
+
+  .header-title {
+    font-size: 2.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .action-buttons-container {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 16px;
+    width: auto;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .mobile-btn {
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+/* Large Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .action-buttons-container {
+    gap: 20px;
+  }
+
+  .mobile-btn {
+    min-width: 160px;
+    height: 52px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile Specific Adjustments */
+@media (max-width: 767px) {
+  .v-container {
+    padding: 12px !important;
+  }
+
+  .header-card .d-flex.flex-column {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px;
+  }
+
+  .header-info {
+    margin-right: 0;
+  }
+
+  .header-card {
+    margin-bottom: 16px;
+  }
+}
+
+/* Dark Theme Adjustments */
+.v-theme--dark .header-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.v-theme--dark .import-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.v-theme--dark .template-card {
+  background: rgba(var(--v-theme-success), 0.1);
+  border-color: rgba(var(--v-theme-success), 0.3);
+}
+
+.v-theme--dark .error-item {
+  background: rgba(var(--v-theme-error), 0.1);
+}
+
 /* MENAMBAHKAN STYLE BARU UNTUK KARTU MOBILE */
 .data-teknis-card-mobile {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
@@ -1556,7 +2026,8 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
 .data-teknis-card-mobile .v-list-item__append {
   font-size: 0.9rem;
 }
-/* ------------------------------------------- */
+
+
 
 .gap-3 {
   gap: 12px;
@@ -1820,12 +2291,34 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
   background: rgba(0, 172, 193, 0.05) !important;
 }
 
-.action-btn {
+/* Only apply custom styling to action buttons that are NOT Import/Export and NOT header-action-btn */
+.action-btn:not([color="success"]):not([color="primary"]):not(.mobile-btn):not(.header-action-btn) {
   transition: all 0.2s ease;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.3) !important;
+  color: rgb(var(--v-theme-primary)) !important;
 }
 
-.action-btn:hover {
-  transform: translateY(-1px);
+.action-btn:not([color="success"]):not([color="primary"]):not(.mobile-btn):not(.header-action-btn):hover {
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+  background-color: rgba(var(--v-theme-primary), 0.15) !important;
+  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.2) !important;
+}
+
+/* Force visibility for action buttons in all themes - EXCEPT Import/Export and header-action-btn */
+.v-btn.action-btn.v-btn--variant-tonal:not([color="success"]):not([color="primary"]):not(.header-action-btn) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+  border-color: rgba(var(--v-theme-primary), 0.3) !important;
+}
+
+.v-btn.action-btn.v-btn--variant-tonal:not([color="success"]):not([color="primary"]):not(.header-action-btn):hover {
+  opacity: 0.9 !important;
+  background-color: rgba(var(--v-theme-primary), 0.15) !important;
 }
 
 .modern-dialog {
@@ -1919,5 +2412,412 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
 .v-chip:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+/* ===============================================
+   MANUAL STYLING FOR MOBILE ACTION BUTTONS
+   Bypassing Vuetify theme engine for reliability
+   =============================================== */
+
+/* Light Theme Manual Styles - Fixed visibility */
+.v-theme--light .mobile-edit-btn {
+  background-color: #1976D2 !important; /* Blue */
+  color: #FFFFFF !important; /* White */
+  opacity: 1 !important;
+  visibility: visible !important;
+  border: 2px solid #1976D2 !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3) !important;
+}
+
+.v-theme--light .mobile-delete-btn {
+  background-color: #D32F2F !important; /* Red */
+  color: #FFFFFF !important; /* White */
+  opacity: 1 !important;
+  visibility: visible !important;
+  border: 2px solid #D32F2F !important;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3) !important;
+}
+
+/* Dark Theme Manual Styles */
+.v-theme--dark .mobile-edit-btn {
+  background-color: #292929 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #424242 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.v-theme--dark .mobile-delete-btn {
+  background-color: #292929 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #424242 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Additional fixes for visibility issues */
+.mobile-edit-btn, .mobile-delete-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  transition: all 0.2s ease !important;
+  border-radius: 8px !important;
+  min-width: 80px !important;
+  height: 36px !important;
+  font-weight: 600 !important;
+}
+
+.mobile-edit-btn:hover, .mobile-delete-btn:hover {
+  opacity: 0.9 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Fix for both desktop and mobile action buttons */
+.v-btn.action-btn {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
+  border: 1px solid rgba(var(--v-theme-primary), 0.5) !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.v-btn.action-btn:hover {
+  background-color: rgba(var(--v-theme-primary), 0.15) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(var(--v-theme-primary), 0.2) !important;
+}
+
+/* Additional override for light theme visibility - EXCEPT Import/Export */
+.v-theme--light .v-btn.action-btn:not([color="success"]):not([color="primary"]) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background-color: rgba(25, 118, 210, 0.08) !important;
+  border: 1px solid rgba(25, 118, 210, 0.5) !important;
+  color: #1976D2 !important;
+  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.1) !important;
+}
+
+.v-theme--light .v-btn.action-btn:not([color="success"]):not([color="primary"]):hover {
+  background-color: rgba(25, 118, 210, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2) !important;
+}
+
+/* Override for error action buttons in light theme */
+.v-theme--light .v-btn.action-btn.v-btn--color-error {
+  background-color: rgba(211, 47, 47, 0.08) !important;
+  border: 1px solid rgba(211, 47, 47, 0.5) !important;
+  color: #D32F2F !important;
+  box-shadow: 0 1px 3px rgba(211, 47, 47, 0.1) !important;
+}
+
+.v-theme--light .v-btn.action-btn.v-btn--color-error:hover {
+  background-color: rgba(211, 47, 47, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2) !important;
+}
+
+/* Force visibility for all action buttons in light theme - EXCEPT Import/Export */
+.v-theme--light .modern-table .v-btn.action-btn:not([color="success"]):not([color="primary"]),
+.v-theme--light .v-data-table .v-btn.action-btn:not([color="success"]):not([color="primary"]) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex !important;
+  background-color: rgba(25, 118, 210, 0.08) !important;
+  border: 1px solid rgba(25, 118, 210, 0.4) !important;
+  color: #1976D2 !important;
+  min-width: 70px !important;
+  height: 32px !important;
+  font-size: 0.8rem !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.v-theme--light .modern-table .v-btn.action-btn.v-btn--color-error:not([color="success"]):not([color="primary"]),
+.v-theme--light .v-data-table .v-btn.action-btn.v-btn--color-error:not([color="success"]):not([color="primary"]) {
+  background-color: rgba(211, 47, 47, 0.08) !important;
+  border: 1px solid rgba(211, 47, 47, 0.4) !important;
+  color: #D32F2F !important;
+}
+
+.v-theme--light .modern-table .v-btn.action-btn:not([color="success"]):not([color="primary"]):hover,
+.v-theme--light .v-data-table .v-btn.action-btn:not([color="success"]):not([color="primary"]):hover {
+  background-color: rgba(25, 118, 210, 0.15) !important;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2) !important;
+}
+
+.v-theme--light .modern-table .v-btn.action-btn.v-btn--color-error:not([color="success"]):not([color="primary"]):hover,
+.v-theme--light .v-data-table .v-btn.action-btn.v-btn--color-error:not([color="success"]):not([color="primary"]):hover {
+  background-color: rgba(211, 47, 47, 0.15) !important;
+  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.2) !important;
+}
+
+/* Fix for header action buttons (Import/Export) to match PelangganView */
+.header-card .action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.header-card .action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+  opacity: 0.9 !important;
+}
+
+.header-card .primary-btn {
+  background: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.header-card .primary-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9 !important;
+}
+
+/* Ensure header buttons work properly in both themes - VERY SPECIFIC OVERRIDES */
+.v-theme--light .header-card .action-btn,
+.v-theme--dark .header-card .action-btn,
+.header-card .v-btn.action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--light .header-card .action-btn:hover,
+.v-theme--dark .header-card .action-btn:hover,
+.header-card .v-btn.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+  opacity: 0.9 !important;
+}
+
+/* Action buttons styling - SAME AS PELANGGANVIEW */
+.action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+}
+
+.action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px);
+}
+
+/* VERY SPECIFIC: Header action buttons (Import/Export) - OVERRIDE EVERYTHING */
+.header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.header-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* ULTRA SPECIFIC: Force header action buttons in light theme */
+.v-theme--light .header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--light .header-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* ULTRA SPECIFIC: Force header action buttons in dark theme */
+.v-theme--dark .header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--dark .header-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* SUPER AGGRESSIVE: Override any other styling that might interfere */
+.action-buttons-container .header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.action-buttons-container .header-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* NUCLEAR OPTION: Force header action buttons to be visible with maximum specificity */
+.v-container .header-card .action-buttons-container .v-btn.header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-container .header-card .action-buttons-container .v-btn.header-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* MAXIMUM SPECIFICITY: Override literally everything */
+div.v-container > div.header-card > div.action-buttons-container > v-btn.header-action-btn,
+.v-theme--light div.v-container > div.header-card > div.action-buttons-container > v-btn.header-action-btn,
+.v-theme--dark div.v-container > div.header-card > div.action-buttons-container > v-btn.header-action-btn {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.primary-btn {
+  background: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.v-theme--light .header-card .primary-btn,
+.v-theme--dark .header-card .primary-btn {
+  background: white !important;
+  color: rgb(var(--v-theme-primary)) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.v-theme--light .header-card .primary-btn:hover,
+.v-theme--dark .header-card .primary-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9 !important;
+}
+
+/* Global override for all action buttons in light theme - EXCEPT Import/Export AND HEADER */
+.v-theme--light .v-btn[class*="action-btn"]:not([color="success"]):not([color="primary"]):not(.header-card *) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex !important;
+}
+
+/* REMOVED: Let header buttons use default styling like PelangganView */
+
+.v-theme--light .v-btn[class*="mobile-edit-btn"],
+.v-theme--light .v-btn[class*="mobile-delete-btn"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+/* Ensure buttons work in all container types - EXCEPT Import/Export AND HEADER */
+.v-theme--light .d-flex:not(.header-card) .v-btn.action-btn:not([color="success"]):not([color="primary"]),
+.v-theme--light .v-card:not(.header-card) .v-btn.action-btn:not([color="success"]):not([color="primary"]),
+.v-theme--light .v-data-table__tr .v-btn.action-btn:not([color="success"]):not([color="primary"]) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* FINAL OVERRIDE: Header Import/Export buttons - SAME AS PELANGGANVIEW */
+.action-buttons-container .v-btn[color="success"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.action-buttons-container .v-btn[color="primary"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.action-buttons-container .v-btn[color="success"]:hover,
+.action-buttons-container .v-btn[color="primary"]:hover {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.9 !important;
+}
+
+/* Force override for ANY potential conflicts - SAME AS PELANGGANVIEW */
+.v-theme--light .action-buttons-container .v-btn[color="success"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--light .action-buttons-container .v-btn[color="primary"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--dark .action-buttons-container .v-btn[color="success"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+}
+
+.v-theme--dark .action-buttons-container .v-btn[color="primary"] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(5px);
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
 }
 </style>

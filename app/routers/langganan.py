@@ -12,7 +12,7 @@ from pydantic import BaseModel, ValidationError, Field
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
 
 from ..database import get_db
 from ..models.harga_layanan import HargaLayanan as HargaLayananModel
@@ -45,7 +45,7 @@ async def create_langganan(
     pelanggan = await db.get(
         PelangganModel,
         langganan_data.pelanggan_id,
-        options=[selectinload(PelangganModel.harga_layanan)],
+        options=[joinedload(PelangganModel.harga_layanan)],
     )
     if not pelanggan or not pelanggan.harga_layanan:
         raise HTTPException(
@@ -104,10 +104,10 @@ async def create_langganan(
         select(LanggananModel)
         .where(LanggananModel.id == db_langganan.id)
         .options(
-            selectinload(LanggananModel.pelanggan).selectinload(
+            joinedload(LanggananModel.pelanggan).joinedload(
                 PelangganModel.harga_layanan
             ),
-            selectinload(LanggananModel.paket_layanan),
+            joinedload(LanggananModel.paket_layanan),
         )
     )
     result = await db.execute(query)
@@ -120,12 +120,12 @@ async def create_langganan(
 async def get_all_langganan(
     search: Optional[str] = None,
     alamat: Optional[str] = None,
-    paket_layanan_id: Optional[int] = None,
+    paket_layanan_name: Optional[str] = None,
     status: Optional[str] = None,
     for_invoice_selection: bool = False,
     skip: int = 0,
     # PERUBAHAN UTAMA: Jadikan 'limit' opsional agar desktop bisa memuat semua
-    limit: Optional[int] = None, 
+    limit: Optional[int] = None,
     db: AsyncSession = Depends(get_db),
 ):
     """Mengambil semua langganan dengan opsi filter dan paginasi."""
@@ -133,11 +133,11 @@ async def get_all_langganan(
         select(LanggananModel)
         .join(LanggananModel.pelanggan)
         .options(
-            selectinload(LanggananModel.pelanggan).options(
-                selectinload(PelangganModel.langganan),
-                selectinload(PelangganModel.harga_layanan)
+            joinedload(LanggananModel.pelanggan).options(
+                joinedload(PelangganModel.langganan),
+                joinedload(PelangganModel.harga_layanan),
             ),
-            selectinload(LanggananModel.paket_layanan),
+            joinedload(LanggananModel.paket_layanan),
         )
     )
 
@@ -146,11 +146,11 @@ async def get_all_langganan(
 
     if search:
         query = query.where(PelangganModel.nama.ilike(f"%{search}%"))
-    if alamat: 
+    if alamat:
         # Mencari di kolom alamat pada tabel PelangganModel
         query = query.where(PelangganModel.alamat.ilike(f"%{alamat}%"))
-    if paket_layanan_id:
-        query = query.where(LanggananModel.paket_layanan_id == paket_layanan_id)
+    if paket_layanan_name:
+        query = query.join(PaketLayananModel).where(PaketLayananModel.nama_paket == paket_layanan_name)
     if status:
         query = query.where(LanggananModel.status == status)
     # Logika ini memastikan bahwa jika parameter limit diberikan (dari mobile),
@@ -160,13 +160,15 @@ async def get_all_langganan(
         final_query = final_query.limit(limit)
 
     result = await db.execute(final_query)
-    langganan_list = result.scalars().all()
-    
+    langganan_list = result.unique().scalars().all()
+
     # ... sisa kode tidak perlu diubah ...
     if for_invoice_selection and langganan_list:
         pelanggan_ids = {l.pelanggan_id for l in langganan_list}
         invoice_counts_stmt = (
-            select(InvoiceModel.pelanggan_id, func.count(InvoiceModel.id).label("count"))
+            select(
+                InvoiceModel.pelanggan_id, func.count(InvoiceModel.id).label("count")
+            )
             .where(InvoiceModel.pelanggan_id.in_(pelanggan_ids))
             .group_by(InvoiceModel.pelanggan_id)
         )
@@ -176,16 +178,14 @@ async def get_all_langganan(
         for langganan in langganan_list:
             pelanggan = langganan.pelanggan
             is_new_user = False
-            
+
             if pelanggan and len(pelanggan.langganan) == 1:
                 if invoice_counts_map.get(pelanggan.id, 0) == 0:
                     is_new_user = True
-            
+
             langganan.is_new_user = is_new_user
 
     return langganan_list
-
-
 
 
 @router.patch("/{langganan_id}", response_model=LanggananSchema)
@@ -210,10 +210,10 @@ async def update_langganan(
         select(LanggananModel)
         .where(LanggananModel.id == db_langganan.id)
         .options(
-            selectinload(LanggananModel.pelanggan).selectinload(
+            joinedload(LanggananModel.pelanggan).joinedload(
                 PelangganModel.harga_layanan
             ),
-            selectinload(LanggananModel.paket_layanan),
+            joinedload(LanggananModel.paket_layanan),
         )
     )
     result = await db.execute(query)
@@ -257,7 +257,7 @@ async def calculate_langganan_price(
     pelanggan = await db.get(
         PelangganModel,
         request_data.pelanggan_id,
-        options=[selectinload(PelangganModel.harga_layanan)],
+        options=[joinedload(PelangganModel.harga_layanan)],
     )
     if not pelanggan or not pelanggan.harga_layanan:
         raise HTTPException(
@@ -294,7 +294,7 @@ async def calculate_langganan_price(
         )
 
     return LanggananCalculateResponse(
-        harga_awal=round(harga_awal_final, 0), tgl_jatuh_tempo=tgl_jatuh_tempo_final
+        harga_awal=round(harga_awal_final, 0), tgl_jatuh_tempo=tgl_jatuh_tempo_final  # type: ignore
     )
 
 
@@ -341,18 +341,36 @@ async def download_csv_template_langganan():
 
 
 @router.get("/export/csv", response_class=StreamingResponse)
-async def export_to_csv_langganan(db: AsyncSession = Depends(get_db)):
-    """Mengekspor semua data langganan ke dalam file CSV."""
+async def export_to_csv_langganan(
+    search: Optional[str] = None,
+    alamat: Optional[str] = None,
+    paket_layanan_name: Optional[str] = None,
+    status: Optional[str] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Mengekspor semua data langganan ke dalam file CSV dengan filter."""
     query = select(LanggananModel).options(
-        selectinload(LanggananModel.pelanggan),
-        selectinload(LanggananModel.paket_layanan),
-    )
+        joinedload(LanggananModel.pelanggan),
+        joinedload(LanggananModel.paket_layanan),
+    ).join(LanggananModel.pelanggan)
+
+    if search:
+        query = query.where(PelangganModel.nama.ilike(f"%{search}%"))
+    if alamat:
+        query = query.where(PelangganModel.alamat.ilike(f"%{alamat}%"))
+    if paket_layanan_name:
+        query = query.join(PaketLayananModel).where(PaketLayananModel.nama_paket == paket_layanan_name)
+    if status:
+        query = query.where(LanggananModel.status == status)
+        
+    query = query.order_by(LanggananModel.id.desc())
+
     result = await db.execute(query)
     langganan_list = result.scalars().unique().all()
 
     if not langganan_list:
         raise HTTPException(
-            status_code=404, detail="Tidak ada data langganan untuk diekspor."
+            status_code=404, detail="Tidak ada data langganan untuk diekspor dengan filter yang diberikan."
         )
 
     output = io.StringIO()
@@ -378,6 +396,11 @@ async def export_to_csv_langganan(db: AsyncSession = Depends(get_db)):
                 "Tgl Jatuh Tempo": langganan.tgl_jatuh_tempo,
                 "Tgl Invoice Terakhir": langganan.tgl_invoice_terakhir,
             }
+        )
+
+    if not rows_to_write:
+        raise HTTPException(
+            status_code=404, detail="Tidak ada data valid untuk diekspor."
         )
 
     writer = csv.DictWriter(output, fieldnames=rows_to_write[0].keys())
@@ -411,29 +434,57 @@ async def import_from_csv_langganan(
     reader = list(csv.DictReader(io.StringIO(content_str)))
     errors = []
     langganan_to_create = []
+    processed_emails_in_file = set()
 
-    emails_to_find = {row.get("email_pelanggan", "").lower().strip() for row in reader if row.get("email_pelanggan")}
-    paket_names_to_find = {row.get("nama_paket_layanan", "").lower().strip() for row in reader if row.get("nama_paket_layanan")}
-    brand_ids_to_find = {row.get("id_brand", "").strip() for row in reader if row.get("id_brand")}
+    emails_to_find = {
+        row.get("email_pelanggan", "").lower().strip()
+        for row in reader
+        if row.get("email_pelanggan")
+    }
+    paket_names_to_find = {
+        row.get("nama_paket_layanan", "").lower().strip()
+        for row in reader
+        if row.get("nama_paket_layanan")
+    }
+    brand_ids_to_find = {
+        row.get("id_brand", "").strip() for row in reader if row.get("id_brand")
+    }
 
-    pelanggan_q = await db.execute(select(PelangganModel).where(func.lower(PelangganModel.email).in_(emails_to_find)))
+    pelanggan_q = await db.execute(
+        select(PelangganModel).where(
+            func.lower(PelangganModel.email).in_(emails_to_find)
+        )
+    )
     pelanggan_map = {p.email.lower(): p for p in pelanggan_q.scalars().all()}
 
     paket_q = await db.execute(
         select(PaketLayananModel).where(
             func.lower(PaketLayananModel.nama_paket).in_(paket_names_to_find),
-            PaketLayananModel.id_brand.in_(brand_ids_to_find)
+            PaketLayananModel.id_brand.in_(brand_ids_to_find),
         )
     )
     paket_map = {(p.nama_paket.lower(), p.id_brand): p for p in paket_q.scalars().all()}
 
     pelanggan_ids_found = [p.id for p in pelanggan_map.values()]
-    existing_langganan_q = await db.execute(select(LanggananModel.pelanggan_id).where(LanggananModel.pelanggan_id.in_(pelanggan_ids_found)))
+    existing_langganan_q = await db.execute(
+        select(LanggananModel.pelanggan_id).where(
+            LanggananModel.pelanggan_id.in_(pelanggan_ids_found)
+        )
+    )
     subscribed_pelanggan_ids = set(existing_langganan_q.scalars().all())
 
     for row_num, row in enumerate(reader, start=2):
         try:
-            data_import = LanggananImport(**row)
+            data_import = LanggananImport(**row) # type: ignore
+
+            # Validasi duplikat email dalam file CSV yang sama
+            email_lower = data_import.email_pelanggan.lower()
+            if email_lower in processed_emails_in_file:
+                errors.append(
+                    f"Baris {row_num}: Email '{data_import.email_pelanggan}' duplikat di dalam file CSV."
+                )
+                continue
+            processed_emails_in_file.add(email_lower)
 
             pelanggan = pelanggan_map.get(data_import.email_pelanggan.lower())
             if not pelanggan:
@@ -456,13 +507,26 @@ async def import_from_csv_langganan(
                 )
                 continue
 
+            # Konversi string tanggal ke objek date jika tidak None
+            tgl_jatuh_tempo_value = None
+            if data_import.tgl_jatuh_tempo:
+                if isinstance(data_import.tgl_jatuh_tempo, str):
+                    try:
+                        tgl_jatuh_tempo_value = datetime.strptime(data_import.tgl_jatuh_tempo, "%Y-%m-%d").date()
+                    except ValueError:
+                        # Jika format tanggal tidak valid, lewati baris ini
+                        errors.append(f"Baris {row_num}: Format tanggal tidak valid untuk tgl_jatuh_tempo: '{data_import.tgl_jatuh_tempo}'")
+                        continue
+                else:
+                    tgl_jatuh_tempo_value = data_import.tgl_jatuh_tempo
+
             new_langganan_data = {
                 "pelanggan_id": pelanggan.id,
                 "paket_layanan_id": paket.id,
                 "status": data_import.status,
                 "metode_pembayaran": data_import.metode_pembayaran,
                 "harga_awal": paket.harga,
-                "tgl_jatuh_tempo": data_import.tgl_jatuh_tempo,
+                "tgl_jatuh_tempo": tgl_jatuh_tempo_value,
             }
             langganan_to_create.append(LanggananModel(**new_langganan_data))
 
@@ -518,7 +582,7 @@ async def calculate_langganan_price_plus_full(
     pelanggan = await db.get(
         PelangganModel,
         request_data.pelanggan_id,
-        options=[selectinload(PelangganModel.harga_layanan)],
+        options=[joinedload(PelangganModel.harga_layanan)],
     )
     if not pelanggan or not pelanggan.harga_layanan:
         raise HTTPException(
@@ -556,6 +620,17 @@ async def calculate_langganan_price_plus_full(
     )
 
 
+@router.get("/count", response_model=int)
+async def get_langganan_count(db: AsyncSession = Depends(get_db)):
+    """
+    Menghitung total jumlah langganan.
+    """
+    count_query = select(func.count(LanggananModel.id))
+    result = await db.execute(count_query)
+    total_count = result.scalar_one()
+    return total_count
+
+
 @router.get("/pelanggan/list", response_model=List[PelangganSchema])
 async def get_all_pelanggan_with_status(db: AsyncSession = Depends(get_db)):
     """
@@ -563,11 +638,11 @@ async def get_all_pelanggan_with_status(db: AsyncSession = Depends(get_db)):
     """
     result = await db.execute(
         select(PelangganModel)
-        .options(selectinload(PelangganModel.langganan))
+        .options(joinedload(PelangganModel.langganan))
         .order_by(PelangganModel.nama)
     )
     pelanggan = result.scalars().unique().all()
-    
+
     for p in pelanggan:
         p.has_subscription = len(p.langganan) > 0
 

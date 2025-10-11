@@ -27,7 +27,7 @@ async def upload_speedtest_proof(file: UploadFile = File(...)):
         )
 
     # Buat nama file yang aman dan unik
-    file_extension = Path(file.filename).suffix
+    file_extension = Path(file.filename or "").suffix
     unique_filename = f"{secrets.token_hex(8)}{file_extension}"
     file_path = UPLOAD_DIR / unique_filename
 

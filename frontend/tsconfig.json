@@ -19,7 +19,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    
+    "noImplicitAny": false,  // Allow implicit any types for flexibility
+    "ignoreDeprecations": "5.0",  // Ignore deprecation warnings for baseUrl
+
+
     /* Path Alias Configuration */
     "baseUrl": ".",
     "paths": {

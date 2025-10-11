@@ -49,7 +49,7 @@ async def get_revenue_report(
     summary_query = (
         select(
             func.coalesce(func.sum(InvoiceModel.total_harga), 0.0),
-            func.count(InvoiceModel.id)
+            func.count(InvoiceModel.id),
         )
         .join(InvoiceModel.pelanggan)
         .where(and_(*filter_conditions))
@@ -94,14 +94,21 @@ async def get_revenue_report_details(
         filter_conditions.append(PelangganModel.id_brand == id_brand)
 
     # --- QUERY UNTUK RINCIAN INVOICE (DENGAN PAGINASI) ---
+    # Query untuk mendapatkan invoice dan informasi pelanggan sekaligus
     invoices_query = (
-        select(InvoiceModel)
-        .join(InvoiceModel.pelanggan)
-        .options(
-            selectinload(InvoiceModel.pelanggan).selectinload(
-                PelangganModel.harga_layanan
-            )
+        select(
+            InvoiceModel.id,
+            InvoiceModel.invoice_number,
+            InvoiceModel.total_harga,
+            InvoiceModel.paid_at,
+            InvoiceModel.metode_pembayaran,
+            InvoiceModel.tgl_jatuh_tempo,
+            InvoiceModel.pelanggan_id,
+            PelangganModel.nama,
+            PelangganModel.alamat,
+            PelangganModel.id_brand
         )
+        .join(InvoiceModel.pelanggan)
         .where(and_(*filter_conditions))
         .order_by(InvoiceModel.paid_at.desc())
         .offset(skip)
@@ -111,42 +118,55 @@ async def get_revenue_report_details(
         invoices_query = invoices_query.limit(limit)
 
     invoices_result = await db.execute(invoices_query)
-    invoices = invoices_result.scalars().unique().all()
+    invoice_pelanggan_data = invoices_result.fetchall()
 
     rincian_invoice_list = []
     wib_timezone = pytz.timezone("Asia/Jakarta")
-    for inv in invoices:
+
+    # Ambil semua id_brand unik untuk query harga_layanan
+    id_brands = [data.id_brand for data in invoice_pelanggan_data if data.id_brand]
+    
+    # Query harga_layanan terkait
+    brand_harga_layanan = {}
+    if id_brands:
+        harga_layanan_query = select(HargaLayananMode).where(
+            HargaLayananMode.id_brand.in_(id_brands)
+        )
+        harga_layanan_result = await db.execute(harga_layanan_query)
+        for harga_layanan in harga_layanan_result.scalars().all():
+            brand_harga_layanan[harga_layanan.id_brand] = harga_layanan
+
+    for data in invoice_pelanggan_data:
         # Tentukan tipe invoice berdasarkan tanggal jatuh tempo
         invoice_type = "Otomatis"
-        if inv.tgl_jatuh_tempo and inv.tgl_jatuh_tempo.day > 1:
+        if data.tgl_jatuh_tempo and data.tgl_jatuh_tempo.day > 1:
             invoice_type = "Prorate"
 
         # Tentukan metode pembayaran final
-        metode_pembayaran_final = inv.metode_pembayaran
+        metode_pembayaran_final = data.metode_pembayaran
         if not metode_pembayaran_final:
             # Jika kosong (via Xendit), gabungkan dengan tipe invoice
             metode_pembayaran_final = f"Xendit - {invoice_type}"
 
         paid_at_wib = None
-        if inv.paid_at:
+        if data.paid_at:
             # Pastikan paid_at adalah timezone-aware (UTC)
-            utc_time = inv.paid_at.replace(tzinfo=pytz.utc)
+            utc_time = data.paid_at.replace(tzinfo=pytz.utc)
             # Konversi ke WIB
             paid_at_wib = utc_time.astimezone(wib_timezone)
 
+        # Get harga_layanan berdasarkan id_brand
+        harga_layanan = brand_harga_layanan.get(data.id_brand)
+
         # Buat item laporan
         report_item = InvoiceReportItem(
-            invoice_number=inv.invoice_number,
-            pelanggan_nama=inv.pelanggan.nama if inv.pelanggan else "N/A",
+            invoice_number=data.invoice_number,
+            pelanggan_nama=data.nama if data.nama else "N/A",
             paid_at=paid_at_wib,
-            total_harga=inv.total_harga,
+            total_harga=data.total_harga,
             metode_pembayaran=metode_pembayaran_final,  # Gunakan nilai yang sudah diproses
-            alamat=inv.pelanggan.alamat if inv.pelanggan else "N/A",
-            id_brand=(
-                inv.pelanggan.harga_layanan.brand
-                if inv.pelanggan and inv.pelanggan.harga_layanan
-                else "N/A"
-            ),
+            alamat=data.alamat if data.alamat else "N/A",
+            id_brand=harga_layanan.brand if harga_layanan else "N/A",
         )
         rincian_invoice_list.append(report_item)
 

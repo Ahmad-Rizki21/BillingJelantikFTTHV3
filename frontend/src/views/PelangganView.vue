@@ -20,6 +20,7 @@
             color="success"
             @click="dialogImport = true"
             prepend-icon="mdi-file-upload-outline"
+            :loading="importing"
             class="action-btn text-none mobile-btn"
             size="default"
             block
@@ -287,7 +288,8 @@
           show-select
           return-object
         >
-        <template v-slot:loading>
+          
+          <template v-slot:loading>
             <div class="d-flex justify-center align-center py-12">
               <div class="text-center">
                 <v-progress-circular color="primary" indeterminate size="48"></v-progress-circular>
@@ -359,6 +361,12 @@
             </div>
           </template>
         </v-data-table>
+        <div class="d-flex align-center pa-2 ml-4" style="position: relative; top: -55px;">
+          <v-chip variant="outlined" color="primary" size="large">
+            Total: {{ totalPelangganCount }} pelanggan di server
+            </v-chip>
+              <v-spacer></v-spacer>
+            </div>
       </div>
     </v-card>
 
@@ -737,20 +745,20 @@
           <v-icon class="mr-3">mdi-upload</v-icon>
           <span class="import-title">Import Pelanggan dari CSV</span>
           <v-spacer></v-spacer>
-          <v-btn 
-            icon 
-            variant="text" 
+          <v-btn
+            icon
+            variant="text"
             @click="closeImportDialog"
             size="small"
           >
             <v-icon color="white">mdi-close</v-icon>
           </v-btn>
         </div>
-        
+
         <v-card-text class="import-content">
-          <v-sheet 
-            border 
-            rounded="lg" 
+          <v-sheet
+            border
+            rounded="lg"
             class="template-card pa-4 mb-6"
             color="surface-variant"
           >
@@ -764,12 +772,12 @@
                   Unduh template CSV untuk memastikan format data sesuai dengan sistem.
                 </p>
               </div>
-              <v-btn 
-                color="success" 
-                variant="elevated" 
-                @click="downloadCsvTemplate" 
-                :loading="downloadingTemplate" 
-                prepend-icon="mdi-download" 
+              <v-btn
+                color="success"
+                variant="elevated"
+                @click="downloadCsvTemplate"
+                :loading="downloadingTemplate"
+                prepend-icon="mdi-download"
                 class="template-btn"
                 :block="$vuetify.display.mobile"
               >
@@ -783,16 +791,16 @@
               <v-icon class="mr-2">mdi-cloud-upload</v-icon>
               Unggah File CSV
             </h6>
-            <v-file-input 
+            <v-file-input
               :model-value="fileToImport"
               @update:model-value="handleFileSelection"
-              label="Pilih file .csv" 
-              accept=".csv" 
-              variant="outlined" 
-              prepend-icon="" 
-              prepend-inner-icon="mdi-paperclip" 
-              show-size 
-              clearable 
+              label="Pilih file .csv"
+              accept=".csv"
+              variant="outlined"
+              prepend-icon=""
+              prepend-inner-icon="mdi-paperclip"
+              show-size
+              clearable
               hide-details="auto"
               class="file-input"
               density="comfortable"
@@ -802,10 +810,10 @@
 
           <v-expand-transition>
             <div v-if="importErrors.length > 0" class="mt-4">
-              <v-alert 
-                type="error" 
-                variant="tonal" 
-                prominent 
+              <v-alert
+                type="error"
+                variant="tonal"
+                prominent
                 border="start"
                 class="error-alert"
               >
@@ -817,14 +825,14 @@
                     </v-chip>
                   </div>
                 </template>
-                
+
                 <p class="mb-3">Mohon perbaiki kesalahan berikut di file CSV Anda dan coba lagi.</p>
                 <v-divider class="mb-3"></v-divider>
-                
+
                 <div class="error-list">
-                  <div 
-                    v-for="(error, i) in importErrors" 
-                    :key="i" 
+                  <div
+                    v-for="(error, i) in importErrors"
+                    :key="i"
                     class="error-item d-flex align-start mb-2"
                   >
                     <v-icon size="small" color="error" class="mr-2 mt-1">mdi-alert-circle</v-icon>
@@ -835,25 +843,25 @@
             </div>
           </v-expand-transition>
         </v-card-text>
-        
+
         <v-divider></v-divider>
-        
+
         <v-card-actions class="import-actions">
           <v-spacer></v-spacer>
-          <v-btn 
-            variant="text" 
+          <v-btn
+            variant="text"
             @click="closeImportDialog"
             class="nav-btn"
           >
             Batal
           </v-btn>
-          <v-btn 
-            color="success" 
-            variant="elevated" 
-            @click="importFromCsv" 
-            :loading="importing" 
-            :disabled="fileToImport.length === 0" 
-            prepend-icon="mdi-upload" 
+          <v-btn
+            color="success"
+            variant="elevated"
+            @click="importFromCsv"
+            :loading="importing"
+            :disabled="fileToImport.length === 0"
+            prepend-icon="mdi-upload"
             class="import-btn"
           >
             Import Sekarang
@@ -900,6 +908,7 @@ interface Pelanggan extends BasePelanggan {
 
 // --- STATE MANAGEMENT ---
 const pelangganList = ref<Pelanggan[]>([]);
+const totalPelangganCount = ref(0); // Total count of customers in database
 const hargaLayananList = ref<HargaLayanan[]>([]);
 const loading = ref(true);
 const saving = ref(false);
@@ -999,6 +1008,8 @@ const paginatedPelanggan = computed(() => {
   return pelangganList.value;
 });
 
+
+
 // --- LIFECYCLE HOOK ---
 onMounted(() => {
   fetchPelanggan();
@@ -1063,13 +1074,30 @@ async function fetchPelanggan(isLoadMore = false) {
     params.append('skip', String(skip));
     params.append('limit', String(itemsPerPage));
 
+    // Fetch data with total count (the backend already returns this in the response)
     const response = await apiClient.get(`/pelanggan/?${params.toString()}`);
-    const newData = response.data;
+    
+    // Check if the response has the expected structure with data and total_count
+    let newData, totalCount;
+    if (response.data && response.data.data && response.data.total_count !== undefined) {
+      // Response has the expected structure from backend
+      newData = response.data.data;
+      totalCount = response.data.total_count;
+    } else {
+      // Fallback: if response doesn't have expected structure, treat as before
+      newData = response.data;
+      totalCount = newData.length; // This is not accurate but provides fallback
+    }
 
     if (isLoadMore) {
       pelangganList.value.push(...newData);
     } else {
       pelangganList.value = newData;
+    }
+
+    // Update the total count
+    if (!isLoadMore) {
+      totalPelangganCount.value = totalCount;
     }
 
     if (newData.length < itemsPerPage) {
@@ -1091,6 +1119,7 @@ function loadMore() {
 }
 
 const applyFilters = debounce(() => {
+  totalPelangganCount.value = 0; // Reset total count when filters change
   fetchPelanggan();
 }, 500);
 
@@ -1776,6 +1805,38 @@ function showSnackbar(text: string, color: 'success' | 'error' | 'warning') {
   text-transform: none;
 }
 
+.nav-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.template-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.error-item {
+  background: rgba(var(--v-theme-error), 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.import-actions {
+  padding: 16px 24px !important;
+  background: rgb(var(--v-theme-surface));
+  border-top: 1px solid rgb(var(--v-theme-outline-variant));
+}
+
+.import-btn {
+  background: rgb(var(--v-theme-success)) !important;
+  color: rgb(var(--v-theme-on-success)) !important;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: none;
+}
+
 .template-btn {
   border-radius: 10px;
   font-weight: 600;
@@ -2232,4 +2293,5 @@ function showSnackbar(text: string, color: 'success' | 'error' | 'warning') {
   font-weight: bold;
   vertical-align: middle;
 }
+
 </style>

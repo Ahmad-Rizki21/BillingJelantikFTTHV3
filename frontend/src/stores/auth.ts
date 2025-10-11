@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import apiClient from '@/services/api';
 import router from '@/router';
+import { setEncryptedToken, getEncryptedToken, removeEncryptedToken } from '@/utils/crypto';
 
 // Definisikan tipe data yang lebih spesifik
 interface Permission {
@@ -22,7 +23,7 @@ interface User {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem('access_token'));
+  const token = ref<string | null>(getEncryptedToken('access_token'));
   const user = ref<User | null>(null);
 
   const isAuthenticated = computed(() => !!token.value);
@@ -36,17 +37,27 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setToken(newToken: string) {
-    localStorage.setItem('access_token', newToken);
+    setEncryptedToken('access_token', newToken);
     token.value = newToken;
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
   }
 
-  function logout() {
-    localStorage.removeItem('access_token');
-    token.value = null;
-    user.value = null;
-    delete apiClient.defaults.headers.common['Authorization'];
-    router.push('/login');
+  async function logout() {
+    const refreshToken = getEncryptedToken('refresh_token');
+    try {
+      if (refreshToken) {
+        await apiClient.post('/auth/logout', { refresh_token: refreshToken });
+      }
+    } catch (error) {
+      console.error("Logout failed on backend, but proceeding with frontend logout:", error);
+    } finally {
+      removeEncryptedToken('access_token');
+      removeEncryptedToken('refresh_token');
+      token.value = null;
+      user.value = null;
+      delete apiClient.defaults.headers.common['Authorization'];
+      router.push('/login');
+    }
   }
 
   async function verifyToken(): Promise<boolean> {
@@ -58,22 +69,39 @@ export const useAuthStore = defineStore('auth', () => {
       return true;
     } catch (error) {
       console.error('Token verification failed:', error);
-      logout();
+      await logout();
       return false;
     }
   }
 
   async function login(email: string, password: string): Promise<boolean> {
     try {
+      // Use URLSearchParams for proper form encoding
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
       const response = await apiClient.post(
-        '/users/token',
-        `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        '/auth/token',
+        formData,
         {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         }
       );
-      setToken(response.data.access_token);
+      
+      // 1. Get tokens from response
+      const { access_token, refresh_token } = response.data;
+
+      // 2. Set tokens in store and local storage
+      setToken(access_token);
+      if (refresh_token) {
+        setEncryptedToken('refresh_token', refresh_token);
+      }
+
+      // 3. Fetch user data using the new token
+      // verifyToken will set the user state and return true on success
       return await verifyToken();
+
     } catch (error) {
       console.error('Login failed:', error);
       return false;

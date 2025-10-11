@@ -3,6 +3,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import DashboardView from '../views/DashboardView.vue';
+import { getEncryptedToken } from '@/utils/crypto';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -155,7 +156,7 @@ const router = createRouter({
 
 // Navigation guard Anda sudah benar, biarkan seperti ini.
 router.beforeEach(async (to, _from, next) => {
-  const token = localStorage.getItem('access_token');
+  const token = getEncryptedToken('access_token');
   const isAuthenticated = !!token;
   
   if (to.meta.requiresAuth && !isAuthenticated) {

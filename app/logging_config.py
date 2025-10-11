@@ -8,6 +8,15 @@ from pathlib import Path
 from datetime import datetime
 import platform
 
+# Import our custom logging utilities
+try:
+    from .logging_utils import SensitiveDataFilter  # type: ignore
+except ImportError:
+    # Fallback if logging_utils.py doesn't exist
+    class SensitiveDataFilter(logging.Filter):
+        def filter(self, record):
+            return True
+
 # --- ASCII Art Banner (Windows Compatible) ---
 ARTACOM_ASCII = """
 +===============================================================+
@@ -186,7 +195,7 @@ def log_database_event(
 
 
 def log_api_request(
-    logger, method: str, endpoint: str, status_code: int, duration: float = None
+    logger, method: str, endpoint: str, status_code: int, duration: float | None = None
 ):
     """API request logging"""
     if USE_UNICODE:
@@ -283,17 +292,17 @@ def setup_logging():
         "formatters": {
             "colored": {
                 "()": EnhancedColoredFormatter,
-                "format": f"%(asctime)s {separator} %(name)s {separator} %(levelname)s {separator} %(message)s",
-                "datefmt": "%H:%M:%S",
+                "format": f"%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
             },
             "detailed": {
                 "()": FileFormatter,
-                "format": f"%(asctime)s {separator} %(name)-15s {separator} %(levelname)-8s {separator} %(funcName)-20s {separator} %(message)s",
+                "format": f"%(asctime)s | %(name)-15s | %(levelname)-8s | %(funcName)-20s | %(message)s",
                 "datefmt": "%Y-%m-%d %H:%M:%S",
             },
             "simple": {
                 "()": FileFormatter,
-                "format": f"%(asctime)s {separator} %(levelname)-8s {separator} %(message)s",
+                "format": f"%(asctime)s | %(levelname)-8s | %(message)s",
                 "datefmt": "%Y-%m-%d %H:%M:%S",
             },
         },
@@ -303,6 +312,7 @@ def setup_logging():
                 "level": "INFO",
                 "formatter": "colored",
                 "stream": sys.stdout,
+                "filters": ["sensitive_filter"],
             },
             "file_app": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -312,6 +322,7 @@ def setup_logging():
                 "maxBytes": 10 * 1024 * 1024,  # 10MB
                 "backupCount": 5,
                 "encoding": "utf-8",
+                "filters": ["sensitive_filter"],
             },
             "file_error": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -321,6 +332,7 @@ def setup_logging():
                 "maxBytes": 5 * 1024 * 1024,  # 5MB
                 "backupCount": 3,
                 "encoding": "utf-8",
+                "filters": ["sensitive_filter"],
             },
             "file_access": {
                 "class": "logging.handlers.RotatingFileHandler",
@@ -330,6 +342,7 @@ def setup_logging():
                 "maxBytes": 10 * 1024 * 1024,  # 10MB
                 "backupCount": 5,
                 "encoding": "utf-8",
+                "filters": ["sensitive_filter"],
             },
         },
         "loggers": {
@@ -365,6 +378,11 @@ def setup_logging():
             },
         },
         "root": {"level": "INFO", "handlers": ["console", "file_app", "file_error"]},
+        "filters": {
+            "sensitive_filter": {
+                "()": SensitiveDataFilter,
+            },
+        },
     }
 
     # Apply logging configuration
@@ -381,12 +399,10 @@ def setup_logging():
     print(startup_info)
 
     # Log startup messages (safe characters only)
-    logger.info("=" * 60)
-    logger.info(">> SISTEM LOGGING BERHASIL DIINISIALISASI!")
-    logger.info(f">> File log disimpan di: {log_dir.absolute()}")
-    logger.info(f">> Waktu startup: {current_time}")
-    logger.info(">> Semua handler logging aktif dan siap digunakan")
-    logger.info("=" * 60)
+    logger.info("=" * 65)
+    logger.info("Artacom FTTH Billing API Server")
+    logger.info(f"Log directory: {log_dir.absolute()}")
+    logger.info("=" * 65)
 
     return logger
 

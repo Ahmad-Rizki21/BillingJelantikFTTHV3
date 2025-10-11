@@ -33,7 +33,7 @@ class ODP(Base):
 
     # Relasi ke OLT
     olt_id: Mapped[int] = mapped_column(ForeignKey("olt.id"))
-    olt: Mapped["OLT"] = relationship(back_populates="odps")
+    olt: Mapped["OLT"] = relationship("OLT", back_populates="odps")
 
     # Relasi ke DataTeknis (one-to-many: satu ODP punya banyak data teknis)
-    data_teknis: Mapped[List["DataTeknis"]] = relationship(back_populates="odp")
+    data_teknis: Mapped[List["DataTeknis"]] = relationship("DataTeknis", back_populates="odp")

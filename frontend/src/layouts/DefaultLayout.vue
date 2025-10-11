@@ -180,41 +180,49 @@
           <div v-if="notifications.length === 0" class="text-center text-medium-emphasis pa-4">
               Tidak ada notifikasi baru.
           </div>
-          <v-list-item
-          v-for="(notif, index) in notifications"
-          :key="index"
-          class="py-2 notification-item"
-          @click="handleNotificationClick(notif)"
-            >
-            <template v-slot:prepend>
-              <v-avatar :color="getNotificationColor(notif.type)" size="32" class="me-3">
-                  <v-icon size="18">{{ getNotificationIcon(notif.type) }}</v-icon>
-              </v-avatar>
-            </template>
+          <template v-else>
+            <v-list-item
+            v-for="(notif, index) in notifications"
+            :key="index"
+            class="py-2 notification-item"
+            @click="handleNotificationClick(notif)"
+              >
+              <template v-slot:prepend>
+                <v-avatar :color="getNotificationColor(notif.type)" size="32" class="me-3">
+                    <v-icon size="18">{{ getNotificationIcon(notif.type) }}</v-icon>
+                </v-avatar>
+              </template>
 
-            <div v-if="notif.type === 'new_payment'" class="notification-content">
-              <v-list-item-title class="font-weight-medium text-body-2">Pembayaran Diterima</v-list-item-title>
-              <v-list-item-subtitle class="text-caption">
-                <strong>{{ notif.data.invoice_number }}</strong> dari <strong>{{ notif.data.pelanggan_nama }}</strong> telah lunas.
-              </v-list-item-subtitle>
-            </div>
+              <div v-if="notif.type === 'new_payment'" class="notification-content">
+                <v-list-item-title class="font-weight-medium text-body-2">Pembayaran Diterima</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">
+                  <strong>{{ notif.data?.invoice_number || 'N/A' }}</strong> dari <strong>{{ notif.data?.pelanggan_nama || 'N/A' }}</strong> telah lunas.
+                </v-list-item-subtitle>
+              </div>
 
-            <div v-if="notif.type === 'new_customer_for_noc'" class="notification-content">
-              <v-list-item-title class="font-weight-medium text-body-2">Pelanggan Baru</v-list-item-title>
-              <v-list-item-subtitle class="text-caption">
-                <strong>{{ notif.data.pelanggan_nama }}</strong> perlu dibuatkan Data Teknis.
-              </v-list-item-subtitle>
-            </div>
+              <div v-else-if="notif.type === 'new_customer_for_noc'" class="notification-content">
+                <v-list-item-title class="font-weight-medium text-body-2">Pelanggan Baru</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">
+                  <strong>{{ notif.data?.pelanggan_nama || 'N/A' }}</strong> perlu dibuatkan Data Teknis.
+                </v-list-item-subtitle>
+              </div>
 
-          <div v-if="notif.type === 'new_technical_data'" class="notification-content">
-            <v-list-item-title class="font-weight-medium text-body-2">Data Teknis Baru</v-list-item-title>
-            <v-list-item-subtitle class="text-caption">
-              Data teknis untuk <strong>{{ notif.data.pelanggan_nama }}</strong> telah ditambahkan.
-            </v-list-item-subtitle>
-            </div>
+              <div v-else-if="notif.type === 'new_technical_data'" class="notification-content">
+                <v-list-item-title class="font-weight-medium text-body-2">Data Teknis Baru</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">
+                  Data teknis untuk <strong>{{ notif.data?.pelanggan_nama || 'N/A' }}</strong> telah ditambahkan.
+                </v-list-item-subtitle>
+              </div>
 
-          </v-list-item>
-          </v-list>
+              <div v-else class="notification-content">
+                <v-list-item-title class="font-weight-medium text-body-2">Notifikasi</v-list-item-title>
+                <v-list-item-subtitle class="text-caption">
+                  {{ notif.message || 'Anda memiliki notifikasi baru' }}
+                </v-list-item-subtitle>
+              </div>
+            </v-list-item>
+          </template>
+        </v-list>
       </v-menu>
     </v-app-bar>
 
@@ -240,15 +248,14 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import logoLight from '@/assets/images/Jelantik-Light.webp';
-import logoDark from '@/assets/images/Jelantik-Dark.webp';
-import { useTheme } from 'vuetify';
-import { useDisplay } from 'vuetify';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useTheme } from 'vuetify'
+import { useDisplay } from 'vuetify'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import apiClient from '@/services/api';
-import { useAuthStore } from '@/stores/auth';
-import { useSettingsStore } from '@/stores/settings';
+import logo from '@/assets/Jelantik 1.svg'; // Assuming you have a logo file
 
 // --- State ---
 const theme = useTheme();
@@ -256,7 +263,17 @@ const { mobile } = useDisplay();
 const drawer = ref(true);
 const rail = ref(false);
 const router = useRouter();
+
+// PERBAIKAN: Inisialisasi notifications dengan validasi lebih baik
 const notifications = ref<any[]>([]);
+// PERBAIKAN: Tambahkan watcher untuk memastikan notifications tetap array
+watch(notifications, (newVal) => {
+  if (!newVal || !Array.isArray(newVal)) {
+    console.warn('[State] notifications bukan array, reset ke array kosong');
+    notifications.value = [];
+  }
+}, { deep: true });
+
 const suspendedCount = ref(0);
 const unpaidInvoiceCount = ref(0);
 const stoppedCount = ref(0);
@@ -265,11 +282,10 @@ const roleCount = ref(0);
 const userPermissions = ref<string[]>([]);
 const authStore = useAuthStore();
 let socket: WebSocket | null = null;
-// let reconnectInterval: NodeJS.Timeout | null = null;
 
 // Computed untuk mobile detection
 const isMobile = computed(() => mobile.value);
-const logoSrc = computed(() => theme.global.current.value.dark ? logoDark : logoLight);
+const logoSrc = computed(() => theme.global.current.value.dark ? logo : logo);
 const settingsStore = useSettingsStore();
 
 // Toggle drawer function untuk mobile/desktop
@@ -292,143 +308,164 @@ async function fetchSidebarBadges() {
   }
 }
 
-// --- Fungsi WebSocket yang Diperbaiki ---
-// function connectWebSocket() {
-//   if (!authStore.token) return;
-//   if (socket && socket.readyState === WebSocket.OPEN) return;
-
-//   // Untuk development (localhost)
-//   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-//     const wsUrl = `ws://127.0.0.1:8000/ws/notifications?token=${authStore.token}`;
-//     console.log(`Connecting to WebSocket at ${wsUrl}`);
-//     socket = new WebSocket(wsUrl);
-//   } else {
-//     // Untuk production - gunakan wss dengan domain yang sama
-//     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-//     const wsUrl = `${wsProtocol}//${window.location.host}/ws/notifications?token=${authStore.token}`;
-//     console.log(`Connecting to WebSocket at ${wsUrl}`);
-//     socket = new WebSocket(wsUrl);
-//   }
-
-//   socket.onopen = () => {
-//     console.log('WebSocket connection established.');
-//     // Clear reconnect interval jika berhasil
-//     if (reconnectInterval) {
-//       clearInterval(reconnectInterval);
-//       reconnectInterval = null;
-//     }
-//   };
-
-// //   function playSound(type: string) {
-// //   let audioFile = '';
-
-// //   if (type === 'new_payment') {
-// //     audioFile = '/pembayaran.mp3'; // Suara baru untuk pembayaran
-// //   } else if (type === 'new_customer_for_noc') {
-// //     audioFile = '/payment.mp3'; // Suara lama untuk pelanggan baru
-// //   }
-
-// //   if (audioFile) {
-// //     const audio = new Audio(audioFile);
-// //     audio.play().catch(error => {
-// //       console.error(`Gagal memutar audio (${audioFile}):`, error);
-// //     });
-// //   }
-// // }
-
-// function playSound(type: string) {
-//   let audioFile = '';
-//   if (type === 'new_payment') {
-//     audioFile = '/pembayaran.mp3';
-//   } else if (type === 'new_customer_for_noc') {
-//     audioFile = '/payment.mp3';
-//   } else if (type === 'new_technical_data') {
-//     audioFile = '/langganan.mp3';
-//   }
-
-//   if (audioFile) {
-//     const audio = new Audio(audioFile);
-//     audio.play().catch(error => {
-//       console.warn(`Gagal memutar audio (${audioFile}):`, error);
-//     });
-//   }
-// }
-
-// socket.onmessage = (event) => {
-//   // Log 1: Lihat data mentah yang diterima
-//   console.log('--- RAW MESSAGE RECEIVED ---', event.data); 
-  
-//   try {
-//     const data = JSON.parse(event.data);
-
-//     // Log 2: Lihat data setelah di-parse menjadi objek
-//     console.log('--- PARSED DATA OBJECT ---', data); 
-    
-//     const notificationType = data.type;
-
-//     if (['new_payment', 'new_technical_data', 'new_customer_for_noc'].includes(notificationType)) {
-//       // Log 3: Konfirmasi tipe notifikasi cocok
-//       console.log('--- NOTIFICATION TYPE MATCHED ---', notificationType); 
-      
-//       notifications.value = [data, ...notifications.value];
-//       playSound(notificationType);
-      
-//       // Log 4: Lihat isi array notifikasi setelah di-update
-//       console.log('--- UPDATED NOTIFICATIONS ARRAY ---', notifications.value); 
-      
-//       const customEvent = new CustomEvent('new-notification', { detail: data });
-//       window.dispatchEvent(customEvent);
-
-//     } else {
-//       // Log 5: Jika tipe notifikasi tidak cocok
-//       console.log('--- NOTIFICATION TYPE MISMATCH ---', notificationType); 
-//     }
-//   } catch (error) {
-//     console.error('Error parsing WebSocket message:', error);
-//   }
-// };
-
-//   socket.onerror = (error) => {
-//     console.error('WebSocket error:', error);
-//   };
-
-//   socket.onclose = (event) => {
-//     console.log('WebSocket closed:', event.code, event.reason);
-    
-//     // Hanya reconnect jika user masih authenticated dan bukan intentional close
-//     if (authStore.isAuthenticated && event.code !== 1000) {
-//       console.log('WebSocket closed unexpectedly. Attempting to reconnect...');
-//       if (!reconnectInterval) {
-//         reconnectInterval = setInterval(() => {
-//           if (authStore.isAuthenticated) {
-//             connectWebSocket();
-//           } else {
-//             disconnectWebSocket();
-//           }
-//         }, 5000);
-//       }
-//     }
-//   };
-// }
-
-let pingInterval: NodeJS.Timeout | null = null;
-let reconnectTimeout: NodeJS.Timeout | null = null;
+let pingInterval: ReturnType<typeof setInterval> | null = null;
+let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+let notificationCleanupInterval: ReturnType<typeof setInterval> | null = null;
 
 function playSound(type: string) {
-  let audioFile = '';
-  if (type === 'new_payment') {
-    audioFile = '/pembayaran.mp3';
-  } else if (type === 'new_customer_for_noc') {
-    audioFile = '/payment.mp3';
-  } else if (type === 'new_technical_data') {
-    audioFile = '/noc_finance.mp3';
-  }
+  try {
+    console.log(`[Audio] Attempting to play sound for type: ${type}`);
+    
+    // PERBAIKAN: Mapping tipe notifikasi ke file audio dengan lebih baik
+    let audioFile = '';
+    switch (type) {
+      case 'new_payment':
+        audioFile = '/pembayaran.mp3';
+        break;
+      case 'new_customer_for_noc':
+      case 'new_customer':
+        audioFile = '/payment.mp3';
+        break;
+      case 'new_technical_data':
+        audioFile = '/noc_finance.mp3';
+        break;
+      default:
+        // Fallback untuk tipe tidak dikenal
+        audioFile = '/notification.mp3';
+        console.warn(`[Audio] Unknown notification type: ${type}, using fallback audio`);
+    }
 
-  if (audioFile) {
-    const audio = new Audio(audioFile);
-    audio.play().catch(error => {
-      console.warn(`Gagal memutar audio (${audioFile}):`, error);
-    });
+    // PERBAIKAN: Validasi file audio dengan lebih baik
+    if (audioFile) {
+      console.log(`[Audio] Loading audio file: ${audioFile}`);
+      
+      // PERBAIKAN: Cek apakah file audio benar-benar ada
+      const audio = new Audio(audioFile);
+      
+      // PERBAIKAN: Tambahkan event listener untuk semua event audio
+      audio.addEventListener('loadstart', () => {
+        console.log(`[Audio] Loading started for ${audioFile}`);
+      });
+      
+      audio.addEventListener('loadeddata', () => {
+        console.log(`[Audio] Audio data loaded for ${audioFile}`);
+      });
+      
+      audio.addEventListener('canplay', () => {
+        console.log(`[Audio] Audio can play for ${audioFile}`);
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error(`[Audio] Gagal memuat audio (${audioFile}):`, e);
+        console.error(`[Audio] Error code: ${audio.error?.code}, message: ${audio.error?.message}`);
+        // PERBAIKAN: Fallback ke beep sederhana
+        fallbackBeep();
+      });
+      
+      audio.addEventListener('play', () => {
+        console.log(`[Audio] Playing audio: ${audioFile}`);
+      });
+      
+      audio.addEventListener('ended', () => {
+        console.log(`[Audio] Finished playing audio: ${audioFile}`);
+      });
+      
+      // PERBAIKAN: Tambahkan timeout untuk playback
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log(`[Audio] Playback started successfully for ${audioFile}`);
+        }).catch(error => {
+          console.warn(`[Audio] Gagal memutar audio (${audioFile}):`, error);
+          // PERBAIKAN: Fallback ke beep sederhana jika playback gagal
+          fallbackBeep();
+        });
+      } else {
+        console.warn(`[Audio] Play promise undefined for ${audioFile}`);
+        // PERBAIKAN: Fallback ke beep sederhana jika playback gagal
+        fallbackBeep();
+      }
+    } else {
+      console.warn(`[Audio] Tidak ada file audio untuk type: ${type}`);
+      // PERBAIKAN: Fallback ke beep sederhana jika tidak ada file
+      fallbackBeep();
+    }
+  } catch (error) {
+    console.error('[Audio] Gagal membuat/memutar audio:', error);
+    // PERBAIKAN: Fallback ke beep sederhana jika terjadi error
+    fallbackBeep();
+  }
+}
+
+// PERBAIKAN: Fungsi fallback beep sederhana dengan logging yang lebih baik
+function fallbackBeep() {
+  try {
+    console.log('[Audio] Fallback beep activated');
+    
+    // Metode 1: AudioContext (modern)
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContext) {
+      const context = new AudioContext();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+      gainNode.gain.setValueAtTime(0.3, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+      
+      oscillator.start(context.currentTime);
+      oscillator.stop(context.currentTime + 0.5);
+      
+      console.log('[Audio] Fallback beep played using AudioContext');
+      return;
+    }
+  } catch (error) {
+    console.warn('[Audio] AudioContext fallback failed:', error);
+  }
+  
+  try {
+    // Metode 2: Fallback ke beep sederhana
+    const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = context.createOscillator();
+    const gainNode = context.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(context.destination);
+    
+    oscillator.frequency.value = 1000;
+    oscillator.type = 'square';
+    gainNode.gain.setValueAtTime(0.3, context.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+    
+    oscillator.start(context.currentTime);
+    oscillator.stop(context.currentTime + 0.3);
+    
+    console.log('[Audio] Fallback beep played (square wave)');
+  } catch (fallbackError) {
+    console.warn('[Audio] All fallback methods failed:', fallbackError);
+    
+    // Metode 3: Alert sebagai fallback terakhir
+    try {
+      // Flash title bar
+      let originalTitle = document.title;
+      let flashInterval: ReturnType<typeof setInterval> = setInterval(() => {
+        document.title = document.title === originalTitle ? "🔔 NOTIFIKASI BARU!" : originalTitle;
+      }, 500);
+
+      // Hentikan flashing setelah 3 detik
+      setTimeout(() => {
+        clearInterval(flashInterval);
+        document.title = originalTitle;
+      }, 3000);
+      
+      console.log('[Audio] Visual notification shown (Title flash)');
+    } catch (visualError) {
+      console.error('[Audio] All audio/visual methods failed:', visualError);
+    }
   }
 }
 
@@ -443,15 +480,20 @@ function connectWebSocket() {
   
   const token = authStore.token;
   const hostname = window.location.hostname;
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   let wsUrl = '';
 
   // 2. Tentukan URL berdasarkan lingkungan (produksi atau development)
   if (hostname === 'billingftth.my.id') {
       // Produksi (Sudah Benar)
-      wsUrl = `wss://${hostname}/api/ws/notifications?token=${token}`;
+      wsUrl = `${protocol}//${hostname}/ws/notifications?token=${token}`;
   } else {
-      // Lokal (Perbaiki di sini, hapus /api)
-      wsUrl = `ws://localhost:8000/ws/notifications?token=${token}`; 
+      // Lokal - Gunakan konfigurasi dari environment variable jika tersedia
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+      // Ubah http:// ke ws:// atau https:// ke wss://
+      const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss:' : 'ws:';
+      const wsHost = API_BASE_URL.replace(/^https?:\/\//, '');
+      wsUrl = `${wsProtocol}//${wsHost}/ws/notifications?token=${token}`; 
   }
 
   // 3. Buat koneksi dengan URL yang sudah pasti benar
@@ -466,22 +508,146 @@ function connectWebSocket() {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send('ping');
       }
-    }, 30000);
+    }, 30000) as any;
   };
 
   socket.onmessage = (event) => {
-    if (event.data === 'pong') return;
-    
-    console.log('[WebSocket] Pesan diterima:', event.data);
+    // Filter out system messages sebelum processing
+    if (event.data === 'pong' || event.data === 'ping') {
+      return; // Silent filter for system messages
+    }
+
     try {
-      const data = JSON.parse(event.data); // 'data' di sini adalah objek notifikasi tunggal
-      if (['new_payment', 'new_technical_data', 'new_customer_for_noc'].includes(data.type)) {
-        notifications.value = [data, ...notifications.value];
-        playSound(data.type);
-        window.dispatchEvent(new CustomEvent('new-notification', { detail: data }));
+      // PERBAIKAN: Validasi data sebelum parsing
+      if (!event.data) {
+        console.warn('[WebSocket] Received empty message');
+        return;
       }
+
+      let data;
+      if (typeof event.data === 'string') {
+        try {
+          data = JSON.parse(event.data);
+        } catch (parseError) {
+          console.error('[WebSocket] Gagal parse JSON:', parseError);
+          console.error('[WebSocket] Raw data:', event.data);
+          return;
+        }
+      } else {
+        data = event.data;
+      }
+      
+      // PERBAIKAN: Validasi struktur data
+      if (!data || typeof data !== 'object') {
+        console.warn('[WebSocket] Invalid data format received:', data);
+        return;
+      }
+
+      // Filter out ping/pong messages in JSON format
+      if (data.type === 'ping' || data.type === 'pong') {
+        return; // Silent filter for system messages
+      }
+      
+      // PERBAIKAN: Pastikan notifications.value adalah array
+      if (!notifications.value || !Array.isArray(notifications.value)) {
+        console.warn('[WebSocket] notifications.value bukan array, inisialisasi ulang...');
+        notifications.value = [];
+      }
+      
+      // PERBAIKAN: Filter notifikasi yang tidak relevan
+      // Jangan tampilkan notifikasi dengan action seperti auth/logout
+      if (data.action && data.action.includes('/auth/')) {
+        console.log('[WebSocket] Skipping auth-related notification:', data.action);
+        return;
+      }
+      
+      // PERBAIKAN: Tambahkan ID unik jika tidak ada
+      if (!data.id) {
+        data.id = Date.now() + Math.floor(Math.random() * 10000);
+        console.log('[WebSocket] Generated ID for notification:', data.id);
+      }
+      
+      // PERBAIKAN: Validasi dan normalisasi type notifikasi
+      const validTypes = ['new_payment', 'new_technical_data', 'new_customer_for_noc', 'new_customer'];
+      
+      // Normalisasi tipe notifikasi
+      if (data.type === 'new_customer') {
+        // Konversi new_customer ke new_customer_for_noc untuk konsistensi
+        data.type = 'new_customer_for_noc';
+        console.log('[WebSocket] Normalized notification type from new_customer to new_customer_for_noc');
+      }
+      
+      // Hanya proses notifikasi dengan tipe yang valid
+      if (validTypes.includes(data.type)) {
+        // PERBAIKAN: Tambahkan timestamp jika tidak ada
+        if (!data.timestamp) {
+          data.timestamp = new Date().toISOString();
+        }
+        
+        // PERBAIKAN: Tambahkan message default jika tidak ada
+        if (!data.message) {
+          switch (data.type) {
+            case 'new_payment':
+              data.message = `Pembayaran baru diterima${data.data?.pelanggan_nama ? ` dari ${data.data.pelanggan_nama}` : ''}`;
+              break;
+            case 'new_customer_for_noc':
+              data.message = `Pelanggan baru${data.data?.pelanggan_nama ? ` '${data.data.pelanggan_nama}'` : ''} telah ditambahkan`;
+              break;
+            case 'new_technical_data':
+              data.message = `Data teknis baru${data.data?.pelanggan_nama ? ` untuk ${data.data.pelanggan_nama}` : ''} telah ditambahkan`;
+              break;
+            default:
+              data.message = 'Notifikasi baru diterima';
+          }
+        }
+        
+        // PERBAIKAN: Pastikan data object ada
+        if (!data.data) {
+          data.data = {};
+        }
+        
+        // PERBAIKAN: Filter notifikasi dengan data kosong
+        // Jangan tampilkan notifikasi jika data penting tidak ada
+        if (data.type === 'new_payment' && !data.data.invoice_number) {
+          console.log('[WebSocket] Skipping new_payment notification without invoice_number');
+          return;
+        }
+        if ((data.type === 'new_customer_for_noc' || data.type === 'new_customer') && !data.data.pelanggan_nama) {
+          console.log('[WebSocket] Skipping new_customer notification without pelanggan_nama');
+          return;
+        }
+        if (data.type === 'new_technical_data' && !data.data.pelanggan_nama) {
+          console.log('[WebSocket] Skipping new_technical_data notification without pelanggan_nama');
+          return;
+        }
+        
+        // PERBAIKAN: Gunakan unshift alih-alih spread operator untuk performa dan konsistensi
+        notifications.value.unshift(data);
+        
+        // Batasi jumlah notifikasi maksimal 20
+        if (notifications.value.length > 20) {
+          notifications.value = notifications.value.slice(0, 20);
+        }
+        
+        console.log('[WebSocket] Notification added to list:', data.type, data.message);
+        
+        // PERBAIKAN: Play sound dengan validasi
+        playSound(data.type);
+        
+        // PERBAIKAN: Dispatch event dengan validasi
+        if (typeof window !== 'undefined' && window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent('new-notification', { detail: data }));
+        }
+        
+        console.log('[WebSocket] Notification processed successfully:', data.type);
+      } else {
+        // Jangan tampilkan notifikasi dengan tipe unknown
+        console.warn('[WebSocket] Unknown notification type (filtered out):', data.type, data);
+      }
+      
     } catch (error) {
       console.error('[WebSocket] Gagal mem-parse pesan:', error);
+      console.error('[WebSocket] Raw message:', event.data);
     }
   };
 
@@ -492,20 +658,37 @@ function connectWebSocket() {
 
   socket.onclose = (event) => {
     console.warn(`[WebSocket] Koneksi ditutup: Kode ${event.code}`);
-    socket = null; 
+    socket = null;
     if (pingInterval) clearInterval(pingInterval);
-    
-    if (authStore.isAuthenticated && event.code !== 1000) {
+
+    // Don't reconnect if it's a normal closure or connection replacement
+    const shouldNotReconnect = [1000, 1001, 1005].includes(event.code) ||
+                               event.reason === "Connection replaced" ||
+                               event.reason === "Logout Pengguna";
+
+    if (authStore.isAuthenticated && !shouldNotReconnect) {
       console.log('[WebSocket] Menjadwalkan reconnect dalam 5 detik...');
       reconnectTimeout = setTimeout(connectWebSocket, 5000);
+    } else if (shouldNotReconnect) {
+      console.log(`[WebSocket] Tidak reconnect karena penutupan normal: ${event.reason || event.code}`);
     }
   };
 }
 
 function disconnectWebSocket() {
   console.log('[WebSocket] Memutuskan koneksi secara manual...');
-  if (reconnectTimeout) clearTimeout(reconnectTimeout);
-  if (pingInterval) clearInterval(pingInterval);
+  if (reconnectTimeout) {
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+  }
+  if (pingInterval) {
+    clearInterval(pingInterval);
+    pingInterval = null;
+  }
+  if (notificationCleanupInterval) {
+    clearInterval(notificationCleanupInterval);
+    notificationCleanupInterval = null;
+  }
 
   if (socket) {
     socket.onclose = null; // Hapus listener onclose agar tidak memicu reconnect
@@ -572,7 +755,7 @@ const filteredMenuGroups = computed(() => {
 
 onMounted(async () => {
   const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) theme.global.name.value = savedTheme;
+  if (savedTheme) theme.change(savedTheme);
 
 
   await settingsStore.fetchMaintenanceStatus(); 
@@ -604,6 +787,37 @@ onMounted(async () => {
     fetchSidebarBadges();
     fetchUnreadNotifications(); // <-- PANGGIL FUNGSI UNTUK MENGAMBIL NOTIFIKASI
     connectWebSocket(); // Memulai WebSocket setelah user terverifikasi
+    
+    // Bersihkan notifikasi yang tidak relevan setiap 30 detik
+    notificationCleanupInterval = setInterval(() => {
+      if (notifications.value && Array.isArray(notifications.value)) {
+        const validTypes = ['new_payment', 'new_technical_data', 'new_customer_for_noc', 'new_customer'];
+        notifications.value = notifications.value.filter(notif => {
+          // Filter out auth-related notifications
+          if (notif.action && notif.action.includes('/auth/')) {
+            return false;
+          }
+          
+          // Filter out unknown types
+          if (!validTypes.includes(notif.type)) {
+            return false;
+          }
+          
+          // Filter out notifications with missing data
+          if (notif.type === 'new_payment' && !notif.data?.invoice_number) {
+            return false;
+          }
+          if ((notif.type === 'new_customer_for_noc' || notif.type === 'new_customer') && !notif.data?.pelanggan_nama) {
+            return false;
+          }
+          if (notif.type === 'new_technical_data' && !notif.data?.pelanggan_nama) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+    }, 30000); // 30 detik
   }
 });
 
@@ -611,11 +825,9 @@ onUnmounted(() => {
   disconnectWebSocket();
 });
 
-onUnmounted(() => disconnectWebSocket());
-
 function toggleTheme() {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark';
-  theme.global.name.value = newTheme;
+  theme.change(newTheme);
   localStorage.setItem('theme', newTheme);
 }
 
@@ -624,7 +836,34 @@ async function fetchUnreadNotifications() {
   try {
     // Ganti dengan endpoint API Anda yang sebenarnya
     const response = await apiClient.get('/notifications/unread'); 
-    notifications.value = response.data;
+    // Filter notifikasi yang relevan saja
+    const validTypes = ['new_payment', 'new_technical_data', 'new_customer_for_noc', 'new_customer'];
+    const filteredNotifications = response.data.notifications.filter((notif: any) => {
+      // Filter out auth-related notifications
+      if (notif.action && notif.action.includes('/auth/')) {
+        return false;
+      }
+      
+      // Filter out unknown types
+      if (!validTypes.includes(notif.type)) {
+        return false;
+      }
+      
+      // Filter out notifications with missing data
+      if (notif.type === 'new_payment' && !notif.data?.invoice_number) {
+        return false;
+      }
+      if ((notif.type === 'new_customer_for_noc' || notif.type === 'new_customer') && !notif.data?.pelanggan_nama) {
+        return false;
+      }
+      if (notif.type === 'new_technical_data' && !notif.data?.pelanggan_nama) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    notifications.value = filteredNotifications.slice(0, 20); // Batasi maksimal 20 notifikasi
   } catch (error) {
     console.error("Gagal mengambil notifikasi yang belum dibaca:", error);
   }
@@ -649,36 +888,182 @@ function getNotificationColor(type: string) {
 }
 
 async function handleNotificationClick(notification: any) {
+  // PERBAIKAN: Validasi parameter dengan lebih baik
+  console.log('[Notification] handleNotificationClick called with:', notification);
+  
+  if (!notification) {
+    console.error("[Notification] Invalid notification object: null or undefined");
+    alert("Notifikasi tidak valid. Silakan refresh halaman.");
+    return;
+  }
+  
+  // PERBAIKAN: Validasi struktur object notification
+  if (typeof notification !== 'object') {
+    console.error("[Notification] Invalid notification object type:", typeof notification, notification);
+    alert("Notifikasi tidak valid. Silakan refresh halaman.");
+    return;
+  }
+  
+  // PERBAIKAN: Validasi ID notifikasi dengan lebih baik
+  if (!notification.hasOwnProperty('id')) {
+    console.error("[Notification] Notification object missing 'id' property:", notification);
+    alert("Notifikasi tidak valid (missing ID). Silakan refresh halaman.");
+    return;
+  }
+  
+  const notificationId = notification.id;
+  if (notificationId === undefined || notificationId === null || notificationId === '') {
+    console.error("[Notification] Invalid notification ID:", notificationId);
+    alert("Notifikasi tidak valid (invalid ID). Silakan refresh halaman.");
+    return;
+  }
+  
+  // PERBAIKAN: Validasi type notifikasi
+  if (!notification.hasOwnProperty('type')) {
+    console.warn("[Notification] Notification object missing 'type' property:", notification);
+    // Jangan hentikan proses, lanjutkan dengan type default
+    notification.type = 'unknown';
+  }
+
+  // Jangan proses notifikasi dengan tipe unknown
+  if (notification.type === 'unknown') {
+    console.warn("[Notification] Skipping unknown notification type:", notification);
+    // Hapus notifikasi dari daftar
+    if (notifications.value && Array.isArray(notifications.value)) {
+      notifications.value = notifications.value.filter(n => n.id !== notificationId);
+    }
+    return;
+  }
+
+  console.log('[Notification] Processing notification click for ID:', notificationId);
+
   // 1. Tandai notifikasi sebagai sudah dibaca di backend
   try {
+    // PERBAIKAN: Validasi API client sebelum panggil
+    if (!apiClient) {
+      throw new Error("API client not initialized");
+    }
+    
+    console.log(`[Notification] Calling API to mark notification ${notificationId} as read`);
+    
     // Ganti dengan endpoint API Anda
-    await apiClient.post(`/notifications/${notification.id}/mark-as-read`); 
+    const response = await apiClient.post(`/notifications/${notificationId}/mark-as-read`);
+    console.log(`[Notification] API response for marking ${notificationId} as read:`, response.status);
     
     // 2. Hapus notifikasi dari daftar di frontend secara visual
-    notifications.value = notifications.value.filter(n => n.id !== notification.id);
+    if (notifications.value && Array.isArray(notifications.value)) {
+      console.log(`[Notification] Removing notification ${notificationId} from frontend list`);
+      notifications.value = notifications.value.filter(n => {
+        const match = n.id !== notificationId;
+        console.log(`[Notification] Filter check - comparing ${n.id} !== ${notificationId} = ${match}`);
+        return match;
+      });
+      console.log(`[Notification] Updated notifications list length: ${notifications.value.length}`);
+    } else {
+      console.warn("[Notification] notifications.value bukan array:", notifications.value);
+      // Fallback: Inisialisasi ulang jika bukan array
+      notifications.value = [];
+    }
 
     // 3. Arahkan pengguna ke halaman yang relevan
+    console.log(`[Notification] Redirecting based on type: ${notification.type}`);
+    
+    // Jangan redirect untuk notifikasi unknown
+    if (notification.type === 'unknown') {
+      console.log("[Notification] No redirect for unknown notification type");
+      return;
+    }
+    
     if (notification.type === 'new_technical_data') {
+      console.log("[Notification] Redirecting to /langganan");
       router.push('/langganan');
-    } else if (notification.type === 'new_customer_for_noc') {
+    } else if (notification.type === 'new_customer_for_noc' || notification.type === 'new_customer') {
+      console.log("[Notification] Redirecting to /data-teknis");
       router.push('/data-teknis');
     } else if (notification.type === 'new_payment') {
-      // Mungkin arahkan ke detail invoice jika ada ID-nya
+      console.log("[Notification] Redirecting to /invoices");
       router.push('/invoices');
+    } else {
+      console.warn("[Notification] Unknown notification type, redirecting to home:", notification.type);
+      // Fallback: Arahkan ke halaman default
+      router.push('/');
     }
 
   } catch (error) {
-    console.error("Gagal menandai notifikasi sebagai sudah dibaca:", error);
+    console.error("[Notification] Gagal menandai notifikasi sebagai sudah dibaca:", error);
+    
+    // PERBAIKAN: Tampilkan pesan error yang lebih informatif
+    if (error instanceof Error) {
+      // Cek apakah ini error 404
+      const errorMessage = error.message.toLowerCase();
+      if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+        console.warn("[Notification] Notifikasi tidak ditemukan di server, hapus dari daftar lokal");
+        // Hapus notifikasi dari daftar lokal meskipun error
+        if (notifications.value && Array.isArray(notifications.value)) {
+          notifications.value = notifications.value.filter(n => n.id !== notificationId);
+        }
+        // Masih arahkan pengguna ke halaman yang relevan
+        if (notification.type === 'new_technical_data') {
+          router.push('/langganan');
+        } else if (notification.type === 'new_customer_for_noc' || notification.type === 'new_customer') {
+          router.push('/data-teknis');
+        } else if (notification.type === 'new_payment') {
+          router.push('/invoices');
+        } else {
+          router.push('/');
+        }
+      } else {
+        // Tampilkan pesan error ke pengguna
+        alert(`Gagal menandai notifikasi sebagai sudah dibaca: ${error.message}`);
+      }
+    } else {
+      alert("Gagal menandai notifikasi sebagai sudah dibaca. Silakan coba lagi.");
+    }
   }
 }
 
 async function markAllAsRead() {
   try {
+    // PERBAIKAN: Validasi API client sebelum panggil
+    if (!apiClient) {
+      throw new Error("API client not initialized");
+    }
+    
     // Ganti dengan endpoint API Anda
-    await apiClient.post('/notifications/mark-all-as-read'); 
-    notifications.value = []; // Kosongkan daftar di frontend
+    const response = await apiClient.post('/notifications/mark-all-as-read'); 
+    
+    // PERBAIKAN: Validasi response sebelum update UI
+    if (response && response.status === 200) {
+      // Kosongkan daftar di frontend hanya jika sukses
+      if (notifications.value && Array.isArray(notifications.value)) {
+        notifications.value = []; // Kosongkan daftar notifikasi
+      } else {
+        console.warn("[Notification] notifications.value bukan array, inisialisasi ulang...");
+        notifications.value = [];
+      }
+      
+      console.log("[Notification] Semua notifikasi telah ditandai sebagai sudah dibaca");
+    } else {
+      throw new Error(`Unexpected response status: ${response.status}`);
+    }
+    
   } catch (error) {
-    console.error("Gagal membersihkan notifikasi:", error);
+    console.error("[Notification] Gagal membersihkan notifikasi:", error);
+    
+    // PERBAIKAN: Tampilkan pesan error yang lebih informatif
+    if (error instanceof Error) {
+      alert(`Gagal membersihkan notifikasi: ${error.message}`);
+    } else {
+      alert("Gagal membersihkan notifikasi. Silakan coba lagi.");
+    }
+    
+    // PERBAIKAN: Fallback ke penghapusan lokal jika API gagal
+    console.warn("[Notification] Fallback ke penghapusan lokal...");
+    if (notifications.value && Array.isArray(notifications.value)) {
+      notifications.value = [];
+    } else {
+      notifications.value = [];
+    }
   }
 }
 

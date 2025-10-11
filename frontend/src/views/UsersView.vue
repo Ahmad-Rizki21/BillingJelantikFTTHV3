@@ -603,10 +603,22 @@ const emailRules = [
 ];
 
 const passwordRules = computed(() => {
+  const rules: ((v: string) => boolean | string)[] = [];
+
+  // For new users, the password is required.
   if (editedIndex.value === -1) {
-    return [(v: string) => !!v || 'Password wajib diisi untuk user baru'];
+    rules.push((v: string) => !!v || 'Password wajib diisi untuk user baru');
   }
-  return [];
+
+  // If a password is entered (for new or existing users), enforce complexity rules.
+  if (editedItem.value.password) {
+    rules.push((v: string) => v.length >= 8 || 'Password minimal 8 karakter');
+    rules.push((v: string) => /[A-Z]/.test(v) || 'Password harus mengandung minimal 1 huruf kapital');
+    rules.push((v: string) => /[a-z]/.test(v) || 'Password harus mengandung minimal 1 huruf kecil');
+    rules.push((v: string) => /[0-9]/.test(v) || 'Password harus mengandung minimal 1 angka');
+  }
+  
+  return rules;
 });
 
 // --- Helper Methods ---
@@ -738,12 +750,22 @@ async function saveUser() {
     
     if (payload.role_id) {
       payload.role_id = parseInt(payload.role_id, 10);
+    } else {
+      payload.role_id = null;
     }
 
     if (editedIndex.value > -1) {
+      // Update existing user
       await apiClient.patch(`/users/${payload.id}`, payload);
     } else {
-      await apiClient.post('/users/', payload);
+      // Create new user
+      const createPayload = {
+        name: payload.name,
+        email: payload.email,
+        password: payload.password,
+        role_id: payload.role_id,
+      };
+      await apiClient.post('/users/', createPayload);
     }
     await fetchUsers();
     closeDialog();

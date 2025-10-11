@@ -501,13 +501,40 @@ async function saveServer() {
 async function handleTestConnection(item: any) {
   testingConnectionId.value = item.id;
   try {
+    // A successful request (2xx status) will land here.
     const response = await apiClient.post(`/mikrotik_servers/${item.id}/test_connection`);
-    showSnackbar(`Berhasil terhubung! ROS: ${response.data.ros_version || response.data.router_os_version}`, 'success');
-    fetchServers();
+
+    const testResult = response.data.test_result;
+    const updatedServer = response.data.updated_server;
+
+    // Show snackbar with the specific success message from the backend
+    const rosVersion = testResult.data?.ros_version || 'N/A';
+    showSnackbar(`${testResult.message} (ROS: ${rosVersion})`, 'success');
+
+    // Find and update the server in the local array for instant UI refresh
+    const index = servers.value.findIndex(s => s.id === item.id);
+    if (index !== -1) {
+      servers.value[index] = updatedServer;
+    }
+
   } catch (error: any) {
-    const detail = error.response?.data?.detail || 'Gagal terhubung ke server.';
-    showSnackbar(`Error: ${detail}`, 'error');
-    fetchServers();
+    // A failed request (like 400 Bad Request) will land here.
+    if (error.response && error.response.data) {
+      const testResult = error.response.data.test_result;
+      const updatedServer = error.response.data.updated_server;
+
+      // Show snackbar with the specific failure message from the backend
+      showSnackbar(testResult.message, 'error');
+
+      // Find and update the server in the local array to show the 'failure' status
+      const index = servers.value.findIndex(s => s.id === item.id);
+      if (index !== -1) {
+        servers.value[index] = updatedServer;
+      }
+    } else {
+      // Fallback for unexpected network errors
+      showSnackbar('An unknown error occurred while testing the connection.', 'error');
+    }
   } finally {
     testingConnectionId.value = null;
   }
@@ -549,14 +576,14 @@ function showSnackbar(text: string, color: 'success' | 'error' | 'info') {
 }
 
 function getConnectionColor(status: string | null): string {
-    if (status === 'Success' || status === 'Connected') return 'success';
-    if (status === 'Failed') return 'error';
+    if (status === 'success') return 'success';
+    if (status === 'failure') return 'error';
     return 'grey';
 }
 
 function getConnectionIcon(status: string | null): string {
-    if (status === 'Success' || status === 'Connected') return 'mdi-check-circle';
-    if (status === 'Failed') return 'mdi-close-circle';
+    if (status === 'success') return 'mdi-check-circle';
+    if (status === 'failure') return 'mdi-close-circle';
     return 'mdi-help-circle';
 }
 </script>

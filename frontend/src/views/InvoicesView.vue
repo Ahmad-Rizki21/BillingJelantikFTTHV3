@@ -162,7 +162,17 @@
               Kelola dan pantau status pembayaran
             </p>
           </div>
-          </div>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            @click="exportPaymentLinksExcel"
+            prepend-icon="mdi-file-excel"
+            class="text-none font-weight-bold"
+          >
+            Export Payment Links
+          </v-btn>
+        </div>
       </div>
 
       <v-expand-transition>
@@ -241,13 +251,13 @@
 
           <template v-slot:item.status_invoice="{ item }">
             <v-chip
-              :color="getStatusColor(item.status_invoice)"
+              :color="getStatusColor(item.payment_link_status || item.status_invoice)"
               variant="elevated"
               size="small"
               class="font-weight-bold status-chip"
-              :prepend-icon="getStatusIcon(item.status_invoice)"
+              :prepend-icon="getStatusIcon(item.payment_link_status || item.status_invoice)"
             >
-              {{ item.status_invoice }}
+              {{ item.payment_link_status || item.status_invoice }}
             </v-chip>
           </template>
 
@@ -344,33 +354,6 @@
                   <span>Tandai Lunas</span>
                 </v-tooltip>
 
-                <v-dialog v-model="dialogMarkAsPaid" max-width="500px" persistent>
-                  <v-card>
-                    <v-card-title class="text-h5">Tandai Lunas?</v-card-title>
-                    <v-card-text>
-                      <p>Anda akan menandai invoice <strong>{{ itemToMark?.invoice_number }}</strong> sebagai lunas.</p>
-                      <v-select
-                        v-model="paymentMethod"
-                        :items="['Cash', 'Bank Transfer', 'Lainnya']"
-                        label="Metode Pembayaran"
-                        variant="outlined"
-                        density="compact"
-                        class="mt-4"
-                      ></v-select>
-                    </v-card-text>
-                    <v-card-actions>
-                      <v-spacer></v-spacer>
-                      <v-btn text @click="closeMarkAsPaidDialog">Batal</v-btn>
-                      <v-btn 
-                        color="success" 
-                        @click="confirmMarkAsPaid"
-                        :loading="markingAsPaid"
-                      >
-                        Konfirmasi
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
-                </v-dialog>
             </div>
           </template>
         </v-data-table>
@@ -412,13 +395,13 @@
                 <div class="text-caption text-medium-emphasis">{{ getPelangganName(item.pelanggan_id) }}</div>
               </div>
               <v-chip
-                :color="getStatusColor(item.status_invoice)"
+                :color="getStatusColor(item.payment_link_status || item.status_invoice)"
                 variant="elevated"
                 size="small"
                 class="font-weight-bold ms-2 me-2"
                 label
               >
-                {{ item.status_invoice }}
+                {{ item.payment_link_status || item.status_invoice }}
               </v-chip>
             </div>
             <v-divider></v-divider>
@@ -495,6 +478,34 @@
 
     </v-card>
 
+    <v-dialog v-model="dialogMarkAsPaid" max-width="500px" persistent>
+      <v-card>
+        <v-card-title class="text-h5">Tandai Lunas?</v-card-title>
+        <v-card-text>
+          <p>Anda akan menandai invoice <strong>{{ itemToMark?.invoice_number }}</strong> sebagai lunas.</p>
+          <v-select
+            v-model="paymentMethod"
+            :items="['Cash', 'Bank Transfer', 'Lainnya']"
+            label="Metode Pembayaran"
+            variant="outlined"
+            density="compact"
+            class="mt-4"
+          ></v-select>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="closeMarkAsPaidDialog">Batal</v-btn>
+          <v-btn 
+            color="success" 
+            @click="confirmMarkAsPaid"
+            :loading="markingAsPaid"
+          >
+            Konfirmasi
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="dialogDelete" max-width="500px" persistent>
       <v-card>
         <v-card-title class="text-h5">Konfirmasi Hapus</v-card-title>
@@ -542,15 +553,15 @@
             clearable
             :prepend-inner-icon="'mdi-account-search'"
             class="mb-4"
-        >
-           
-            </v-autocomplete>
+            no-data-text="Tidak ada data langganan ditemukan"
+          >
+          </v-autocomplete>
           <v-expand-transition>
             <div v-if="selectedLanggananDetails">
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    :model-value="formatCurrency(selectedLanggananDetails.harga_awal)"
+                    :model-value="formatCurrency(selectedLanggananDetails.harga_awal || 0)"
                     label="Harga Sesuai Langganan"
                     variant="outlined"
                     readonly
@@ -570,6 +581,16 @@
               <p class="text-caption text-medium-emphasis mt-n2">
                 * Total tagihan akhir akan ditambahkan pajak sesuai brand.
               </p>
+            </div>
+            <div v-else-if="selectedLanggananId">
+              <v-alert
+                type="warning"
+                variant="tonal"
+                density="compact"
+                class="mb-4"
+              >
+                Detail langganan tidak tersedia. Silakan pilih langganan lain.
+              </v-alert>
             </div>
           </v-expand-transition>
         </v-card-text>
@@ -664,6 +685,7 @@ const auth = useAuthStore();
 
 // --- State ---
 const invoices = ref<Invoice[]>([]);
+const invoicesForExistingUserCheck = ref<Invoice[]>([]); // Khusus untuk cek existing user
 const pelangganList = ref<PelangganSelectItem[]>([]);
 const langgananList = ref<any[]>([]);
 const loading = ref(true);
@@ -704,55 +726,128 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false, align: 'center' as const, width: '120px' },
 ];
 
-function isUserExisting(pelangganId: number): boolean {
-  // Cek apakah ada invoice yang sudah dibuat untuk pelanggan ini
-  return invoices.value.some(invoice => invoice.pelanggan_id === pelangganId);
-}
+
+
 
 // --- Computed Properties ---
 const langgananForSelect = computed(() => {
-  return langgananList.value.map(langganan => {
-    // Cari pelanggan yang sesuai dengan langganan ini
-    const pelanggan = pelangganList.value.find(p => p.id === langganan.pelanggan_id);
-    
-    // Check apakah user sudah existing
-    const isNewUser = pelanggan ? !isUserExisting(pelanggan.id) : false;
-    
-    // Buat title dengan format yang diinginkan
-    const title = `${pelanggan?.nama || 'N/A'}${isNewUser ? ' - NEW USER' : ''}`;
+  if (!langgananList.value || loading.value) return [];
 
-    return {
-      // properti 'id' diperlukan untuk item-value
-      id: langganan.id,
-      
-      // Properti 'title' dengan format: Nama - NEW USER - Paket xxx
-      title: title,
-
-      // Objek item mentah (raw item) untuk diakses di template slot
-      raw: {
-        ...langganan,
-        pelanggan: pelanggan,
-        // Ambil flag is_new_user dari response backend
-        is_new_user: langganan.is_new_user || false
+  // Filter langganan yang valid untuk invoice generation
+  return langgananList.value
+    .filter(langganan => {
+      // Hanya tampilkan langganan dengan status aktif
+      if (langganan.status === 'Berhenti' || langganan.status === 'Tidak Aktif') {
+        return false;
       }
-    };
-  });
+      return true;
+    })
+    .map(langganan => {
+      // Cari pelanggan yang sesuai dengan langganan ini
+      const pelanggan = pelangganList.value?.find(p => p.id === langganan.pelanggan_id);
+
+      // Handle kasus ketika pelanggan tidak ditemukan
+      if (!pelanggan) {
+        console.error(`❌ Data tidak konsisten: Langganan ID ${langganan.id} mereferensikan pelanggan_id ${langganan.pelanggan_id} yang tidak ada di database pelanggan.`);
+        // Tampilkan dengan informasi error yang jelas
+        return {
+          id: langganan.id,
+          title: `❌ ERROR: ID ${langganan.id} - Pelanggan ID ${langganan.pelanggan_id} tidak ditemukan`,
+          raw: {
+            ...langganan,
+            pelanggan: null,
+            is_new_user: false,
+            has_error: true,
+            error_message: `Pelanggan ID ${langganan.pelanggan_id} tidak ditemukan di database`
+          },
+          disabled: true // Non-aktifkan pilihan ini
+        };
+      }
+
+      // Check apakah user sudah existing (pernah ada invoice)
+      // Gabungkan data dari invoices.value (current) dan invoicesForExistingUserCheck.value (history)
+      const allInvoicesForCheck = [
+        ...(invoices.value || []),
+        ...(invoicesForExistingUserCheck.value || [])
+      ];
+
+      const existingInvoices = allInvoicesForCheck.filter(inv => inv.pelanggan_id === pelanggan.id);
+      const hasHistoryInvoices = existingInvoices.length > 0;
+
+      
+      // NEW USER hanya untuk user yang benar-benar baru (belum pernah ada invoice sama sekali)
+      const isNewUser = !hasHistoryInvoices;
+
+      
+      // Buat title dengan format yang diinginkan
+      const pelangganName = pelanggan.nama || `ID: ${pelanggan.id}`;
+
+      // Build title dengan format yang diinginkan
+      const title = isNewUser
+        ? `${pelangganName} - (User Baru)`
+        : pelangganName;
+
+      return {
+        // properti 'id' diperlukan untuk item-value
+        id: langganan.id,
+
+        // Properti 'title' dengan format yang lebih informatif
+        title: title,
+
+        
+        // Objek item mentah (raw item) untuk diakses di template slot
+        raw: {
+          ...langganan,
+          pelanggan: pelanggan,
+          // Hitung NEW USER secara client-side (lebih akurat)
+          is_new_user: isNewUser,
+          has_error: false
+        }
+      };
+    })
+    .filter(item => item !== null); // Filter out null items (jika ada)
 });
 
 const selectedLanggananDetails = computed(() => {
-  if (!selectedLanggananId.value) return null;
-  return langgananList.value.find(lang => lang.id === selectedLanggananId.value);
+  if (!selectedLanggananId.value || !langgananList.value) return null;
+  const langganan = langgananList.value.find(lang => lang.id === selectedLanggananId.value);
+  
+  // Tambahkan pengecekan tambahan
+  if (!langganan) return null;
+  
+  // Tambahkan data pelanggan jika tersedia
+  const pelanggan = pelangganList.value?.find(p => p.id === langganan.pelanggan_id) || null;
+  
+  // Pastikan semua field yang dibutuhkan tersedia
+  return {
+    ...langganan,
+    pelanggan: pelanggan,
+    harga_awal: langganan.harga_awal || 0,
+    tgl_jatuh_tempo: langganan.tgl_jatuh_tempo || new Date()
+  };
 });
 
 // --- REVISI UTAMA DIMULAI DI SINI ---
 
 // --- Stats Methods --- (Menjadi lebih sederhana)
-const getPaidCount = () => invoices.value.filter(inv => inv.status_invoice === 'Lunas').length;
-const getPendingCount = () => invoices.value.filter(inv => inv.status_invoice === 'Belum Dibayar').length;
-const getOverdueCount = () => invoices.value.filter(inv => inv.status_invoice === 'Kadaluarsa').length;
+const getPaidCount = () => {
+  if (!invoices.value) return 0;
+  return invoices.value.filter(inv => inv.status_invoice === 'Lunas').length;
+};
+const getPendingCount = () => {
+  if (!invoices.value) return 0;
+  // Hitung berdasarkan status link pembayaran yang aktif
+  return invoices.value.filter(inv => inv.payment_link_status === 'Belum Dibayar').length;
+};
+const getOverdueCount = () => {
+  if (!invoices.value) return 0;
+  // Hitung berdasarkan status link pembayaran yang expired
+  return invoices.value.filter(inv => inv.payment_link_status === 'Expired').length;
+};
 
 // --- Helper Functions --- (Menjadi lebih sederhana)
 function getPelangganName(pelangganId: number): string {
+  if (!pelangganList.value) return `ID: ${pelangganId}`;
   const pelanggan = pelangganList.value.find(p => p.id === pelangganId);
   return pelanggan?.nama || `ID: ${pelangganId}`;
 }
@@ -765,20 +860,17 @@ function getStatusColor(status: string): string {
   switch (status) {
     case 'Lunas': return 'success';
     case 'Kadaluarsa': return 'error';
+    case 'Expired': return 'error';  // Status Expired menggunakan warna merah
     case 'Belum Dibayar': return 'warning';
     default: return 'grey';
   }
 }
 
 const filteredInvoices = computed(() => {
-  // Jika switch "Tampilkan Lunas" aktif (true), tampilkan semua data yang kita miliki
-  if (showPaidInvoices.value) {
-    return invoices.value; // Ini akan menampilkan Lunas, Belum Dibayar, DAN Kadaluarsa
-  }
-  
-  // Jika switch tidak aktif (false), tampilkan HANYA yang statusnya "Belum Dibayar"
-  // Ini secara otomatis menyembunyikan "Lunas" DAN "Kadaluarsa" sesuai permintaan Anda.
-  return invoices.value.filter(inv => inv.status_invoice === 'Belum Dibayar');
+  // Optimasi: Data sudah difilter di server, jadi tidak perlu filter client-side lagi
+  // showPaidInvoices.value = false -> data sudah difilter show_active_only di backend
+  // showPaidInvoices.value = true -> data lengkap (tapi dengan limit)
+  return invoices.value;
 });
 
 /**
@@ -789,6 +881,7 @@ function getStatusIcon(status: string): string {
   switch (status) {
     case 'Lunas': return 'mdi-check-circle';
     case 'Kadaluarsa': return 'mdi-alert-circle';
+    case 'Expired': return 'mdi-timer-off';  // Icon untuk link expired
     case 'Belum Dibayar': return 'mdi-clock-outline';
     default: return 'mdi-help-circle';
   }
@@ -835,6 +928,7 @@ onMounted(() => {
   fetchInvoices();
   fetchPelangganForSelect();
   fetchLanggananForSelect();
+  fetchAllInvoicesForExistingUserCheck(); // Load history invoice untuk accurate NEW user detection
   window.addEventListener('new-notification', handleNewNotification);
 });
 
@@ -851,10 +945,51 @@ async function fetchInvoices() {
     if (startDate.value) params.append('start_date', startDate.value);
     if (endDate.value) params.append('end_date', endDate.value);
 
+    // Optimasi: Jika switch "Tampilkan Lunas & Kadaluarsa" tidak aktif,
+    // filter hanya invoice yang belum dibayar
+    if (!showPaidInvoices.value) {
+      if (!selectedStatus.value) {  // Jika tidak ada filter status spesifik
+        params.append('status_invoice', 'Belum Dibayar');
+      }
+      // Tambahkan limit untuk mencegah load terlalu banyak data
+      params.append('limit', '100');
+    }
+
     const response = await apiClient.get<Invoice[]>(`/invoices/?${params.toString()}`);
     invoices.value = response.data.sort((a, b) => b.id - a.id);
+
+      } catch (error) {
+    console.error('Error fetching invoices:', error);
+    showSnackbar('Gagal memuat data invoice. Silakan coba lagi.', 'error');
   } finally {
     loading.value = false;
+  }
+}
+
+// TAMBAHAN: Fungsi khusus untuk fetch semua invoice tanpa filter untuk keperluan cek existing user
+async function fetchAllInvoicesForExistingUserCheck() {
+  try {
+    const params = new URLSearchParams();
+    params.append('limit', '1000'); // Load banyak invoice untuk akurasi
+    params.append('status_invoice', 'Lunas'); // Prioritaskan invoice lunas untuk history
+
+    const response = await apiClient.get<Invoice[]>(`/invoices/?${params.toString()}`);
+    const allInvoices = response.data;
+
+    // Update state untuk existing user check
+    if (!invoicesForExistingUserCheck.value) {
+      invoicesForExistingUserCheck.value = [];
+    }
+
+    // Hanya tambahkan invoice yang belum ada di list
+    const newInvoices = allInvoices.filter(inv =>
+      !invoicesForExistingUserCheck.value.some(existing => existing.id === inv.id)
+    );
+
+    invoicesForExistingUserCheck.value.push(...newInvoices);
+
+      } catch (error) {
+    console.error('Error fetching all invoices for existing user check:', error);
   }
 }
 
@@ -879,6 +1014,10 @@ watch([searchQuery, selectedStatus, startDate, endDate], () => {
   applyFilters();
 });
 
+watch(showPaidInvoices, () => {
+  applyFilters();
+});
+
 function resetFilters() {
   searchQuery.value = '';
   selectedStatus.value = null;
@@ -890,25 +1029,101 @@ const handleNewNotification = (event: Event) => {
   const customEvent = event as CustomEvent;
   const notificationData = customEvent.detail;
   if (notificationData.type === 'new_payment') {
-    fetchInvoices();
+    // Force refresh invoices dengan sedikit delay untuk memastikan backend sudah update
+    setTimeout(() => {
+      fetchInvoices();
+    }, 1000);
   }
 };
 
 async function fetchPelangganForSelect() {
   try {
-    const response = await apiClient.get<PelangganSelectItem[]>('/pelanggan/');
-    pelangganList.value = response.data;
-  } catch (error) { console.error(error); }
+    console.log('🔄 Loading pelanggan data...');
+    // FIX: Gunakan parameter for_invoice_selection=true untuk menghilangkan limit
+    const response = await apiClient.get<any>('/pelanggan/?for_invoice_selection=true');
+
+    // Handle response format yang benar (PelangganListResponse has 'data' field)
+    let data: any[] = [];
+    if (response.data && Array.isArray(response.data.data)) {
+      data = response.data.data;
+      console.log(`✅ Loaded ${data.length} pelanggan records from PelangganListResponse`);
+    } else if (Array.isArray(response.data)) {
+      data = response.data;
+      console.log(`✅ Loaded ${data.length} pelanggan records (direct array)`);
+    } else {
+      console.error("❌ Unexpected response format:", response.data);
+      pelangganList.value = [];
+      showSnackbar('Format data pelanggan tidak valid.', 'error');
+      return;
+    }
+
+    pelangganList.value = data;
+
+      } catch (error) {
+    console.error('❌ Error fetching pelanggan list:', error);
+    showSnackbar('Gagal memuat daftar pelanggan.', 'error');
+  }
 }
 
 async function fetchLanggananForSelect() {
   try {
-    const response = await apiClient.get<any[]>(
-      '/langganan/?for_invoice_selection=true'
+    console.log('🔄 Loading langganan data for invoice selection...');
+    // QUICK FIX: Tambahkan limit besar untuk memastikan semua data ter-load
+    const response = await apiClient.get<any>(
+      '/langganan/?for_invoice_selection=true&limit=1000'
     );
-    langgananList.value = response.data;
-  } catch (error) { 
-    console.error('Error fetching langganan:', error); 
+    const data = Array.isArray(response.data) ? response.data : response.data.data;
+
+    if (Array.isArray(data)) {
+      console.log(`✅ Loaded ${data.length} langganan records`);
+      langgananList.value = data;
+
+      // DEBUG: Cek apakah langganan ID 244 ada
+      const langganan244 = data.find(l => l.id === 244);
+      if (langganan244) {
+        console.log('✅ Found langganan ID 244:', {
+          id: langganan244.id,
+          pelanggan_id: langganan244.pelanggan_id,
+          status: langganan244.status,
+          hasPelangganData: !!langganan244.pelanggan,
+          pelangganNama: langganan244.pelanggan?.nama || 'NO DATA',
+          hasPaketData: !!langganan244.paket_layanan,
+          paketNama: langganan244.paket_layanan?.nama || 'NO PAKET',
+          paketId: langganan244.paket_layanan_id || 'NO PAKET_ID'
+        });
+      } else {
+        console.warn('❌ Langganan ID 244 tidak ditemukan dalam API response!');
+
+        // Cek ID range untuk debugging
+        if (data.length > 0) {
+          const ids = data.map(l => l.id);
+          const minId = Math.min(...ids);
+          const maxId = Math.max(...ids);
+          console.warn(`📊 Range ID langganan: ${minId} - ${maxId}`);
+
+          // Cari langganan dengan pelanggan_id 258
+          const pelanggan258Langganan = data.filter(l => l.pelanggan_id === 258);
+          if (pelanggan258Langganan.length > 0) {
+            console.warn(`ℹ️ Ditemukan ${pelanggan258Langganan.length} langganan dengan pelanggan_id 258:`,
+              pelanggan258Langganan.map(l => ({
+                id: l.id,
+                status: l.status,
+                hasPaket: !!l.paket_layanan,
+                paketNama: l.paket_layanan?.nama || 'NO PAKET'
+              }))
+            );
+          }
+        }
+      }
+
+          } else {
+      console.error("❌ Fetched langgananList is not an array:", response.data);
+      langgananList.value = []; // Fallback to empty array
+      showSnackbar('Format data langganan tidak valid.', 'warning');
+    }
+  } catch (error) {
+    console.error('❌ Error fetching langganan:', error);
+    showSnackbar('Gagal memuat daftar langganan.', 'warning');
   }
 }
 
@@ -924,17 +1139,48 @@ function openGenerateDialog() {
 
 async function generateManualInvoice() {
   if (!selectedLanggananId.value) return;
+
+  // Validasi tambahan untuk mencegah error
+  const selectedLangganan = langgananForSelect.value.find(item => item.id === selectedLanggananId.value);
+  if (!selectedLangganan) {
+    showSnackbar('Langganan yang dipilih tidak valid.', 'error');
+    return;
+  }
+
+  // Cek apakah langganan memiliki error
+  if (selectedLangganan.raw?.has_error) {
+    showSnackbar(selectedLangganan.raw.error_message || 'Data langganan tidak konsisten. Hubungi admin.', 'error');
+    return;
+  }
+
+  // Cek apakah pelanggan tersedia
+  if (!selectedLangganan.raw?.pelanggan) {
+    showSnackbar('Data pelanggan tidak lengkap. Hubungi admin untuk perbaikan data.', 'error');
+    return;
+  }
+
   generating.value = true;
   try {
     await apiClient.post('/invoices/generate', {
       langganan_id: selectedLanggananId.value
     });
-    showSnackbar('Invoice berhasil dibuat!', 'success');
+    showSnackbar(`Invoice berhasil dibuat untuk ${selectedLangganan.raw.pelanggan.nama}!`, 'success');
     fetchInvoices();
     closeDialog();
   } catch (error: any) {
     const detail = error.response?.data?.detail || 'Gagal membuat invoice.';
-    showSnackbar(detail, 'error');
+
+    // Handle error spesifik untuk data tidak konsisten
+    if (detail.includes('tidak ditemukan')) {
+      showSnackbar('⚠️ Data tidak konsisten! Silakan refresh halaman atau hubungi admin.', 'error');
+      // Refresh data untuk memperbarui tampilan
+      await Promise.all([
+        fetchLanggananForSelect(),
+        fetchPelangganForSelect()
+      ]);
+    } else {
+      showSnackbar(detail, 'error');
+    }
   } finally {
     generating.value = false;
   }
@@ -1045,6 +1291,36 @@ async function confirmMarkAsPaid() {
     showSnackbar(detail, 'error');
   } finally {
     markingAsPaid.value = false;
+  }
+}
+
+function exportPaymentLinksExcel() {
+  try {
+    // Bangun URL dengan parameter filter
+    let url = '/invoices/export-payment-links-excel';
+    const params = new URLSearchParams();
+    
+    if (searchQuery.value) params.append('search', searchQuery.value);
+    if (selectedStatus.value) params.append('status_invoice', selectedStatus.value);
+    if (startDate.value) params.append('start_date', startDate.value);
+    if (endDate.value) params.append('end_date', endDate.value);
+    
+    // Jika switch "Tampilkan Lunas & Kadaluarsa" tidak aktif dan tidak ada filter status spesifik,
+    // maka kita hanya ingin mengekspor invoice yang belum dibayar
+    if (!showPaidInvoices.value && !selectedStatus.value) {
+      params.append('status_invoice', 'Belum Dibayar');
+    }
+    
+    if (params.toString()) {
+      url += '?' + params.toString();
+    }
+    
+    // Unduh file
+    window.open(apiClient.defaults.baseURL + url, '_blank');
+    showSnackbar('File Excel sedang diunduh...', 'success');
+  } catch (error) {
+    console.error('Error exporting payment links:', error);
+    showSnackbar('Gagal mengunduh file Excel', 'error');
   }
 }
 </script>
@@ -1461,5 +1737,36 @@ async function confirmMarkAsPaid() {
 
 .custom-snackbar {
   border-radius: 12px;
+}
+
+/* NEW USER Chip Styling */
+:deep(.v-list-item .v-chip) {
+  font-weight: 600;
+  font-size: 11px;
+}
+
+:deep(.v-list-item .v-chip .v-chip__prepend) {
+  margin-right: 4px;
+}
+
+.new-user-badge {
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Enhanced Autocomplete styling for better NEW USER visibility */
+:deep(.v-autocomplete .v-field__input) {
+  font-weight: 500;
 }
 </style>

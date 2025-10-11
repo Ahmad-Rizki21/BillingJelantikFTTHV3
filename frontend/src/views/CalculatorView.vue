@@ -83,6 +83,22 @@
                 :color="startDate ? 'success' : 'primary'"
               ></v-text-field>
             </div>
+            
+            <!-- Include Next Month Toggle -->
+            <div class="input-group mb-4">
+              <label class="input-label">
+                <v-icon size="18" class="me-2">mdi-calendar-plus</v-icon>
+                Opsi Harga
+              </label>
+              <v-switch
+                v-model="includeNextMonth"
+                label="Termasuk harga bulan depan"
+                color="primary"
+                inset
+                class="mt-2"
+                hide-details
+              ></v-switch>
+            </div>
 
             <!-- Progress Indicator -->
             <div class="progress-section">
@@ -221,6 +237,27 @@
                     <div class="total-amount">{{ formatCurrency(calculationResult.total_harga_prorate) }}</div>
                   </div>
                 </div>
+                
+                <!-- Next Month Price -->
+                <div v-if="includeNextMonth && fullMonthlyPriceValue" class="next-month-section mt-4">
+                  <div class="d-flex align-center justify-space-between">
+                    <div class="next-month-info">
+                      <div class="next-month-label text-medium-emphasis">Harga Bulan Depan</div>
+                      <div class="next-month-amount">{{ formatCurrency(fullMonthlyPriceValue) }}</div>
+                    </div>
+                    <v-chip color="info" size="small" variant="tonal">
+                      <v-icon start>mdi-calendar-arrow-right</v-icon>
+                      Bulan Penuh
+                    </v-chip>
+                  </div>
+                  <v-divider class="my-3"></v-divider>
+                  <div class="d-flex align-center justify-space-between">
+                    <div class="grand-total-label">Total Keseluruhan</div>
+                    <div class="grand-total-amount font-weight-bold text-h6">
+                      {{ formatCurrency(calculationResult.total_harga_prorate + fullMonthlyPriceValue) }}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- Actions -->
@@ -258,7 +295,7 @@ import { debounce } from 'lodash-es';
 
 // Interfaces
 interface Brand { id_brand: string; brand: string; pajak: number; }
-interface Paket { id: number; id_brand: string; nama_paket: string; }
+interface Paket { id: number; id_brand: string; nama_paket: string; harga: number; }
 interface ProrateResult {
   harga_dasar_prorate: number;
   pajak: number;
@@ -273,6 +310,8 @@ const selectedBrand = ref<Brand | null>(null);
 const selectedPaket = ref<number | null>(null);
 const startDate = ref(new Date().toISOString().split('T')[0]);
 const calculationResult = ref<ProrateResult | null>(null);
+const includeNextMonth = ref(false);
+const fullMonthlyPrice = ref<number | null>(null);
 
 // Computed
 const filteredPaketList = computed(() => {
@@ -286,6 +325,12 @@ const completionPercentage = computed(() => {
   if (selectedPaket.value) completed += 33.33;
   if (startDate.value) completed += 33.34;
   return Math.round(completed);
+});
+
+const fullMonthlyPriceValue = computed(() => {
+  if (!selectedPaket.value) return 0;
+  const paket = paketList.value.find(p => p.id === selectedPaket.value);
+  return paket ? paket.harga : 0;
 });
 
 // Watcher to trigger calculation
@@ -306,6 +351,20 @@ watch([selectedBrand, selectedPaket, startDate], debounce(async () => {
     calculationResult.value = null;
   }
 }, 500));
+
+// Watcher to update full monthly price when selectedPaket changes
+watch(selectedPaket, () => {
+  if (selectedPaket.value) {
+    const paket = paketList.value.find(p => p.id === selectedPaket.value);
+    if (paket) {
+      fullMonthlyPrice.value = paket.harga;
+    } else {
+      fullMonthlyPrice.value = null;
+    }
+  } else {
+    fullMonthlyPrice.value = null;
+  }
+});
 
 // Reset form when brand changes
 watch(selectedBrand, () => {

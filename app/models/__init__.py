@@ -3,6 +3,7 @@ from .data_teknis import DataTeknis
 from .harga_layanan import HargaLayanan
 from .langganan import Langganan
 from .user import User
+from .token_blacklist import TokenBlacklist
 from .permission import Permission
 from .role_has_permissions import role_has_permissions
 from .role import Role
@@ -13,3 +14,6 @@ from .olt import OLT
 from .odp import ODP
 from .system_setting import SystemSetting
 from .activity_log import ActivityLog
+from .inventory_item import InventoryItem
+from .inventory_item_type import InventoryItemType
+from .inventory_status import InventoryStatus

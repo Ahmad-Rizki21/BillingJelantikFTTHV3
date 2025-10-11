@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import axios, { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
 
 // Definisikan tipe untuk respons error dari backend
 interface ErrorResponse {
@@ -58,7 +58,8 @@ async function handleResetPassword() {
   loading.value = true;
 
   try {
-    const response = await axios.post<{ message: string }>('http://127.0.0.1:8000/users/reset-password', {
+    // Use the configured API client instead of hardcoded URL
+    const response = await axios.post<{ message: string }>('/users/reset-password', {
       email: resetEmail.value,
       new_password: newPassword.value,
       token: resetToken.value,
@@ -501,9 +502,9 @@ function backToLogin() {
 
 .branding-section {
   flex: 1.2;
-  background: rgba(15, 23, 42, 0.98); /* Increased opacity from 0.95 */
-  backdrop-filter: blur(15px); /* Reduced from 20px */
-  border-right: 2px solid rgba(14, 165, 233, 0.3); /* Stronger border */
+  background: rgba(15, 23, 42, 0.98);
+  /* backdrop-filter: blur(15px); -- DIHAPUS untuk menghilangkan efek blur pada section ini */
+  border-right: 2px solid rgba(14, 165, 233, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -522,17 +523,6 @@ function backToLogin() {
   bottom: 0;
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, transparent 50%, rgba(59, 130, 246, 0.05) 100%);
   z-index: -1;
-}
-
-.no-blur .card-content {
-  backdrop-filter: none;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(14, 165, 233, 0.5);
-}
-
-.no-blur .branding-section {
-  backdrop-filter: none;
-  background: rgba(15, 23, 42, 1);
 }
 
 .brand-container {
@@ -659,7 +649,7 @@ function backToLogin() {
   100% { box-shadow: 0 0 30px rgba(14, 165, 233, 0.7), 0 0 40px rgba(59, 130, 246, 0.3); }
 }
 
-/* Enhanced Features Grid with 3D cards - IMPROVED CONTRAST */
+/* Enhanced Features Grid with 3D cards - IMPROVED CONTRAST & BLUR REMOVED */
 .features-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -680,9 +670,9 @@ function backToLogin() {
 }
 
 .card-content {
-  background: rgba(255, 255, 255, 0.15); /* Slightly more opacity for better visibility */
-  backdrop-filter: blur(8px); /* Reduced from 15px to 8px */
-  border: 1px solid rgba(14, 165, 233, 0.4); /* Stronger border */
+  background: rgba(41, 51, 65, 0.7); /* DIUBAH - Warna latar belakang diubah menjadi lebih solid */
+  /* backdrop-filter: blur(8px); -- DIHAPUS untuk menghilangkan efek blur */
+  border: 1px solid rgba(59, 130, 246, 0.5); /* DIUBAH - Border dibuat lebih terlihat */
   border-radius: 20px;
   padding: 1.8rem;
   text-align: center;
@@ -691,8 +681,8 @@ function backToLogin() {
   transform: translateZ(0);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2), /* Increased opacity */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1), /* DIUBAH - Efek shadow disesuaikan */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .card-content::before {
@@ -747,24 +737,25 @@ function backToLogin() {
   50% { transform: translateY(-5px) rotateZ(3deg); }
 }
 
-.fiber-icon { color: #0ea5e9; text-shadow: 0 0 15px #0ea5e9; }
-.speed-icon { color: #f59e0b; text-shadow: 0 0 15px #f59e0b; }
-.customer-icon { color: #8b5cf6; text-shadow: 0 0 15px #8b5cf6; }
-.analytics-icon { color: #10b981; text-shadow: 0 0 15px #10b981; }
+/* DIUBAH - Menghapus text-shadow untuk menghilangkan blur pada ikon */
+.fiber-icon { color: #0ea5e9; }
+.speed-icon { color: #f59e0b; }
+.customer-icon { color: #8b5cf6; }
+.analytics-icon { color: #10b981; }
 
 .card-content h3 {
   font-size: 1.1rem;
   font-weight: 700;
   color: #ffffff;
   margin-bottom: 0.8rem;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); /* Stronger shadow */
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .card-content p {
   font-size: 0.9rem;
-  color: #f1f5f9; /* Changed from #e2e8f0 to lighter color */
+  color: #f1f5f9;
   line-height: 1.5;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); /* Stronger shadow */
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 
@@ -1997,3 +1988,4 @@ function backToLogin() {
   background: rgba(14, 165, 233, 0.5);
 }
 </style>
+

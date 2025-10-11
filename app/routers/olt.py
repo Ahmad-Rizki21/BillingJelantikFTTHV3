@@ -8,7 +8,6 @@ from netmiko import (
     NetmikoAuthenticationException,
     NetmikoTimeoutException,
 )
-from ..security import decrypt_password
 import asyncio
 from ..models.user import User as UserModel
 from ..auth import get_current_active_user
@@ -18,7 +17,6 @@ import logging
 from ..models.olt import OLT as OLTModel
 from ..schemas.olt import OLT as OLTSchema, OLTCreate, OLTUpdate
 from ..database import get_db
-from ..security import encrypt_password
 
 router = APIRouter(prefix="/olt", tags=["OLT"])
 
@@ -28,10 +26,6 @@ netmiko_logger = logging.getLogger("netmiko")
 
 @router.post("/", response_model=OLTSchema, status_code=status.HTTP_201_CREATED)
 async def create_olt(olt_data: OLTCreate, db: AsyncSession = Depends(get_db)):
-    # Enkripsi password sebelum disimpan
-    if olt_data.password:
-        olt_data.password = encrypt_password(olt_data.password)
-
     db_olt = OLTModel(**olt_data.model_dump())
     db.add(db_olt)
     await db.commit()
@@ -85,6 +79,12 @@ def _perform_netmiko_connection(olt_details: dict):
         olt_details["blocking_timeout"] = (
             20  # Waktu tunggu lebih lama untuk eksekusi perintah
         )
+        
+        # Hapus key yang tidak diperlukan oleh Netmiko
+        clean_details = olt_details.copy()
+        # Hapus key internal yang tidak diperlukan Netmiko
+        for key in ['session_log']:
+            clean_details.pop(key, None)
 
         with ConnectHandler(**olt_details) as net_connect:
             net_connect.find_prompt()
@@ -127,17 +127,6 @@ async def test_olt_connection(
             content={"status": "failure", "message": "Username atau password kosong."},
         )
 
-    try:
-        decrypted_password = decrypt_password(db_olt.password)
-    except Exception:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "status": "failure",
-                "message": "Password tersimpan tidak valid. Harap simpan ulang password.",
-            },
-        )
-
     device_type_map = {"hsgq": "generic_telnet", "zte": "zte_zxan_ssh"}
     device_type = device_type_map.get(db_olt.tipe_olt.lower(), "generic")
 
@@ -145,7 +134,7 @@ async def test_olt_connection(
         "device_type": device_type,
         "host": db_olt.ip_address,
         "username": db_olt.username,
-        "password": decrypted_password,
+        "password": db_olt.password,
         "port": 23 if device_type == "generic_telnet" else 22,
         "conn_timeout": 10,
     }
