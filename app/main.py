@@ -63,8 +63,6 @@ from .websocket_manager import manager
 # --- AKHIR TAMBAHAN IMPORT ---
 
 
-
-
 # Fungsi untuk membuat tabel di database saat aplikasi pertama kali dijalankan
 async def create_tables():
     async with engine.begin() as conn:
