@@ -60,8 +60,6 @@ def _get_cache_key(prefix: str, **kwargs) -> str:
 
 def _evict_expired_items():
     """Hapus cache items yang sudah expired."""
-    global _cache_store, _cache_stats
-
     expired_keys = [key for key, item in _cache_store.items() if item.get("expires_at", 0) < time.time()]  # type: ignore
 
     for key in expired_keys:
@@ -74,8 +72,6 @@ def _evict_expired_items():
 
 def _evict_lru_items(count: int = 1):
     """Hapus cache items dengan LRU (Least Recently Used) policy."""
-    global _cache_store, _cache_stats
-
     if len(_cache_store) <= CACHE_CONFIG["max_cache_size"]:
         return
 
@@ -91,7 +87,6 @@ def _evict_lru_items(count: int = 1):
 
 def get_from_cache(key: str) -> Optional[Any]:
     """Ambil data dari cache."""
-    global _cache_stats
 
     _evict_expired_items()
 
@@ -116,7 +111,6 @@ def get_from_cache(key: str) -> Optional[Any]:
 
 def set_to_cache(key: str, value: Any, ttl: int):
     """Simpan data ke cache."""
-    global _cache_stats
 
     # Enforce cache size limit
     if len(_cache_store) >= CACHE_CONFIG["max_cache_size"]:
@@ -167,7 +161,6 @@ def cache_result(ttl: int, key_prefix: str = ""):
 
 def invalidate_cache_pattern(pattern: str):
     """Invalidate cache items yang match dengan pattern."""
-    global _cache_store
 
     keys_to_remove = [key for key in _cache_store.keys() if pattern in key]
 
@@ -194,7 +187,6 @@ def get_cache_stats() -> Dict[str, Any]:
 
 def clear_all_cache():
     """Clear semua cache data."""
-    global _cache_store, _cache_stats
 
     cleared_count = len(_cache_store)
     _cache_store.clear()
