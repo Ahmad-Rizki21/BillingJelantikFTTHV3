@@ -113,6 +113,7 @@ def validate_password_strength(password: str):
 
 from typing import Optional
 
+
 # Token data class untuk Pydantic models
 class Token:
     def __init__(self, access_token: str, token_type: str, expires_in: int, refresh_token: Optional[str] = None):
