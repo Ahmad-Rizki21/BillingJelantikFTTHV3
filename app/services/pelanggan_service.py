@@ -3,7 +3,7 @@ Pelanggan Service Layer - Menghilangkan duplikasi business logic dari routers
 """
 
 import logging
-from typing import Any, Collection, Dict, List, Optional
+from typing import Any, Callable, Collection, Dict, List, Optional, cast
 
 from sqlalchemy import func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -208,13 +208,13 @@ class PelangganService(BaseService[PelangganModel, PelangganCreate, PelangganUpd
             config = ExportConfigurations.PELANGGAN_EXPORT
             processed_data = CSVExporter.prepare_export_data(
                 search_result["data"],
-                field_mapping=dict(config["field_mapping"]),
-                exclude_fields=list(config["exclude_fields"]),
-                transform_functions=dict(config["transform_functions"]),
+                field_mapping=dict(cast(Dict[str, str], config["field_mapping"])),
+                exclude_fields=list(cast(List[str], config["exclude_fields"])),
+                transform_functions=dict(cast(Dict[str, Callable[..., Any]], config["transform_functions"])),
             )
 
             # Create CSV response
-            return CSVExporter.create_csv_response(processed_data, "pelanggan", list(config["headers"]))
+            return CSVExporter.create_csv_response(processed_data, "pelanggan", list(cast(List[str], config["headers"])))
 
         except Exception as e:
             ErrorHandler.handle_internal_server_error(

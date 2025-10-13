@@ -6,7 +6,7 @@ import csv
 import io
 import logging
 from datetime import datetime
-from typing import Any, Callable, Collection, Dict, List, Optional, Union
+from typing import Any, Callable, Collection, Dict, List, Optional, Union, cast
 
 from fastapi.responses import StreamingResponse
 
@@ -285,12 +285,12 @@ def create_pelanggan_export_response(data: List[Any]) -> StreamingResponse:
 
     processed_data = CSVExporter.prepare_export_data(
         data,
-        field_mapping=config["field_mapping"],
-        exclude_fields=config["exclude_fields"],
-        transform_functions=config["transform_functions"],
+        field_mapping=cast(Dict[str, str], config["field_mapping"]),
+        exclude_fields=cast(List[str], config["exclude_fields"]),
+        transform_functions=cast(Dict[str, Callable[..., Any]], config["transform_functions"]),
     )
 
-    return CSVExporter.create_csv_response(processed_data, "pelanggan", config["headers"])
+    return CSVExporter.create_csv_response(processed_data, "pelanggan", cast(List[str], config["headers"]))
 
 
 def create_data_teknis_export_response(data: List[Any]) -> StreamingResponse:
@@ -298,10 +298,12 @@ def create_data_teknis_export_response(data: List[Any]) -> StreamingResponse:
     config = ExportConfigurations.DATA_TEKNIS_EXPORT
 
     processed_data = CSVExporter.prepare_export_data(
-        data, field_mapping=config["field_mapping"], exclude_fields=config["exclude_fields"]
+        data,
+        field_mapping=cast(Dict[str, str], config["field_mapping"]),
+        exclude_fields=cast(List[str], config["exclude_fields"]),
     )
 
-    return CSVExporter.create_csv_response(processed_data, "data_teknis", config["headers"])
+    return CSVExporter.create_csv_response(processed_data, "data_teknis", cast(List[str], config["headers"]))
 
 
 def create_invoice_export_response(data: List[Any]) -> StreamingResponse:
@@ -309,7 +311,9 @@ def create_invoice_export_response(data: List[Any]) -> StreamingResponse:
     config = ExportConfigurations.INVOICE_EXPORT
 
     processed_data = CSVExporter.prepare_export_data(
-        data, field_mapping=config["field_mapping"], transform_functions=config["transform_functions"]
+        data,
+        field_mapping=cast(Dict[str, str], config["field_mapping"]),
+        transform_functions=cast(Dict[str, Callable[..., Any]], config["transform_functions"]),
     )
 
-    return CSVExporter.create_csv_response(processed_data, "invoice", config["headers"])
+    return CSVExporter.create_csv_response(processed_data, "invoice", cast(List[str], config["headers"]))
