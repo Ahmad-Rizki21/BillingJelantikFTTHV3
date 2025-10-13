@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import String, BigInteger, func, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
+# Import Base secara eksplisit untuk menghindari error mypy
 from ..database import Base
 
 if TYPE_CHECKING:

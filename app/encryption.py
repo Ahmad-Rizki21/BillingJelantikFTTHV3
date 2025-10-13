@@ -30,7 +30,8 @@ class EncryptionService:
             return plaintext
 
         encrypted_bytes = self.cipher_suite.encrypt(plaintext.encode())
-        return encrypted_bytes.decode()
+        result: str = encrypted_bytes.decode()
+        return result
 
     def decrypt(self, ciphertext: str) -> str:
         """Dekripsi ciphertext menjadi plaintext"""

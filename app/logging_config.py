@@ -11,13 +11,14 @@ from pathlib import Path
 # Import our custom logging utilities
 try:
     from .logging_utils import SensitiveDataFilter  # type: ignore
+    # If import is successful, SensitiveDataFilter is already defined
 except ImportError:
     # Fallback if logging_utils.py doesn't exist
     class FallbackSensitiveDataFilter(logging.Filter):
         def filter(self, record: logging.LogRecord) -> bool:
             return True
 
-    SensitiveDataFilter: type = FallbackSensitiveDataFilter
+    SensitiveDataFilter = FallbackSensitiveDataFilter  # type: ignore
 
 
 # --- ASCII Art Banner (Windows Compatible) ---

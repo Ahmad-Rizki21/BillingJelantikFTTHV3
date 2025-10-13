@@ -45,7 +45,8 @@ def encrypt_password(password: str) -> str:
     if not password:
         return ""
     try:
-        encrypted = cipher_suite.encrypt(password.encode()).decode()
+        encrypted_bytes = cipher_suite.encrypt(password.encode())
+        encrypted: str = encrypted_bytes.decode()
         return encrypted
     except Exception as e:
         # Log error without sensitive data
