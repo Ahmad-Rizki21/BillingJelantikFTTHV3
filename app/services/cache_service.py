@@ -8,7 +8,6 @@ import time
 import hashlib
 from typing import Any, Optional, Dict, List
 from datetime import datetime, timedelta
-import logging
 from functools import wraps
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -17,16 +16,16 @@ logger = logging.getLogger("app.cache_service")
 
 # In-memory cache storage (dapat diganti dengan Redis di production)
 _cache_store: Dict[str, Any] = {}  # type: ignore
-_cache_stats = {"hits": 0, "misses": 0, "sets": 0, "evictions": 0}
+_cache_stats: Dict[str, int] = {"hits": 0, "misses": 0, "sets": 0, "evictions": 0}
 
 # Cache configuration
 CACHE_CONFIG = {
     "harga_layanan_ttl": 3600,  # 1 jam
-    "paket_layanan_ttl": 3600,  # 1 jam
-    "brand_data_ttl": 1800,  # 30 menit
-    "mikrotik_servers_ttl": 300,  # 5 menit
-    "user_permissions_ttl": 600,  # 10 menit
-    "dashboard_cache_ttl": 300,  # 5 menit
+    "paket_layanan_ttl": 3600, # 1 jam
+    "brand_data_ttl": 1800, # 30 menit
+    "mikrotik_servers_ttl": 300, # 5 menit
+    "user_permissions_ttl": 600, # 10 menit
+    "dashboard_cache_ttl": 300, # 5 menit
     "max_cache_size": 1000,  # Maximum items in cache
 }
 
@@ -59,50 +58,58 @@ def _get_cache_key(prefix: str, **kwargs) -> str:
 
 def _evict_expired_items():
     """Hapus cache items yang sudah expired."""
-    global _cache_store, _cache_stats
-
-    expired_keys = [key for key, item in _cache_store.items() if item.get("expires_at", 0) < time.time()]  # type: ignore
+    expired_keys = [key for key, item in _cache_store.items() if item.get("expires_at", 0) < time.time()]
 
     for key in expired_keys:
         del _cache_store[key]
         _cache_stats["evictions"] += 1
 
     if expired_keys:
-        logger.debug(f"Evicted {len(expired_keys)} expired cache items")
+        logger.debug(f"Evicted {len(expired_keys)} expired cache items"
 
 
 def _evict_lru_items(count: int = 1):
     """Hapus cache items dengan LRU (Least Recently Used) policy."""
-    global _cache_store, _cache_stats
-
     if len(_cache_store) <= CACHE_CONFIG["max_cache_size"]:
         return
 
     # Sort by last accessed time
-    sorted_items = sorted(_cache_store.items(), key=lambda x: x[1].get("last_accessed", 0))  # type: ignore
+    sorted_items = sorted(_cache_store.items(), key=lambda x: x[1].get("last_accessed", 0))
 
     # Remove oldest items
-    for i in range(min(count, len(sorted_items))):
+    for i in range(min(count, len(sorted_items)):
         key = sorted_items[i][0]
         del _cache_store[key]
         _cache_stats["evictions"] += 1
 
 
+def _get_cache_stats() -> Dict[str, int]:
+    """Get cache statistics untuk monitoring."""
+    total_requests = _cache_stats["hits"] + _cache_stats["misses"]
+    hit_rate = (_cache_stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+
+    return {
+        "stats": _cache_stats.copy(),
+        "hit_rate_percent": round(hit_rate, 2),
+        "cache_size": len(_cache_store),
+        "max_size": CACHE_CONFIG["max_cache_size"],
+        "utilization_percent": round(len(_cache_store) / CACHE_CONFIG["max_cache_size"] * 100, 2),
+    }
+
+
 def get_from_cache(key: str) -> Optional[Any]:
     """Ambil data dari cache."""
-    global _cache_stats
-
     _evict_expired_items()
 
     if key in _cache_store:
         item = _cache_store[key]
-        if item.get("expires_at", 0) >= time.time():  # type: ignore
+        if item.get("expires_at", 0) >= time.time():
             # Update last access time
-            item["last_accessed"] = time.time()  # type: ignore
-            item["access_count"] = item.get("access_count", 0) + 1  # type: ignore
+            item["last_accessed"] = time.time()
+            item["access_count"] = item.get("access_count", 0) + 1
             _cache_stats["hits"] += 1
             logger.debug(f"Cache hit: {key}")
-            return item.get("value")  # type: ignore
+            return item.get("value")
         else:
             # Remove expired item
             del _cache_store[key]
@@ -113,9 +120,9 @@ def get_from_cache(key: str) -> Optional[Any]:
     return None
 
 
-def set_to_cache(key: str, value: Any, ttl: int):
+def set_to_cache(key: str, value: Any, ttl: int) -> None:
     """Simpan data ke cache."""
-    global _cache_stats
+    _cache_stats = _cache_stats
 
     # Enforce cache size limit
     if len(_cache_store) >= CACHE_CONFIG["max_cache_size"]:
@@ -130,6 +137,39 @@ def set_to_cache(key: str, value: Any, ttl: int):
     }
     _cache_stats["sets"] += 1
     logger.debug(f"Cache set: {key} (TTL: {ttl}s)")
+
+def get_cache_stats() -> Dict[str, int]:
+    """Get cache statistics for monitoring."""
+    total_requests = _cache_stats["hits"] + _cache_stats["misses"]
+    hit_rate = (_cache_stats["hits"] / total_requests * 100) if total_requests > 0 else 0
+
+    return {
+        "stats": _cache_stats.copy(),
+        "hit_rate_percent": round(hit_rate, 2),
+        "cache_size": len(_cache_store),
+        "max_size": CACHE_CONFIG["max_cache_size"],
+        "utilization_percent": round(len(_cache_store) / CACHE_CONFIG["max_cache_size"] * 100, 2),
+    }
+
+
+def clear_all_cache() -> int:
+    """Clear semua cache data."""
+    cleared_count = len(_cache_store)
+    _cache_store.clear()
+    _cache_stats = {"hits": 0, "misses": 0, "sets": 0, "evictions": 0}
+
+    logger.info(f"Cleared {cleared_count} cache items")
+    return cleared_count
+
+
+def _evict_data_caches():
+    """Invalidate semua data-related cache saat ada perubahan data."""
+    patterns = ["harga_layanan", "paket_layanan", "brand_data", "dashboard_data"]
+
+    for pattern in patterns:
+        invalidate_cache_pattern(pattern)
+
+    logger.info("Invalidated all data caches due to data changes")
 
 
 def cache_result(ttl: int, key_prefix: str = ""):
@@ -166,8 +206,6 @@ def cache_result(ttl: int, key_prefix: str = ""):
 
 def invalidate_cache_pattern(pattern: str):
     """Invalidate cache items yang match dengan pattern."""
-    global _cache_store
-
     keys_to_remove = [key for key in _cache_store.keys() if pattern in key]
 
     for key in keys_to_remove:
@@ -186,27 +224,12 @@ def get_cache_stats() -> Dict[str, Any]:
         "stats": _cache_stats.copy(),
         "hit_rate_percent": round(hit_rate, 2),
         "cache_size": len(_cache_store),
-        "max_size": CACHE_CONFIG["max_cache_size"],
+        "max_cache_size": CACHE_CONFIG["max_cache_size"],
         "utilization_percent": round(len(_cache_store) / CACHE_CONFIG["max_cache_size"] * 100, 2),
     }
 
 
-def clear_all_cache():
-    """Clear semua cache data."""
-    global _cache_store, _cache_stats
-
-    cleared_count = len(_cache_store)
-    _cache_store.clear()
-    _cache_stats = {"hits": 0, "misses": 0, "sets": 0, "evictions": 0}
-
-    logger.info(f"Cleared {cleared_count} cache items")
-    return cleared_count
-
-
-# Specific cache functions untuk berbagai jenis data
-
-
-async def get_cached_harga_layanan(db: AsyncSession) -> List[Dict]:
+def get_cached_harga_layanan(db: AsyncSession) -> List[Dict]:
     """Get harga layanan data dengan cache."""
     from ..models.harga_layanan import HargaLayanan
 
