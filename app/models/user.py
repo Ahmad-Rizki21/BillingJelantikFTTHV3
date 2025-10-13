@@ -4,7 +4,6 @@ from datetime import datetime
 
 from sqlalchemy import String, BigInteger, func, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy.ext.declarative import declarative_base
 
 from ..database import Base
 

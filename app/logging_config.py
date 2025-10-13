@@ -17,7 +17,7 @@ except ImportError:
         def filter(self, record: logging.LogRecord) -> bool:
             return True
 
-    SensitiveDataFilter = FallbackSensitiveDataFilter
+    SensitiveDataFilter: type = FallbackSensitiveDataFilter
 
 
 # --- ASCII Art Banner (Windows Compatible) ---

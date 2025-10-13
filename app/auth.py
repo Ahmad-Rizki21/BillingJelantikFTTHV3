@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -24,12 +24,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifikasi password."""
-    return pwd_context.verify(plain_password, hashed_password)
+    result: bool = pwd_context.verify(plain_password, hashed_password)
+    return result
 
 
 def get_password_hash(password: str) -> str:
     """Hash password."""
-    return pwd_context.hash(password)
+    result: str = pwd_context.hash(password)
+    return result
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
@@ -72,9 +74,9 @@ async def authenticate_user(email: str, password: str, db: AsyncSession) -> Unio
     return user
 
 
-def get_password_requirements():
+def get_password_requirements() -> dict:
     """Get password requirements untuk frontend validation."""
-    return {
+    result: dict = {
         "min_length": 8,
         "require_uppercase": True,
         "require_lowercase": True,
@@ -82,6 +84,7 @@ def get_password_requirements():
         "require_special": True,
         "no_whitespace": True,
     }
+    return result
 
 
 def validate_password_strength(password: str):
@@ -108,7 +111,8 @@ def validate_password_strength(password: str):
     if any(c.isspace() for c in password):
         errors.append("Password tidak boleh mengandung spasi")
 
-    return len(errors) == 0, errors
+    result: tuple[bool, list] = (len(errors) == 0, errors)
+    return result
 
 
 from typing import Optional

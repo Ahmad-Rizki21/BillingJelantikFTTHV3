@@ -39,7 +39,8 @@ class EncryptionService:
 
         try:
             decrypted_bytes = self.cipher_suite.decrypt(ciphertext.encode())
-            return decrypted_bytes.decode()
+            result: str = decrypted_bytes.decode()
+            return result
         except Exception as e:
             # This is a critical error, likely due to a wrong key or corrupted data.
             # Re-raising or logging as a severe error is better than returning ciphertext.

@@ -676,7 +676,7 @@ def log_exception(logger: logging.Logger, exception: Exception, context: str = "
 
 
 # --- Shutdown Handler ---
-def setup_shutdown_handler(start_time: datetime) -> callable:
+def setup_shutdown_handler(start_time: datetime) -> Callable[[], None]:
     """Setup graceful shutdown logging"""
 
     def shutdown_handler() -> None:

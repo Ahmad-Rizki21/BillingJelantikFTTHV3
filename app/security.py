@@ -71,7 +71,7 @@ def decrypt_password(encrypted_password: str) -> str:
     try:
         # Attempt to decrypt the password.
         decrypted_bytes = cipher_suite.decrypt(encrypted_password.encode())
-        decrypted_password_str = decrypted_bytes.decode()
+        decrypted_password_str: str = decrypted_bytes.decode()
         return decrypted_password_str
     except Exception as e:
         # If decryption fails, it is a critical error. Do not suppress it.

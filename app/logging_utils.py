@@ -96,10 +96,10 @@ class SensitiveDataFilter(logging.Filter):
                 record.args = filtered_args  # type: ignore
             elif isinstance(record.args, (list, tuple)):
                 # Handle positional arguments
-                filtered_args: list = []
+                filtered_list_args = []
                 for value in record.args:
-                    filtered_args.append(self._filter_sensitive_data(value))
-                record.args = tuple(filtered_args)  # type: ignore
+                    filtered_list_args.append(self._filter_sensitive_data(value))
+                record.args = tuple(filtered_list_args)  # type: ignore
 
         return True
 
