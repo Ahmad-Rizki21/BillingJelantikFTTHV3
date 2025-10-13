@@ -58,7 +58,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         skip: int = 0,
         limit: Optional[int] = None,
         search: Optional[str] = None,
-        search_fields: Optional[Collection[str]] = None,
+        search_fields: Optional[List[str]] = None,
         order_by_field: str = "id",
         order_desc: bool = True,
     ) -> Sequence[ModelType]:
@@ -91,7 +91,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return (await self.db.execute(query)).scalars().all()
 
-    async def get_total_count(self, search: Optional[str] = None, search_fields: Optional[Collection[str]] = None) -> int:
+    async def get_total_count(self, search: Optional[str] = None, search_fields: Optional[List[str]] = None) -> int:
         """Menghitung total records dengan filter yang sama seperti get_all"""
         query = select(func.count(self.model.id))  # type: ignore
 
@@ -108,7 +108,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return (await self.db.execute(query)).scalar() or 0
 
-    async def create(self, obj_in: CreateSchemaType, exclude_fields: Optional[Collection[str]] = None) -> ModelType:
+    async def create(self, obj_in: CreateSchemaType, exclude_fields: Optional[List[str]] = None) -> ModelType:
         """
         Membuat record baru dengan error handling standar
         exclude_fields: list of fields to exclude from creation (e.g., password confirmation)
@@ -186,7 +186,7 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return existing is None
 
     async def validate_unique_fields(
-        self, obj_data: Dict[str, Any], unique_fields: Optional[Collection[str]] = None, exclude_id: Optional[int] = None
+        self, obj_data: Dict[str, Any], unique_fields: Optional[List[str]] = None, exclude_id: Optional[int] = None
     ) -> None:
         """
         Validate multiple unique fields dan raise HTTPException jika conflict
@@ -218,7 +218,7 @@ class PaginatedResponse(BaseModel, Generic[ModelType]):
         skip: int = 0,
         limit: Optional[int] = None,
         search: Optional[str] = None,
-        search_fields: Optional[Collection[str]] = None,
+        search_fields: Optional[List[str]] = None,
         order_by_field: str = "id",
         order_desc: bool = True,
     ) -> "PaginatedResponse[ModelType]":

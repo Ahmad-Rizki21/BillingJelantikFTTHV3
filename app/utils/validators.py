@@ -122,7 +122,7 @@ class DatabaseValidator:
 
     @staticmethod
     async def validate_multiple_unique_fields(
-        db: AsyncSession, model_class: Any, data: dict, unique_fields: Collection[str], exclude_id: Optional[int] = None
+        db: AsyncSession, model_class: Any, data: dict, unique_fields: List[str], exclude_id: Optional[int] = None
     ) -> None:
         """
         Validasi multiple unique fields dalam satu panggilan

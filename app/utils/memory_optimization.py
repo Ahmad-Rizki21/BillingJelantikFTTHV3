@@ -221,7 +221,7 @@ def optimize_large_list_comprehension(
 
 
 async def create_streaming_csv_response(
-    data_generator: AsyncGenerator[List[dict], None], filename: str, headers: Collection[str]
+    data_generator: AsyncGenerator[List[dict], None], filename: str, headers: List[str]
 ) -> AsyncGenerator[str, None]:
     """
     Create streaming CSV response untuk mengurangi memory usage.

@@ -336,7 +336,7 @@ class PelangganService(BaseService[PelangganModel, PelangganCreate, PelangganUpd
             if not FieldValidator.validate_nik(update_dict["no_ktp"]):
                 raise ErrorHandler.handle_bad_request("NIK harus 16 digit angka")
 
-    def _select_fields(self, pelanggan: PelangganModel, fields: Collection[str]) -> Dict[str, Any]:
+    def _select_fields(self, pelanggan: PelangganModel, fields: List[str]) -> Dict[str, Any]:
         """Select specific fields dari pelanggan object"""
         result = {"id": pelanggan.id}  # Always include ID
 

@@ -6,7 +6,7 @@ import csv
 import io
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Collection, Dict, List, Optional, Union
 
 from fastapi.responses import StreamingResponse
 
@@ -21,7 +21,7 @@ class CSVExporter:
 
     @staticmethod
     def create_csv_response(
-        data: List[Dict[str, Any]], filename_prefix: str, headers: Optional[Collection[str]] = None, include_bom: bool = True
+        data: List[Dict[str, Any]], filename_prefix: str, headers: Optional[List[str]] = None, include_bom: bool = True
     ) -> StreamingResponse:
         """
         Create CSV response dengan format yang konsisten
@@ -71,9 +71,7 @@ class CSVExporter:
             raise
 
     @staticmethod
-    def create_csv_template(
-        headers: Collection[str], sample_data: List[Dict[str, Any]], filename_prefix: str
-    ) -> StreamingResponse:
+    def create_csv_template(headers: List[str], sample_data: List[Dict[str, Any]], filename_prefix: str) -> StreamingResponse:
         """
         Create CSV template untuk import dengan sample data
         Menghilangkan duplikasi template creation logic
@@ -110,7 +108,7 @@ class CSVExporter:
     def prepare_export_data(
         raw_data: List[Any],
         field_mapping: Optional[Dict[str, str]] = None,
-        exclude_fields: Optional[Collection[str]] = None,
+        exclude_fields: Optional[List[str]] = None,
         transform_functions: Optional[Dict[str, Callable[..., Any]]] = None,
     ) -> List[Dict[str, Any]]:
         """
@@ -169,7 +167,7 @@ class CSVImportHelper:
 
     @staticmethod
     def validate_csv_headers(
-        expected_headers: Collection[str], actual_headers: Collection[str], case_sensitive: bool = False
+        expected_headers: List[str], actual_headers: List[str], case_sensitive: bool = False
     ) -> tuple[bool, List[str]]:
         """
         Validate CSV headers terhadap expected headers
