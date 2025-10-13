@@ -16,6 +16,7 @@ except ImportError:
     class FallbackSensitiveDataFilter(logging.Filter):
         def filter(self, record: logging.LogRecord) -> bool:
             return True
+
     SensitiveDataFilter = FallbackSensitiveDataFilter
 
 
@@ -190,7 +191,9 @@ def log_database_event(logger: logging.Logger, operation: str, table: str, statu
         logger.info(message)
 
 
-def log_api_request(logger: logging.Logger, method: str, endpoint: str, status_code: int, duration: float | None = None) -> None:
+def log_api_request(
+    logger: logging.Logger, method: str, endpoint: str, status_code: int, duration: float | None = None
+) -> None:
     """API request logging"""
     if USE_UNICODE:
         status_icon = "✅" if 200 <= status_code < 300 else "⚠️" if 300 <= status_code < 400 else "❌"

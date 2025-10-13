@@ -421,7 +421,12 @@ def log_database_event(logger: logging.Logger, operation: str, table: str, statu
 
 
 def log_api_request(
-    logger: logging.Logger, method: str, endpoint: str, status_code: int, duration: float | None = None, user_info: str = "Anonymous"
+    logger: logging.Logger,
+    method: str,
+    endpoint: str,
+    status_code: int,
+    duration: float | None = None,
+    user_info: str = "Anonymous",
 ) -> None:
     """API request logging with performance metrics"""
     if USE_UNICODE:

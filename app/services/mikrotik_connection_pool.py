@@ -413,7 +413,7 @@ class MikrotikConnectionPool:
         password: str,
         operation_func: Callable[[Any], Any],
         max_retries: int = 3,
-        retry_delay: int = 1
+        retry_delay: int = 1,
     ) -> Any:
         """Execute an operation with enhanced retry mechanism and circuit breaker integration."""
         pool_key = self._get_pool_key(host_ip, port)

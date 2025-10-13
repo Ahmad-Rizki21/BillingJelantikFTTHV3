@@ -71,7 +71,9 @@ class CSVExporter:
             raise
 
     @staticmethod
-    def create_csv_template(headers: Collection[str], sample_data: List[Dict[str, Any]], filename_prefix: str) -> StreamingResponse:
+    def create_csv_template(
+        headers: Collection[str], sample_data: List[Dict[str, Any]], filename_prefix: str
+    ) -> StreamingResponse:
         """
         Create CSV template untuk import dengan sample data
         Menghilangkan duplikasi template creation logic
@@ -298,9 +300,7 @@ def create_data_teknis_export_response(data: List[Any]) -> StreamingResponse:
     config = ExportConfigurations.DATA_TEKNIS_EXPORT
 
     processed_data = CSVExporter.prepare_export_data(
-        data,
-        field_mapping=config["field_mapping"],
-        exclude_fields=config["exclude_fields"]
+        data, field_mapping=config["field_mapping"], exclude_fields=config["exclude_fields"]
     )
 
     return CSVExporter.create_csv_response(processed_data, "data_teknis", config["headers"])
@@ -311,9 +311,7 @@ def create_invoice_export_response(data: List[Any]) -> StreamingResponse:
     config = ExportConfigurations.INVOICE_EXPORT
 
     processed_data = CSVExporter.prepare_export_data(
-        data,
-        field_mapping=config["field_mapping"],
-        transform_functions=config["transform_functions"]
+        data, field_mapping=config["field_mapping"], transform_functions=config["transform_functions"]
     )
 
     return CSVExporter.create_csv_response(processed_data, "invoice", config["headers"])

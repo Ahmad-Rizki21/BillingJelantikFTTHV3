@@ -68,7 +68,9 @@ class TokenBlacklist(Base):
         return False
 
     @classmethod
-    def blacklist_token(cls, db, jti: str, user_id: int, token_type: str, expires_at: datetime, reason: str | None = None) -> None:
+    def blacklist_token(
+        cls, db, jti: str, user_id: int, token_type: str, expires_at: datetime, reason: str | None = None
+    ) -> None:
         """Add a token to the blacklist"""
         # Ini akan diimplementasikan di service layer
         pass
