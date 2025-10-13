@@ -11,6 +11,7 @@ from pathlib import Path
 # Import our custom logging utilities
 try:
     from .logging_utils import SensitiveDataFilter  # type: ignore
+
     # If import is successful, SensitiveDataFilter is already defined
 except ImportError:
     # Fallback if logging_utils.py doesn't exist
