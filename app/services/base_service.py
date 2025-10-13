@@ -3,7 +3,7 @@ Base Service Layer untuk menghilangkan duplikasi kode CRUD operations
 """
 
 import logging
-from typing import Any, Dict, Generic, List, Optional, Sequence, Type, TypeVar, Collection
+from typing import Any, Collection, Dict, Generic, List, Optional, Sequence, Type, TypeVar
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel
