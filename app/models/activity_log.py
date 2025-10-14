@@ -7,7 +7,11 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )  # <-- Tambahkan relationship
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 from datetime import datetime
 
 # --- 2. Tambahkan blok TYPE_CHECKING untuk type hint ---

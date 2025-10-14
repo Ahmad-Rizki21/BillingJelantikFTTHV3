@@ -31,6 +31,12 @@ from ..schemas.pelanggan import Pelanggan as PelangganSchema
 router = APIRouter(prefix="/langganan", tags=["Langganan"])
 
 
+# --- Skema Respons Baru ---
+class LanggananListResponse(BaseModel):
+    data: List[LanggananSchema]
+    total_count: int
+
+
 # --- Endpoint Utama untuk Manajemen Langganan ---
 
 
@@ -108,7 +114,7 @@ async def create_langganan(langganan_data: LanggananCreate, db: AsyncSession = D
     return created_langganan
 
 
-@router.get("/", response_model=List[LanggananSchema])
+@router.get("/", response_model=LanggananListResponse)
 async def get_all_langganan(
     search: Optional[str] = None,
     alamat: Optional[str] = None,
@@ -116,12 +122,11 @@ async def get_all_langganan(
     status: Optional[str] = None,
     for_invoice_selection: bool = False,
     skip: int = 0,
-    # PERUBAHAN UTAMA: Jadikan 'limit' opsional agar desktop bisa memuat semua
-    limit: Optional[int] = None,
+    limit: Optional[int] = 15,
     db: AsyncSession = Depends(get_db),
 ):
-    """Mengambil semua langganan dengan opsi filter dan paginasi."""
-    query = (
+    """Mengambil semua langganan dengan opsi filter dan paginasi serta total count."""
+    base_query = (
         select(LanggananModel)
         .join(LanggananModel.pelanggan)
         .options(
@@ -132,29 +137,41 @@ async def get_all_langganan(
             joinedload(LanggananModel.paket_layanan),
         )
     )
+    count_query = select(func.count(LanggananModel.id)).join(LanggananModel.pelanggan)
 
     if for_invoice_selection:
-        query = query.where(LanggananModel.status != "Berhenti")
+        base_query = base_query.where(LanggananModel.status != "Berhenti")
+        count_query = count_query.where(LanggananModel.status != "Berhenti")
 
     if search:
-        query = query.where(PelangganModel.nama.ilike(f"%{search}%"))
+        filter_condition = PelangganModel.nama.ilike(f"%{search}%")
+        base_query = base_query.where(filter_condition)
+        count_query = count_query.where(filter_condition)
     if alamat:
-        # Mencari di kolom alamat pada tabel PelangganModel
-        query = query.where(PelangganModel.alamat.ilike(f"%{alamat}%"))
+        filter_condition = PelangganModel.alamat.ilike(f"%{alamat}%")
+        base_query = base_query.where(filter_condition)
+        count_query = count_query.where(filter_condition)
     if paket_layanan_name:
-        query = query.join(PaketLayananModel).where(PaketLayananModel.nama_paket == paket_layanan_name)
+        join_condition = base_query.join(PaketLayananModel).where(PaketLayananModel.nama_paket == paket_layanan_name)
+        base_query = join_condition
+        count_query = count_query.join(PaketLayananModel).where(PaketLayananModel.nama_paket == paket_layanan_name)
     if status:
-        query = query.where(LanggananModel.status == status)
-    # Logika ini memastikan bahwa jika parameter limit diberikan (dari mobile),
-    # query akan dibatasi. Jika tidak (dari desktop), semua data akan diambil.
-    final_query = query.offset(skip)
-    if limit is not None:
-        final_query = final_query.limit(limit)
+        filter_condition = LanggananModel.status == status
+        base_query = base_query.where(filter_condition)
+        count_query = count_query.where(filter_condition)
 
-    result = await db.execute(final_query)
+    # Get total count before applying pagination
+    total_count_result = await db.execute(count_query)
+    total_count = total_count_result.scalar_one()
+
+    # Apply ordering and pagination to the main query
+    data_query = base_query.order_by(LanggananModel.id.desc())
+    if limit is not None:
+        data_query = data_query.offset(skip).limit(limit)
+
+    result = await db.execute(data_query)
     langganan_list = result.unique().scalars().all()
 
-    # ... sisa kode tidak perlu diubah ...
     if for_invoice_selection and langganan_list:
         pelanggan_ids = {l.pelanggan_id for l in langganan_list}
         invoice_counts_stmt = (
@@ -175,7 +192,7 @@ async def get_all_langganan(
 
             langganan.is_new_user = is_new_user
 
-    return langganan_list
+    return LanggananListResponse(data=langganan_list, total_count=total_count)
 
 
 @router.patch("/{langganan_id}", response_model=LanggananSchema)

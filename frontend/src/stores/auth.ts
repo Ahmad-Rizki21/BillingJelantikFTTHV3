@@ -108,6 +108,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function refreshToken(): Promise<boolean> {
+    try {
+      const refreshToken = getEncryptedToken('refresh_token');
+      if (!refreshToken) {
+        console.log('[Auth] No refresh token available');
+        return false;
+      }
+
+      console.log('[Auth] Attempting to refresh access token...');
+      const response = await apiClient.post('/auth/refresh', {
+        refresh_token: refreshToken
+      });
+
+      const { access_token, refresh_token } = response.data;
+
+      // Update tokens
+      setToken(access_token);
+      if (refresh_token) {
+        setEncryptedToken('refresh_token', refresh_token);
+      }
+
+      console.log('[Auth] Token refreshed successfully');
+      return true;
+    } catch (error) {
+      console.error('[Auth] Token refresh failed:', error);
+      return false;
+    }
+  }
+
   async function initializeAuth() {
     if (token.value) {
       await verifyToken();
@@ -123,6 +152,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     verifyToken,
     login,
+    refreshToken, // Tambahkan refresh token function
     initializeAuth,
   };
 });

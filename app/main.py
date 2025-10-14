@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect, status
@@ -253,15 +254,84 @@ def websocket_test():
     return {"message": "WebSocket endpoint accessible", "status": "ok"}
 
 
-# WebSocket endpoint
+# Test endpoint untuk token validation
+@app.get("/api/ws/token-test")
+async def test_token_validation(request: Request):
+    """Test endpoint untuk debugging token validation."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return {"error": "No Bearer token provided"}
+
+    token = auth_header.replace("Bearer ", "")
+
+    # Test token validation
+    from .auth import verify_access_token
+    try:
+        payload = verify_access_token(token)
+        return {
+            "status": "valid",
+            "payload": {
+                "user_id": payload.get("sub"),
+                "email": payload.get("email"),
+                "exp": payload.get("exp"),
+                "iat": payload.get("iat")
+            },
+            "token_preview": token[:20] + "..." if len(token) > 20 else token
+        }
+    except Exception as e:
+        return {
+            "status": "invalid",
+            "error": str(e),
+            "token_preview": token[:20] + "..." if len(token) > 20 else token
+        }
+
+
+# Endpoint untuk monitoring active WebSocket connections
+@app.get("/api/ws/status")
+async def websocket_status():
+    """Monitor active WebSocket connections."""
+    metrics = manager.get_metrics()
+    active_connections = list(manager.active_connections.keys())
+
+    # Get connection metadata
+    connection_details = {}
+    for user_id in active_connections:
+        if user_id in manager.connection_metadata:
+            metadata = manager.connection_metadata[user_id]
+            connection_details[user_id] = {
+                "connected_at": metadata.get("connected_at", 0),
+                "last_activity": metadata.get("last_activity", 0),
+                "messages_sent": metadata.get("messages_sent", 0),
+                "roles": list(manager.user_roles.get(user_id, []))
+            }
+
+    return {
+        "metrics": metrics,
+        "active_connections": active_connections,
+        "connection_details": connection_details,
+        "total_active": len(active_connections)
+    }
+
+
+# WebSocket endpoint untuk notifications
+# Path: /ws/notifications (langsung di main.py sesuai konfigurasi Apache)
 @app.websocket("/ws/notifications")
 async def websocket_notifications(websocket: WebSocket, token: str = Query(...)):
     """WebSocket endpoint untuk notifications real-time."""
     db = None
+    endpoint_name = "main.py"
     logger = logging.getLogger("app.websocket")
-    logger.info(f"WebSocket connection attempt with token: {token[:20]}...")
+    logger.info(f"[{endpoint_name}] WebSocket connection attempt with token: {token[:20] if len(token) > 20 else token}...")
 
     try:
+        # Validasi token awal
+        if not token:
+            logger.warning(f"[{endpoint_name}] No token provided")
+            await websocket.close(code=4001, reason="Token required")
+            return
+
+        logger.info(f"[{endpoint_name}] Token received, attempting validation...")
+
         # Dapatkan database session
         db_generator = get_db()
         db = await db_generator.__anext__()
@@ -269,39 +339,85 @@ async def websocket_notifications(websocket: WebSocket, token: str = Query(...))
         # Verifikasi token dan dapatkan user
         user = await get_user_from_token(token, db)
         if not user:
-            logger.error("Invalid token provided")
+            # Log detail token untuk debugging (hanya sebagian untuk security)
+            token_preview = token[:20] + "..." if len(token) > 20 else token
+            logger.error(f"[{endpoint_name}] Invalid token provided - Token preview: {token_preview}")
+
+            # Coba decode token untuk melihat expiry
+            try:
+                from .auth import verify_access_token
+                payload = verify_access_token(token)
+                exp = payload.get('exp', 'unknown')
+                logger.error(f"[{endpoint_name}] Token decode successful but user not found. Expiry: {exp}")
+            except Exception as decode_error:
+                logger.error(f"[{endpoint_name}] Token decode failed: {str(decode_error)}")
+
             await websocket.close(code=4001, reason="Invalid token")
             return
 
+        logger.info(f"[{endpoint_name}] Authentication successful: {user.name} (ID: {user.id}, Email: {user.email})")
+
         # Connect WebSocket menggunakan manager
         await manager.connect(websocket, user.id)
-        logger.info(f"WebSocket connected for user {user.id}")
+        logger.info(f"[{endpoint_name}] Connection established for user {user.id}")
+
+        # Kirim pesan konfirmasi ke client
+        await websocket.send_text(json.dumps({
+            "type": "connection_established",
+            "message": "WebSocket connected successfully",
+            "user_id": user.id,
+            "timestamp": datetime.now().isoformat(),
+            "server_info": {
+                "active_connections": len(manager.active_connections),
+                "user_roles": list(manager.user_roles.get(user.id, []))
+            }
+        }))
 
         try:
             # Keep connection alive dan handle incoming messages
             while True:
-                # Tunggu pesan dari client (bisa berupa ping/pong atau commands)
+                # Tunggu pesan dari client
                 data = await websocket.receive_text()
-                logger.debug(f"Received message from user {user.id}: {data}")
+                log_message = data[:100] + "..." if len(data) > 100 else data
+                logger.debug(f"[{endpoint_name}] Message from user {user.id}: {log_message}")
 
                 # Handle ping/pong untuk keep-alive
-                if data == "ping":
-                    await websocket.send_text("pong")
+                if data.lower() == "ping":
+                    await websocket.send_text(json.dumps({
+                        "type": "pong",
+                        "timestamp": datetime.now().isoformat()
+                    }))
+                    continue
+
+                # Handle JSON commands
+                try:
+                    msg_data = json.loads(data)
+                    command = msg_data.get("command")
+
+                    if command == "get_status":
+                        await websocket.send_text(json.dumps({
+                            "type": "status_response",
+                            "status": "connected",
+                            "user_id": user.id,
+                            "timestamp": datetime.now().isoformat()
+                        }))
+
+                except json.JSONDecodeError:
+                    logger.warning(f"[{endpoint_name}] Non-JSON message from user {user.id}: {log_message}")
 
         except WebSocketDisconnect:
-            logger.info(f"WebSocket disconnected for user {user.id}")
+            logger.info(f"[{endpoint_name}] WebSocket disconnected for user {user.id}")
         except Exception as e:
-            logger.error(f"WebSocket error for user {user.id}: {e}")
+            logger.error(f"[{endpoint_name}] WebSocket error for user {user.id}: {e}")
         finally:
             await manager.disconnect(user.id)
 
     except Exception as e:
-        logger.error(f"WebSocket connection error: {e}")
+        logger.error(f"[{endpoint_name}] WebSocket connection error: {e}")
         try:
             await websocket.close(code=4000, reason="Connection error")
         except Exception as e:
-            #  Cukup log sebagai debug, karena ini bukan error kritis
-            logger.debug(f"Failed to cleanly close WebSocket during final cleanup: {e}")
+            logger.debug(f"[{endpoint_name}] Failed to cleanly close WebSocket during final cleanup: {e}")
     finally:
         # Tutup database session
         if db:
@@ -326,20 +442,24 @@ async def startup_event():
     # Setiap job diberi 'id' unik untuk mencegah duplikasi penjadwalan.
     # 'replace_existing=True' memastikan jika server restart, job lama akan diganti.
 
-    # Membuat invoice baru setiap hari jam 1 pagi untuk H-5 jatuh tempo.
-    # scheduler.add_job(job_generate_invoices, 'cron', hour=1, minute=0, timezone='Asia/Jakarta', id="generate_invoices_job", replace_existing=True)
+    #==============================================================GENERATE INVOICE====================================================================================#
+    # Generate invoice setiap hari jam 10:00 pagi untuk langganan yang jatuh tempo 5 hari lagi (H-5).
+    #scheduler.add_job(job_generate_invoices, 'cron', hour=10, minute=0, timezone='Asia/Jakarta', id="generate_invoices_job", replace_existing=True)
+    #==============================================================GENERATE INVOICE====================================================================================#
 
-    # Menonaktifkan layanan yang telat bayar setiap hari jam 2 pagi.
-    # scheduler.add_job(job_suspend_services, 'cron', hour=2, minute=0, timezone='Asia/Jakarta', id="suspend_services_job", replace_existing=True)
+    #==============================================================SUSPANDED AND UNSUSPANDED=======================================================================#
+    # Suspend services tepat tanggal 5 jam 00:00 untuk pelanggan yang telat bayar dari jatuh tempo tanggal 1.
+    #scheduler.add_job(job_suspend_services, 'cron', day=5, hour=0, minute=0, timezone='Asia/Jakarta', id="suspend_services_job", replace_existing=True)
+    #==============================================================SUSPANDED AND UNSUSPANDED=======================================================================#
 
     # Mengirim pengingat pembayaran setiap hari jam 8 pagi.
-    # scheduler.add_job(job_send_payment_reminders, 'cron', hour=8, minute=0, timezone='Asia/Jakarta', id="send_reminders_job", replace_existing=True)
+    #scheduler.add_job(job_send_payment_reminders, 'cron', hour=8, minute=0, timezone='Asia/Jakarta', id="send_reminders_job", replace_existing=True)
 
     # Memverifikasi pembayaran yang mungkin terlewat setiap 15 menit.
-    # scheduler.add_job(job_verify_payments, 'interval', minutes=15, id="verify_payments_job", replace_existing=True)
+    #scheduler.add_job(job_verify_payments, 'interval', minutes=15, id="verify_payments_job", replace_existing=True)
 
     # Mencoba ulang sinkronisasi Mikrotik yang gagal setiap 5 menit.
-    # scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job", replace_existing=True)
+    #scheduler.add_job(job_retry_mikrotik_syncs, 'interval', minutes=5, id="retry_mikrotik_syncs_job", replace_existing=True)
 
     # 4. Mulai scheduler
     scheduler.start()
@@ -357,10 +477,10 @@ async def shutdown_event():
 # API_PREFIX = os.getenv("API_PREFIX", "")
 
 # Meng-include semua router
-app.include_router(auth.router)
 app.include_router(pelanggan.router)
 app.include_router(user.router)
 app.include_router(role.router)
+app.include_router(auth.router)
 app.include_router(data_teknis.router)
 app.include_router(harga_layanan.router)
 app.include_router(langganan.router)

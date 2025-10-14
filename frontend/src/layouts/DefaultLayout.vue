@@ -308,9 +308,10 @@ async function fetchSidebarBadges() {
   }
 }
 
-let pingInterval: ReturnType<typeof setInterval> | null = null;
-let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
-let notificationCleanupInterval: ReturnType<typeof setInterval> | null = null;
+let pingInterval: NodeJS.Timeout | null = null;
+let reconnectTimeout: NodeJS.Timeout | null = null;
+let notificationCleanupInterval: NodeJS.Timeout | null = null;
+let tokenCheckInterval: NodeJS.Timeout | null = null;
 
 function playSound(type: string) {
   try {
@@ -452,7 +453,7 @@ function fallbackBeep() {
     try {
       // Flash title bar
       let originalTitle = document.title;
-      let flashInterval: ReturnType<typeof setInterval> = setInterval(() => {
+      let flashInterval: NodeJS.Timeout | null = setInterval(() => {
         document.title = document.title === originalTitle ? "🔔 NOTIFIKASI BARU!" : originalTitle;
       }, 500);
 
@@ -466,6 +467,23 @@ function fallbackBeep() {
     } catch (visualError) {
       console.error('[Audio] All audio/visual methods failed:', visualError);
     }
+  }
+}
+
+async function refreshTokenAndReconnect() {
+  try {
+    console.log('[WebSocket] Attempting to refresh token...');
+    const success = await authStore.refreshToken();
+    if (success) {
+      console.log('[WebSocket] Token refreshed, reconnecting...');
+      connectWebSocket();
+    } else {
+      console.log('[WebSocket] Token refresh failed, logging out...');
+      authStore.logout();
+    }
+  } catch (error) {
+    console.error('[WebSocket] Token refresh error:', error);
+    authStore.logout();
   }
 }
 
@@ -503,12 +521,33 @@ function connectWebSocket() {
   // --- Sisa event handler (onopen, onmessage, dll.) bisa tetap sama ---
   socket.onopen = () => {
     console.log('[WebSocket] Koneksi berhasil dibuat.');
+
+    // Hentikan interval yang mungkin sudah ada
     if (pingInterval) clearInterval(pingInterval);
+    if (tokenCheckInterval) clearInterval(tokenCheckInterval);
+
+    // Setup ping interval
     pingInterval = setInterval(() => {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send('ping');
       }
-    }, 30000) as any;
+    }, 30000);
+
+    // Setup token health check interval
+    tokenCheckInterval = setInterval(async () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        // Verify token validity setiap menit
+        const isValid = await authStore.verifyToken();
+        if (!isValid) {
+          console.log('[WebSocket] Token no longer valid, refreshing...');
+          if (tokenCheckInterval) {
+            clearInterval(tokenCheckInterval);
+            tokenCheckInterval = null;
+          }
+          await refreshTokenAndReconnect();
+        }
+      }
+    }, 60000); // Check every minute
   };
 
   socket.onmessage = (event) => {
@@ -659,7 +698,10 @@ function connectWebSocket() {
   socket.onclose = (event) => {
     console.warn(`[WebSocket] Koneksi ditutup: Kode ${event.code}`);
     socket = null;
+
+    // Clean up all intervals
     if (pingInterval) clearInterval(pingInterval);
+    if (tokenCheckInterval) clearInterval(tokenCheckInterval);
 
     // Don't reconnect if it's a normal closure or connection replacement
     const shouldNotReconnect = [1000, 1001, 1005].includes(event.code) ||
@@ -667,8 +709,14 @@ function connectWebSocket() {
                                event.reason === "Logout Pengguna";
 
     if (authStore.isAuthenticated && !shouldNotReconnect) {
-      console.log('[WebSocket] Menjadwalkan reconnect dalam 5 detik...');
-      reconnectTimeout = setTimeout(connectWebSocket, 5000);
+      // Check if closed due to token expiration (code 1008 = Policy Violation)
+      if (event.code === 1008) {
+        console.log('[WebSocket] Connection closed due to token policy, attempting refresh...');
+        reconnectTimeout = setTimeout(refreshTokenAndReconnect, 1000);
+      } else {
+        console.log('[WebSocket] Menjadwalkan reconnect dalam 5 detik...');
+        reconnectTimeout = setTimeout(connectWebSocket, 5000);
+      }
     } else if (shouldNotReconnect) {
       console.log(`[WebSocket] Tidak reconnect karena penutupan normal: ${event.reason || event.code}`);
     }
@@ -688,6 +736,10 @@ function disconnectWebSocket() {
   if (notificationCleanupInterval) {
     clearInterval(notificationCleanupInterval);
     notificationCleanupInterval = null;
+  }
+  if (tokenCheckInterval) {
+    clearInterval(tokenCheckInterval);
+    tokenCheckInterval = null;
   }
 
   if (socket) {

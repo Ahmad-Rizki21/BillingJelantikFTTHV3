@@ -1,7 +1,12 @@
 from sqlalchemy import ForeignKey, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 
 class InventoryHistory(Base):

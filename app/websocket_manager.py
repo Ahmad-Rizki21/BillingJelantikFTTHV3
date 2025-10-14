@@ -103,6 +103,38 @@ class ConnectionManager:
         """Get all users that have a specific role."""
         return [user_id for user_id, roles in self.user_roles.items() if role in roles]
 
+    async def send_to_user(self, user_id: int, message: dict):
+        """Send message to a specific user."""
+        if user_id not in self.active_connections:
+            logger.warning(f"User {user_id} is not connected")
+            return False
+
+        # Ensure message has timestamp
+        if "timestamp" not in message:
+            message["timestamp"] = datetime.datetime.now().isoformat()
+
+        try:
+            # Serialize message
+            message_json = json.dumps(message, ensure_ascii=False)
+            # Send to specific user
+            await self.active_connections[user_id].send_text(message_json)
+
+            # Update user activity
+            if user_id in self.connection_metadata:
+                self.connection_metadata[user_id]["last_activity"] = time.time()
+                self.connection_metadata[user_id]["messages_sent"] += 1
+
+            self.metrics["messages_sent"] += 1
+            logger.info(f"Message sent to user {user_id}")
+            return True
+
+        except Exception as e:
+            self.metrics["messages_failed"] += 1
+            logger.error(f"Failed to send message to user {user_id}: {e}")
+            # Remove disconnected user
+            await self.disconnect(user_id)
+            return False
+
     async def broadcast_to_roles(self, message: dict, user_ids: List[int]):
         """Mengirim pesan ke daftar user_id tertentu dengan batch processing."""
         if not user_ids:

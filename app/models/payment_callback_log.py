@@ -5,7 +5,11 @@ from datetime import datetime
 from sqlalchemy import String, BigInteger, func, DateTime, Index
 from sqlalchemy.orm import Mapped, mapped_column
 
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 
 class PaymentCallbackLog(Base):

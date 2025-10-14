@@ -5,11 +5,11 @@ from datetime import datetime
 from sqlalchemy import String, BigInteger, func, DateTime, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-# Import Base secara eksplisit untuk menghindari error mypy
-from ..database import Base as BaseClass
-
-# Alias Base untuk menghindari error mypy
-Base = BaseClass
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 if TYPE_CHECKING:
     from .role import Role

@@ -968,7 +968,7 @@ onMounted(() => {
   fetchLangganan();
   fetchPelangganForSelect();
   fetchPaketLayananForSelect();
-  fetchTotalCount();
+  // fetchTotalCount(); // This is now redundant
 
   window.addEventListener('new-notification', handleNewNotification);
 
@@ -1149,41 +1149,39 @@ async function fetchLangganan(isLoadMore = false) {
     if (selectedPaket.value) params.append('paket_layanan_id', String(selectedPaket.value));
     if (selectedStatus.value) params.append('status', selectedStatus.value);
 
-    // --- LOGIKA KUNCI: Tambahkan paginasi HANYA untuk mobile ---
-    if (mobile.value) {
-      const skip = (mobilePage.value - 1) * itemsPerPage;
-      params.append('skip', String(skip));
-      params.append('limit', String(itemsPerPage));
-    }
+    // --- LOGIKA KUNCI: Tambahkan paginasi ---
+    const skip = (mobilePage.value - 1) * itemsPerPage;
+    params.append('skip', String(skip));
+    params.append('limit', String(itemsPerPage));
     
-    const response = await apiClient.get<Langganan[]>(`/langganan/?${params.toString()}`);
-    let newData = response.data;
+    const response = await apiClient.get(`/langganan/?${params.toString()}`);
+    const { data: newData, total_count: newTotalCount } = response.data;
 
-    // If a package is selected, we need to filter the results to include all packages with the same name
+    let filteredData = newData;
     if (selectedPaket.value) {
       const selectedPackage = paketLayananSelectList.value.find(p => p.id === selectedPaket.value);
       if (selectedPackage) {
-        // Find all package IDs with the same name as the selected package
         const allSameNamePackageIds = paketLayananSelectList.value
           .filter(p => p.nama_paket === selectedPackage.nama_paket)
           .map(p => p.id);
         
-        // Filter the response data to include all packages with any of these IDs
-        newData = newData.filter(item => 
+        filteredData = newData.filter((item: Langganan) => 
           allSameNamePackageIds.includes(item.paket_layanan_id)
         );
       }
     }
 
     if (isLoadMore) {
-      langgananList.value.push(...newData); // Tambahkan data baru ke list yang ada
+      langgananList.value.push(...filteredData);
     } else {
-      langgananList.value = newData; // Ganti list dengan data baru
+      langgananList.value = filteredData;
+      totalLanggananCount.value = newTotalCount;
     }
 
-    // Cek apakah masih ada data untuk dimuat di halaman berikutnya
-    if (newData.length < itemsPerPage) {
+    if (langgananList.value.length >= newTotalCount) {
       hasMoreData.value = false;
+    } else {
+      hasMoreData.value = true;
     }
 
   } catch (error) {
@@ -1545,16 +1543,6 @@ async function importFromCsv() {
     importing.value = false;
   }
 }
-
-async function fetchTotalCount() {
-  try {
-    const response = await apiClient.get('/langganan/count');
-    totalLanggananCount.value = response.data;
-  } catch (error) {
-    console.error('Gagal mengambil total langganan:', error);
-  }
-}
-
 </script>
 
 <style scoped>

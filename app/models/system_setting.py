@@ -2,7 +2,12 @@
 
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 
 class SystemSetting(Base):

@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING
 from datetime import date, datetime
 from sqlalchemy import BigInteger, ForeignKey, Date, String, func, Numeric, Column, Index
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 if TYPE_CHECKING:
     from .pelanggan import Pelanggan

@@ -7,8 +7,8 @@ import { getEncryptedToken, removeEncryptedToken } from '@/utils/crypto';
 // Konfigurasi instance axios
 const apiClient = axios.create({
   // baseURL: import.meta.env.VITE_API_BASE_URL,
-  baseURL: '/api', // Jika ingin build lalu Upload ke Server
-  // baseURL: 'http://127.0.0.1:8000', // Local
+  // baseURL: '/api', // Jika ingin build lalu Upload ke Server
+  baseURL: 'http://127.0.0.1:8000', // Local
   timeout: 30000,
 });
 
@@ -27,28 +27,64 @@ apiClient.interceptors.request.use(
 );
 
 // ==========================================================
-// --- TAMBAHAN BARU: Interceptor untuk MEMERIKSA setiap response ---
+// --- INTERCEPTOR UNTUK AUTO TOKEN REFRESH ---
 // ==========================================================
 apiClient.interceptors.response.use(
   (response) => {
     // Jika response sukses (status 2xx), lanjutkan seperti biasa
     return response;
   },
-  (error) => {
-    // Jika response dari server adalah error
-    if (error.response && error.response.status === 401) {
-      // 2. Cek apakah status errornya adalah 401 (Unauthorized)
-      console.error("Sesi tidak valid atau telah berakhir. Mengarahkan ke halaman login.");
-      
-      // 3. Hapus token yang sudah tidak valid dari penyimpanan
-      removeEncryptedToken('access_token');
-      removeEncryptedToken('refresh_token');
-      // Anda juga bisa membersihkan data user dari state management (Pinia) di sini jika perlu
-      
-      // 4. Arahkan pengguna ke halaman login
-      router.push('/login');
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Jika response dari server adalah error 401 (Unauthorized)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true; // Tandai request sudah pernah dicoba
+
+      try {
+        console.log('[API] Access token expired, attempting refresh...');
+
+        // Ambil refresh token dari storage
+        const refreshToken = getEncryptedToken('refresh_token');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Request token baru ke backend
+        const response = await apiClient.post('/auth/refresh', {
+          refresh_token: refreshToken
+        });
+
+        // Update tokens di storage dan header
+        const { access_token, refresh_token } = response.data;
+        localStorage.setItem('access_token', access_token); // Update localStorage
+        if (refresh_token) {
+          localStorage.setItem('refresh_token', refresh_token);
+        }
+
+        // Update Authorization header untuk request yang gagal
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+
+        console.log('[API] Token refreshed successfully');
+
+        // Retry request original dengan token baru
+        return apiClient(originalRequest);
+
+      } catch (refreshError) {
+        console.error('[API] Token refresh failed:', refreshError);
+
+        // Hapus semua token dan redirect ke login
+        removeEncryptedToken('access_token');
+        removeEncryptedToken('refresh_token');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+
+        // Redirect ke halaman login
+        router.push('/login');
+        return Promise.reject(refreshError);
+      }
     }
-    
+
     // Kembalikan error agar bisa ditangani lebih lanjut jika ada logic lain
     return Promise.reject(error);
   }

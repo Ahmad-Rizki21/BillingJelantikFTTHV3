@@ -3,7 +3,11 @@ from __future__ import annotations
 from typing import List, TYPE_CHECKING
 from sqlalchemy import String, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 if TYPE_CHECKING:
     from .olt import OLT

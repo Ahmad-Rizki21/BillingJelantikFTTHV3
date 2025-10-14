@@ -6,7 +6,11 @@ from typing import List, TYPE_CHECKING
 # 1. Tambahkan ForeignKey dan mapped_column
 from sqlalchemy import String, Integer, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 if TYPE_CHECKING:
     from .odp import ODP

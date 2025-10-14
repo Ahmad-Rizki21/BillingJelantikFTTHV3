@@ -6,7 +6,11 @@ from datetime import datetime
 
 from sqlalchemy import String, BigInteger, Boolean, func, DateTime, Integer, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from ..database import Base
+# Import Base dengan type annotation yang benar untuk mypy
+if TYPE_CHECKING:
+    from sqlalchemy.orm import DeclarativeBase as Base
+else:
+    from ..database import Base
 
 if TYPE_CHECKING:
     from .data_teknis import DataTeknis

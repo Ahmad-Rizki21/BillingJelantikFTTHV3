@@ -34,7 +34,7 @@ class TokenService:
         if expires_delta:
             expire = datetime.utcnow() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
+            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)  # Uses config value (120 minutes)
 
         to_encode.update({"exp": expire, "iat": datetime.utcnow()})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)

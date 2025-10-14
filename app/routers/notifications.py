@@ -2,6 +2,7 @@
 
 import logging
 import json
+from datetime import datetime
 from fastapi import (
     APIRouter,
     WebSocket,
@@ -49,6 +50,28 @@ class UnreadNotificationsResponse(BaseModel):
 @router.get("/test-websocket")
 async def test_websocket():
     return {"message": "WebSocket router is working", "status": "ok"}
+
+
+# Test endpoint untuk verifikasi path WebSocket
+@router.get("/websocket-info")
+async def websocket_info():
+    """
+    Informasi tentang konfigurasi WebSocket untuk debugging
+
+    Berdasarkan konfigurasi Apache:
+    - Frontend URL: wss://billingftth.my.id/ws/notifications?token=xxx
+    - Apache Proxy: ws://127.0.0.1:8000/ws/notifications
+    - FastAPI Main: /ws/notifications (langsung di main.py)
+    """
+    return {
+        "websocket_path": "/ws/notifications",
+        "frontend_url": "wss://billingftth.my.id/ws/notifications?token=YOUR_TOKEN",
+        "apache_proxy": "ws://127.0.0.1:8000/ws/notifications",
+        "fastapi_endpoint": "/ws/notifications",
+        "implementation": "main.py",
+        "status": "active",
+        "description": "WebSocket untuk real-time notifications"
+    }
 
 
 # Endpoint untuk mendapatkan notifikasi yang belum dibaca
@@ -129,46 +152,5 @@ async def mark_as_read(notification_id: int, current_user: UserModel = Depends(g
     return {"message": f"Notification {notification_id} marked as read"}
 
 
-@router.websocket("/ws/notifications")
-async def websocket_endpoint(websocket: WebSocket, token: str = Query(...), db: AsyncSession = Depends(get_db)):
-    logger.info(f"WebSocket connection attempt with token: {token[:20]}...")
-
-    try:
-        user = await get_user_from_token(token=token, db=db)
-        if not user:
-            logger.warning("WebSocket authentication failed: Invalid token")
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-            return
-
-        logger.info(f"User authenticated: {user.name} (ID: {user.id})")
-
-    except Exception as e:
-        logger.error(f"WebSocket authentication error: {str(e)}")
-        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        return
-
-    user_id = user.id
-
-    try:
-        await manager.connect(websocket, user_id)
-        logger.info(f"WebSocket connected successfully for user {user_id}")
-
-        while True:
-            try:
-                message = await websocket.receive_text()
-                if message == "ping":
-                    await websocket.send_text("pong")
-                logger.debug(f"Received message from user {user_id}: {message}")
-
-            except WebSocketDisconnect:
-                logger.info(f"WebSocket disconnected for user {user_id}")
-                break
-            except Exception as e:
-                logger.error(f"Error in WebSocket message loop for user {user_id}: {str(e)}")
-                break
-
-    except Exception as e:
-        logger.error(f"Error in WebSocket connection for user {user_id}: {str(e)}")
-    finally:
-        await manager.disconnect(user_id)
-        logger.info(f"WebSocket connection cleanup completed for user {user_id}")
+# WebSocket endpoint telah dipindahkan ke main.py
+# Path: /ws/notifications (langsung di main.py sesuai konfigurasi Apache)

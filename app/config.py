@@ -66,7 +66,7 @@ class Settings(BaseSettings):
     XENDIT_CALLBACK_TOKEN_JELANTIK: str = "default_callback_token_jelantik"
     SECRET_KEY: str = "default_secret_key_change_in_production"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 120  # 2 jam untuk mengurangi frequency token refresh
     XENDIT_API_KEY_JAKINET: str = "default_api_key_jakinet"
     XENDIT_API_KEY_JELANTIK: str = "default_api_key_jelantik"
     XENDIT_API_URL: str = "https://api.xendit.co/v2/invoices"
