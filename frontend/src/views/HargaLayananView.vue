@@ -256,55 +256,71 @@
 </template>
 
 <script setup lang="ts">
+// Import library Vue yang dibutuhin buat komponen reaktif
 import { ref, onMounted, computed } from 'vue';
-import apiClient from '@/services/api';
+import apiClient from '@/services/api';  // API client buat komunikasi sama backend
 import type { HargaLayanan, PaketLayanan } from '@/interfaces/layanan';
 
-// Import komponen dialog (pastikan path ini benar)
+// Import komponen dialog buat form input
 import HargaLayananDialog from '@/components/dialogs/HargaLayananDialog.vue';
 import PaketLayananDialog from '@/components/dialogs/PaketLayananDialog.vue';
 
-// --- State ---
-const brands = ref<HargaLayanan[]>([]);
-const packages = ref<PaketLayanan[]>([]);
-const brandLoading = ref(true);
-const packageLoading = ref(true);
+// ===== STATE MANAGEMENT =====
+// Data arrays buat nyimpan brand dan paket dari API
+const brands = ref<HargaLayanan[]>([]);      // Data semua brand provider
+const packages = ref<PaketLayanan[]>([]);   // Data semua paket layanan
+
+// Loading states buat indikator loading
+const brandLoading = ref(true);     // Loading pas fetch data brand
+const packageLoading = ref(true);   // Loading pas fetch data paket
+
+// Selected brand buat filter paket
 const selectedBrand = ref<HargaLayanan | null>(null);
 
-// Dialog States
-const dialogBrand = ref(false);
-const dialogPackage = ref(false);
-const editedBrand = ref<Partial<HargaLayanan>>({});
-const editedPackage = ref<Partial<PaketLayanan>>({});
-let editedBrandIndex = -1;
-let editedPackageIndex = -1;
+// ===== DIALOG STATE MANAGEMENT =====
+// Kontrol visibility dialog buat masing-masing form
+const dialogBrand = ref(false);     // Dialog buat input brand
+const dialogPackage = ref(false);   // Dialog buat input paket
 
-// --- Headers (Dengan Tipe `align` yang Benar) ---
+// Data buat form edit (bisa kosong atau ada data yang diedit)
+const editedBrand = ref<Partial<HargaLayanan>>({});     // Data brand yang lagi diedit
+const editedPackage = ref<Partial<PaketLayanan>>({});   // Data paket yang lagi diedit
+
+// Index buat tracking item yang lagi diedit di array
+let editedBrandIndex = -1;      // Index brand yang diedit
+let editedPackageIndex = -1;    // Index paket yang diedit
+
+// ===== TABLE HEADERS CONFIGURATION =====
+// Konfigurasi kolom buat tabel brand provider
 const brandHeaders = [
-  { title: 'ID Brand', key: 'id_brand', width: '15%' },
-  { title: 'Nama Brand', key: 'brand', width: '30%' },
-  { title: 'Pajak', key: 'pajak', align: 'center' as const, width: '15%' },
-  { title: 'Key Xendit', key: 'xendit_key_name', width: '25%' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'center' as const, width: '15%' },
+  { title: 'ID Brand', key: 'id_brand', width: '15%' },           // ID unik brand
+  { title: 'Nama Brand', key: 'brand', width: '30%' },            // Nama brand provider
+  { title: 'Pajak', key: 'pajak', align: 'center' as const, width: '15%' },    // Persentase pajak
+  { title: 'Key Xendit', key: 'xendit_key_name', width: '25%' },  // Nama key payment gateway
+  { title: 'Actions', key: 'actions', sortable: false, align: 'center' as const, width: '15%' },  // Kolom aksi
 ];
 
+// Konfigurasi kolom buat tabel paket layanan
 const packageHeaders = [
-  { title: 'Nama Paket', key: 'nama_paket', width: '40%' },
-  { title: 'Kecepatan', key: 'kecepatan', align: 'center' as const, width: '20%' },
-  { title: 'Harga', key: 'harga', align: 'end' as const, width: '25%' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'center' as const, width: '15%' },
+  { title: 'Nama Paket', key: 'nama_paket', width: '40%' },        // Nama paket internet
+  { title: 'Kecepatan', key: 'kecepatan', align: 'center' as const, width: '20%' },  // Kecepatan internet
+  { title: 'Harga', key: 'harga', align: 'end' as const, width: '25%' },            // Harga paket
+  { title: 'Actions', key: 'actions', sortable: false, align: 'center' as const, width: '15%' },  // Kolom aksi
 ];
 
-// --- Computed Properties ---
+// ===== COMPUTED PROPERTIES =====
+// Filter paket berdasarkan brand yang dipilih
 const filteredPackages = computed(() => {
-  if (!selectedBrand.value) return [];
+  if (!selectedBrand.value) return [];  // Kalo belum ada brand yang dipilih, return kosong
   return packages.value.filter((p: PaketLayanan) => p.id_brand === selectedBrand.value!.id_brand);
 });
 
-// --- Methods ---
+// ===== LIFECYCLE HOOKS =====
+// Jalankan fungsi-fungsi ini pas komponen pertama kali dimuat
 onMounted(() => {
-  fetchBrands();
-  fetchPackages();
+  fetchBrands();   // Ambil data brand dari API
+  fetchPackages(); // Ambil data paket dari API
+});
 });
 
 async function fetchBrands() {

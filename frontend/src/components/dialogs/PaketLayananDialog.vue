@@ -171,80 +171,94 @@
 </template>
 
 <script setup lang="ts">
+// Import library yang dibutuhin buat komponen ini
 import { ref, watch, computed } from 'vue';
 import type { PaketLayanan } from '@/interfaces/layanan';
 
+// Props yang masuk dari parent component
 const props = defineProps<{
-  modelValue: boolean,
-  editedItem: Partial<PaketLayanan>,
-  brandId?: string
+  modelValue: boolean,        // Kontrol dialog buka/tutup
+  editedItem: Partial<PaketLayanan>,  // Data paket yang lagi diedit
+  brandId?: string           // ID brand buat paket baru
 }>();
 
+// Event yang dikirim ke parent component
 const emit = defineEmits(['update:modelValue', 'save']);
 
+// Data lokal buat nyimpan form input
 const localItem = ref<Partial<PaketLayanan>>({});
-const isEditMode = computed(() => !!localItem.value.id);
+
+// Computed properties buat nentuin status form
+const isEditMode = computed(() => !!localItem.value.id);  // Ngecek apakah lagi edit atau buat baru
 const formTitle = computed(() => isEditMode.value ? 'Edit Paket Layanan' : 'Tambah Paket Layanan');
 
+// Validasi form - ngecek semua field required udah diisi belum
 const isFormValid = computed(() => {
-  return localItem.value.nama_paket && 
-         localItem.value.kecepatan && 
+  return localItem.value.nama_paket &&
+         localItem.value.kecepatan &&
          localItem.value.harga;
 });
 
+// Watcher buat sinkronin data dari props ke local form
 watch(() => props.editedItem, (newVal) => {
   localItem.value = { ...newVal };
 }, { immediate: true, deep: true });
 
-// Set id_brand from brandId prop when creating new package
+// Otomatis set brand ID kalau lagi buat paket baru
 watch(() => props.brandId, (newBrandId) => {
   if (newBrandId && !localItem.value.id_brand) {
     localItem.value.id_brand = newBrandId.trim();
   }
 }, { immediate: true });
 
+// Fungsi buat nyimpan data
 function submit() {
-  // Clean up id_brand to remove leading/trailing spaces
+  // Bersihin ID brand dari spasi yang ga perlu
   const itemToSave = { ...localItem.value };
   if (itemToSave.id_brand) {
     itemToSave.id_brand = itemToSave.id_brand.trim();
   }
   emit('save', itemToSave);
-  emit('update:modelValue', false);
+  emit('update:modelValue', false);  // Tutup dialog setelah save
 }
 
+// Fungsi buat nentuin warna label kecepatan internet
 function getSpeedColor(speed: number | undefined): string {
-  if (!speed) return 'grey';
-  if (speed < 25) return 'orange';
-  if (speed < 100) return 'blue';
-  if (speed < 500) return 'green';
-  return 'purple';
+  if (!speed) return 'grey';    // Belum diisi = abu-abu
+  if (speed < 25) return 'orange';  // Kecepatan rendah = oranye
+  if (speed < 100) return 'blue';   // Kecepatan sedang = biru
+  if (speed < 500) return 'green';  // Kecepatan tinggi = hijau
+  return 'purple';  // Kecepatan super tinggi = ungu
 }
 
+// Fungsi buat nentuin label kecepatan internet
 function getSpeedLabel(speed: number | undefined): string {
   if (!speed) return '';
-  if (speed < 25) return 'Basic';
-  if (speed < 100) return 'Fast';
-  if (speed < 500) return 'Ultra';
-  return 'Extreme';
+  if (speed < 25) return 'Basic';   // Internet basic buat browsing
+  if (speed < 100) return 'Fast';   // Cepat buat streaming
+  if (speed < 500) return 'Ultra';  // Super cepat buat gaming
+  return 'Extreme';  // Ngebut banget buat pro user
 }
 
+// Fungsi buat format mata duit biar kelihatan rapih
 function formatCurrency(value: number | undefined): string {
   if (!value || isNaN(value)) return "Rp 0";
-  return new Intl.NumberFormat('id-ID', { 
-    style: 'currency', 
-    currency: 'IDR', 
-    minimumFractionDigits: 0 
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
   }).format(value);
 }
 </script>
 
 <style scoped>
+/* Styling utama buat dialog card biar kelihatan modern */
 .dialog-card {
   border-radius: 16px !important;
   overflow: hidden;
 }
 
+/* Header dialog dengan gradient hijau yang cakep */
 .dialog-header {
   background: linear-gradient(135deg, #00695c 0%, #00897b 50%, #26a69a 100%);
   position: relative;
@@ -260,10 +274,12 @@ function formatCurrency(value: number | undefined): string {
   background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
+/* Grup buat tiap field input biar rapih */
 .field-group {
   position: relative;
 }
 
+/* Styling buat label field input */
 .field-label {
   display: block;
   font-size: 0.875rem;

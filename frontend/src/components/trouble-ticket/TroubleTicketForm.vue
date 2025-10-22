@@ -566,27 +566,28 @@
 </template>
 
 <script setup lang="ts">
+// Import library Vue yang dibutuhin buat komponen reaktif
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import apiClient from '@/services/api'
+import apiClient from '@/services/api'  // API client buat komunikasi sama backend
 
-// Props
+// Props yang diterima dari parent component
 interface Props {
-  modelValue: boolean
-  ticket?: any
+  modelValue: boolean  // Kontrol dialog buka/tutup
+  ticket?: any         // Data ticket yang lagi diedit (kalo ada)
 }
 
 const props = withDefaults(defineProps<Props>(), {
   ticket: null
 })
 
-// Emits
+// Event yang dikirim ke parent component
 const emit = defineEmits<{
-  'update:modelValue': [value: boolean]
-  'saved': []
-  'cancelled': []
+  'update:modelValue': [value: boolean]  // Update status dialog
+  'saved': []                           // Trigger pas ticket berhasil disimpan
+  'cancelled': []                       // Trigger pas user batal
 }>()
 
-// Types
+// Type definition buat data pelanggan
 interface Customer {
   id: number
   nama: string
@@ -597,21 +598,23 @@ interface Customer {
   }
 }
 
+// Type definition buat data teknis (koneksi internet pelanggan)
 interface TechnicalData {
   id: number
-  ip_pelanggan: string
-  password_pppoe: string
-  id_vlan: string
-  olt: string
-  olt_custom: string
-  pon: string
-  port_odp: string
-  onu_power: number
-  sn: string
-  id_pelanggan: string
-  display_name: string
+  ip_pelanggan: string        // IP address yang dipake pelanggan
+  password_pppoe: string      // Password PPPoE buat koneksi
+  id_vlan: string             // ID VLAN buat segmentasi jaringan
+  olt: string                 // Lokasi OLT (Optical Line Terminal)
+  olt_custom: string          // Nama OLT custom kalo ada
+  pon: string                 // Port PON di OLT
+  port_odp: string            // Port ODP yang dipake
+  onu_power: number           // Daya sinyal ONU (dalam dBm)
+  sn: string                  // Serial number perangkat
+  id_pelanggan: string        // ID pelanggan
+  display_name: string        // Nama tampilan yang mudah dibaca
 }
 
+// Type definition buat data user/teknisi
 interface User {
   id: number
   name: string
@@ -620,32 +623,38 @@ interface User {
   }
 }
 
-// State
-const formRef = ref()
-const valid = ref(false)
-const loading = ref(false)
-const loadingCustomers = ref(false)
-const loadingTechnicalData = ref(false)
-const loadingUsers = ref(false)
+// ===== STATE MANAGEMENT =====
+// Refs buat kontrol form dan loading states
+const formRef = ref()                    // Referensi ke form element
+const valid = ref(false)                 // Status validasi form
+const loading = ref(false)               // Loading state utama
+const loadingCustomers = ref(false)      // Loading buat fetch data pelanggan
+const loadingTechnicalData = ref(false)  // Loading buat fetch data teknis
+const loadingUsers = ref(false)          // Loading buat fetch data user
 
-const customers = ref<Customer[]>([])
-const technicalData = ref<TechnicalData[]>([])
-const users = ref<User[]>([])
-const selectedCustomer = ref<Customer | null>(null)
-const selectedTechnicalData = ref<TechnicalData | null>(null)
+// Arrays buat nyimpan data dari API
+const customers = ref<Customer[]>([])           // Data semua pelanggan
+const technicalData = ref<TechnicalData[]>([])  // Data teknis pelanggan
+const users = ref<User[]>([])                   // Data user/teknisi
 
+// Selected data refs
+const selectedCustomer = ref<Customer | null>(null)        // Pelanggan yang dipilih
+const selectedTechnicalData = ref<TechnicalData | null>(null)  // Data teknis yang dipilih
+
+// Reactive form data - otomatis track perubahan
 const formData = reactive({
-  pelanggan_id: null as number | null,
-  data_teknis_id: null as number | null,
-  title: '',
-  description: '',
-  category: '',
-  priority: 'medium',
-  assigned_to: null as number | null,
-  evidence: null as string | null
+  pelanggan_id: null as number | null,     // ID pelanggan yang dipilih
+  data_teknis_id: null as number | null,   // ID data teknis yang dipilih
+  title: '',                               // Judul trouble ticket
+  description: '',                         // Deskripsi detail masalah
+  category: '',                            // Kategori masalah
+  priority: 'medium',                      // Prioritas (low/medium/high/critical)
+  assigned_to: null as number | null,      // User yang ditugasin nanganin
+  evidence: null as string | null          // Path file evidence (kalo ada)
 })
 
-const evidenceFiles = ref<File[]>([])
+// File upload state
+const evidenceFiles = ref<File[]>([])  // Array buat nyimpan file evidence yang diupload
 const snackbar = ref({ show: false, text: '', color: 'success' as 'success' | 'error' | 'warning' | 'info' })
 
 // Options
