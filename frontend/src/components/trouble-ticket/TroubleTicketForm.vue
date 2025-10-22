@@ -248,37 +248,56 @@
               <v-col cols="12" sm="12" md="4">
                 <v-select
                   v-model="formData.assigned_to"
-                  label="Assigned To (Optional)"
-                  :items="users"
-                  item-title="name"
+                  label="Assigned To (Teknisi Only)"
+                  :items="teknisiUsersWithDisplayName"
+                  item-title="displayName"
                   item-value="id"
                   :loading="loadingUsers"
                   clearable
-                  hint="Assign to specific user"
+                  :hint="teknisiUsers.length > 0 ? `Select from ${teknisiUsers.length} available teknisi` : 'No teknisi users available'"
                   persistent-hint
                   variant="outlined"
                   density="comfortable"
                   rounded="lg"
                   class="modern-input"
+                  :no-data-text="loadingUsers ? 'Loading teknisi users...' : 'No teknisi users found'"
                 >
                   <template v-slot:prepend-inner>
                     <v-icon color="primary" size="20">mdi-account-arrow-right</v-icon>
                   </template>
-                  
+
                   <template v-slot:item="{ item, props }">
                     <v-list-item
                       v-bind="props"
-                      :title="item.raw.name"
-                      :subtitle="item.raw.role?.name || 'No role'"
+                      :title="getUserDisplayName(item.raw)"
+                      :subtitle="item.raw.role?.name || 'Teknisi'"
                       rounded="lg"
                       class="modern-list-item"
                     >
                       <template v-slot:prepend>
-                        <v-avatar size="36" color="primary" class="text-white">
-                          <span class="text-caption font-weight-bold">{{ getInitials(item.raw.name) }}</span>
+                        <v-avatar size="36" color="orange" class="text-white">
+                          <span class="text-body-2 font-weight-bold">{{ getInitials(getUserDisplayName(item.raw)) }}</span>
                         </v-avatar>
                       </template>
+                      <template v-slot:append>
+                        <v-chip size="x-small" color="orange" variant="flat">
+                          <v-icon start size="10">mdi-wrench</v-icon>
+                          {{ item.raw.role?.name || 'Teknisi' }}
+                        </v-chip>
+                      </template>
                     </v-list-item>
+                  </template>
+
+                  <template v-slot:selection="{ item }">
+                    <div class="d-flex align-center">
+                      <v-avatar size="24" color="orange" class="text-white me-2">
+                        <span class="text-caption font-weight-bold">{{ getInitials(getUserDisplayName(item.raw)) }}</span>
+                      </v-avatar>
+                      <div class="d-flex flex-column">
+                        <span class="text-caption font-weight-medium">{{ getUserDisplayName(item.raw) }}</span>
+                        <span class="text-caption text-medium-emphasis">{{ item.raw.role?.name || 'Teknisi' }}</span>
+                      </div>
+                    </div>
                   </template>
                 </v-select>
               </v-col>
@@ -673,18 +692,54 @@ const uniqueCustomers = computed(() => {
 // Ensure unique technical data for dropdown
 const uniqueTechnicalData = computed(() => {
   const uniqueMap = new Map()
-  
+
   technicalData.value.forEach(item => {
     if (!uniqueMap.has(item.id)) {
       uniqueMap.set(item.id, item)
     }
   })
-  
+
   return Array.from(uniqueMap.values())
 })
 
+// Filter users untuk only show Teknisi role
+const teknisiUsers = computed(() => {
+  return users.value.filter(user =>
+    user.role?.name === 'Teknisi'
+  )
+})
+
+// Add displayName property to teknisi users for proper dropdown display
+const teknisiUsersWithDisplayName = computed(() => {
+  return teknisiUsers.value.map(user => ({
+    ...user,
+    displayName: getUserDisplayName(user)
+  }))
+})
+
 // Methods
+const getUserDisplayName = (user: any) => {
+  // Try multiple possible name fields in order of preference
+  if (user.name && user.name.trim()) {
+    return user.name.trim()
+  }
+  if (user.nama && user.nama.trim()) {
+    return user.nama.trim()
+  }
+  if (user.username && user.username.trim()) {
+    return user.username.trim()
+  }
+  if (user.email && user.email.trim()) {
+    return user.email.split('@')[0].trim() // Use email prefix as last resort
+  }
+
+  // Final fallback with ID
+  return `Teknisi #${user.id || 'Unknown'}`
+}
+
 const getInitials = (name: string) => {
+  if (!name || name.trim() === '') return '?'
+
   return name
     .split(' ')
     .map(n => n[0])

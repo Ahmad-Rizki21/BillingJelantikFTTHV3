@@ -199,12 +199,17 @@ watch(() => props.editedItem, (newVal) => {
 // Set id_brand from brandId prop when creating new package
 watch(() => props.brandId, (newBrandId) => {
   if (newBrandId && !localItem.value.id_brand) {
-    localItem.value.id_brand = newBrandId;
+    localItem.value.id_brand = newBrandId.trim();
   }
 }, { immediate: true });
 
 function submit() {
-  emit('save', localItem.value);
+  // Clean up id_brand to remove leading/trailing spaces
+  const itemToSave = { ...localItem.value };
+  if (itemToSave.id_brand) {
+    itemToSave.id_brand = itemToSave.id_brand.trim();
+  }
+  emit('save', itemToSave);
   emit('update:modelValue', false);
 }
 

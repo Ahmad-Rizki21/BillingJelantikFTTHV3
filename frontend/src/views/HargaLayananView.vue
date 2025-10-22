@@ -311,7 +311,10 @@ async function fetchBrands() {
   brandLoading.value = true;
   try {
     const response = await apiClient.get<HargaLayanan[]>('/harga_layanan/');
-    brands.value = response.data;
+    brands.value = response.data.map(brand => ({
+      ...brand,
+      id_brand: brand.id_brand.trim()
+    }));
   } finally {
     brandLoading.value = false;
   }
@@ -354,7 +357,7 @@ async function savePackage(item: PaketLayanan) {
   if (editedPackageIndex > -1) {
     await apiClient.patch(`/paket_layanan/${item.id}`, item);
   } else {
-    item.id_brand = selectedBrand.value!.id_brand;
+    item.id_brand = selectedBrand.value!.id_brand.trim();
     await apiClient.post('/paket_layanan/', item);
   }
   fetchPackages();
@@ -382,9 +385,42 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 }
 
-// TODO: Implement delete dialogs
-function openDeleteBrandDialog(item: HargaLayanan) { alert(`Hapus Brand: ${item.brand}`); }
-function openDeletePackageDialog(item: PaketLayanan) { alert(`Hapus Paket: ${item.nama_paket}`); }
+// Delete Functions
+async function deleteBrand(id_brand: string) {
+  try {
+    await apiClient.delete(`/harga_layanan/${id_brand}`);
+    fetchBrands(); // Refresh brands
+    fetchPackages(); // Refresh packages
+    // Clear selection if deleted brand was selected
+    if (selectedBrand.value && selectedBrand.value.id_brand === id_brand) {
+      selectedBrand.value = null;
+    }
+  } catch (error) {
+    console.error('Error deleting brand:', error);
+    alert('Gagal menghapus brand. Pastikan tidak ada pelanggan yang menggunakan brand ini.');
+  }
+}
+
+function openDeleteBrandDialog(item: HargaLayanan) {
+  if (confirm(`Apakah Anda yakin ingin menghapus brand "${item.brand}"? Semua paket layanan terkait juga akan terhapus.`)) {
+    deleteBrand(item.id_brand);
+  }
+}
+async function deletePackage(paketId: number) {
+  try {
+    await apiClient.delete(`/paket_layanan/${paketId}`);
+    fetchPackages(); // Refresh packages
+  } catch (error) {
+    console.error('Error deleting package:', error);
+    alert('Gagal menghapus paket. Pastikan tidak ada pelanggan yang menggunakan paket ini.');
+  }
+}
+
+function openDeletePackageDialog(item: PaketLayanan) {
+  if (confirm(`Apakah Anda yakin ingin menghapus paket "${item.nama_paket}"?`)) {
+    deletePackage(item.id!);
+  }
+}
 </script>
 
 <style scoped>
