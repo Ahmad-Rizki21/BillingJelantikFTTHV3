@@ -321,8 +321,6 @@ onMounted(() => {
   fetchBrands();   // Ambil data brand dari API
   fetchPackages(); // Ambil data paket dari API
 });
-});
-
 async function fetchBrands() {
   brandLoading.value = true;
   try {

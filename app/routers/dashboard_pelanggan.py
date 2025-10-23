@@ -88,6 +88,7 @@ async def _get_main_statistics() -> MainStats:
             )
             jakinet_stats_result = (await db.execute(jakinet_stats_stmt)).first()
 
+            
             # Query untuk pendapatan Jakinet
             q_pendapatan = (
                 select(func.sum(InvoiceModel.paid_amount))
@@ -147,6 +148,7 @@ async def _get_growth_trend() -> ChartData:
             six_months_ago = today - relativedelta(months=5)
             first_day_of_period = six_months_ago.replace(day=1)
 
+            
             stmt = (
                 select(
                     func.date_format(LanggananModel.tgl_mulai_langganan, "%Y-%m").label("bulan"),
@@ -206,6 +208,7 @@ async def _get_jakinet_revenue_trend(timespan: str = "6m") -> ChartData:
             start_period = today - relativedelta(months=num_months - 1)
             first_day_of_period = start_period.replace(day=1, hour=0, minute=0, second=0)
 
+            
             stmt = (
                 select(
                     func.date_format(InvoiceModel.paid_at, "%Y-%m").label("bulan"),

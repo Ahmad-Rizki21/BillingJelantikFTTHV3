@@ -168,7 +168,12 @@
               </div>
             </v-card-title>
             <v-card-text class="pa-6 pt-2">
-              <div class="chart-container" style="height: 280px; position: relative;">
+              <div v-if="stats.pelanggan_aktif === 0" class="d-flex align-center justify-center flex-column text-center" style="height: 280px;">
+                <v-icon size="48" color="grey-lighten-1">mdi-chart-pie</v-icon>
+                <h4 class="text-h6 mt-4 text-medium-emphasis">Tidak Ada Data Pelanggan</h4>
+                <p class="text-body-2 text-medium-emphasis">Belum ada data pelanggan JakiNet yang tersedia.</p>
+              </div>
+              <div v-else class="chart-container" style="height: 280px; position: relative;">
                 <canvas ref="pieChartCanvas" style="max-height: 280px;"></canvas>
               </div>
             </v-card-text>
@@ -185,7 +190,12 @@
               </div>
             </v-card-title>
             <v-card-text class="pa-6 pt-2">
-              <div class="chart-container" style="height: 280px; position: relative;">
+              <div v-if="!growthChartData || !growthChartData.labels || growthChartData.labels.length === 0" class="d-flex align-center justify-center flex-column text-center" style="height: 280px;">
+                <v-icon size="48" color="grey-lighten-1">mdi-chart-line</v-icon>
+                <h4 class="text-h6 mt-4 text-medium-emphasis">Tidak Ada Data Pertumbuhan</h4>
+                <p class="text-body-2 text-medium-emphasis">Belum ada data pertumbuhan pelanggan JakiNet.</p>
+              </div>
+              <div v-else class="chart-container" style="height: 280px; position: relative;">
                 <canvas ref="lineChartCanvas" style="max-height: 280px;"></canvas>
               </div>
             </v-card-text>
@@ -326,9 +336,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import apiClient from '@/services/api';
-import { Chart, ChartConfiguration, DoughnutController, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, LineController, BarController } from 'chart.js';
+import { Chart, ChartConfiguration, DoughnutController, ArcElement, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, BarElement, LineController, BarController, Filler } from 'chart.js';
 
 // Register Chart.js components
 Chart.register(
@@ -341,6 +351,7 @@ Chart.register(
   BarElement,
   LineController,
   BarController,
+  Filler,
   Title,
   Tooltip,
   Legend
@@ -397,9 +408,14 @@ const averageRevenuePerUser = computed(() => {
 });
 
 const hasRevenueData = computed(() => {
-  if (!revenueChartData.value || !revenueChartData.value.data) {
+  // Perbaikan: Validasi yang lebih komprehensif
+  if (!revenueChartData.value ||
+      !revenueChartData.value.data ||
+      !Array.isArray(revenueChartData.value.data) ||
+      revenueChartData.value.data.length === 0) {
     return false;
   }
+  // Check if there's any positive revenue data
   return revenueChartData.value.data.some(value => value > 0);
 });
 
@@ -411,10 +427,11 @@ async function fetchDashboardData(timespan: string = '6m') {
       params: { timespan }
     });
     const data = response.data;
+
     stats.value = data.main_stats;
     growthChartData.value = data.growth_chart;
     revenueChartData.value = data.revenue_chart;
-    
+
     // Re-initialize charts with new data
     initializeCharts();
 
@@ -440,7 +457,8 @@ function createPieChart() {
 
   if (pieChart) pieChart.destroy();
 
-  const activeExisting = stats.value.pelanggan_jakinet_aktif - stats.value.pelanggan_baru_bulan_ini;
+  // Perbaikan: Pastikan activeExisting tidak negatif
+  const activeExisting = Math.max(0, stats.value.pelanggan_jakinet_aktif - stats.value.pelanggan_baru_bulan_ini);
 
   const config: ChartConfiguration<'doughnut'> = {
     type: 'doughnut',
@@ -448,7 +466,7 @@ function createPieChart() {
       labels: ['Pelanggan Aktif (Lama)', 'Pelanggan Baru (Bulan Ini)', 'Pelanggan Berhenti (Bulan Ini)'],
       datasets: [{
         data: [
-          activeExisting > 0 ? activeExisting : 0,
+          activeExisting,
           stats.value.pelanggan_baru_bulan_ini,
           stats.value.pelanggan_berhenti_bulan_ini
         ],
@@ -518,6 +536,11 @@ function createLineChart() {
   if (!ctx) return;
 
   if (lineChart) lineChart.destroy();
+
+  // Perbaikan: Validasi data sebelum render chart
+  if (!growthChartData.value || !growthChartData.value.labels || !growthChartData.value.data) {
+    return;
+  }
 
   const config: ChartConfiguration<'line'> = {
     type: 'line',
@@ -688,6 +711,12 @@ function createRevenueChart() {
 
   if (revenueChart) revenueChart.destroy();
 
+  // Perbaikan: Validasi data sebelum render chart
+  if (!revenueChartData.value || !revenueChartData.value.labels || !revenueChartData.value.data) {
+    console.warn('Tidak ada data untuk revenue chart');
+    return;
+  }
+
   const gradient = ctx.createLinearGradient(0, 0, 0, 400);
   gradient.addColorStop(0, 'rgba(76, 175, 80, 0.4)');
   gradient.addColorStop(1, 'rgba(76, 175, 80, 0.05)');
@@ -772,20 +801,32 @@ function createRevenueChart() {
 }
 
 function initializeCharts() {
-  nextTick(() => {
+  // Perbaikan: Gunakan setTimeout untuk memastikan DOM sudah ter-render dengan sempurna
+  setTimeout(() => {
+    // Perbaikan: Render semua chart yang memungkinkan, tapi tetap validasi data
     createPieChart();
-    createLineChart();
     createBarChart();
-    // Hanya render chart pendapatan jika ada data
+
+    // Render line chart jika ada data growth
+    if (growthChartData.value && growthChartData.value.labels && growthChartData.value.data) {
+      createLineChart();
+    }
+
+    // Render revenue chart jika ada data
     if (hasRevenueData.value) {
       createRevenueChart();
     }
-  });
+  }, 100); // 100ms delay untuk memastikan DOM selesai render
 }
 
 watch(revenueTimeframe, (newTimeframe) => {
   fetchDashboardData(newTimeframe);
 });
+
+// Perbaikan: Watch untuk data changes dan re-initialize charts
+watch([stats, growthChartData], () => {
+  initializeCharts();
+}, { deep: true });
 
 onMounted(() => {
   fetchDashboardData(revenueTimeframe.value);

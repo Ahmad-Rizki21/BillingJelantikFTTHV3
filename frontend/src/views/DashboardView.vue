@@ -689,6 +689,28 @@ const loyalitasDonutOptions = computed((): ChartOptions<'doughnut'> => ({
         padding: 20,
         font: { size: 12, weight: 'bold' as const }
       }
+    },
+    tooltip: {
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
+      borderColor: 'rgb(99, 102, 241)',
+      borderWidth: 2,
+      titleFont: { size: 14, weight: 'bold' },
+      bodyFont: { size: 12 },
+      padding: 12,
+      cornerRadius: 8,
+      displayColors: true,
+      boxPadding: 4,
+      callbacks: {
+        label: function(context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percentage}%)`;
+        }
+      }
     }
   },
 }));
@@ -701,9 +723,9 @@ const chartOptions = computed((): ChartOptions<'bar'> => ({
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
-      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
-      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
       borderColor: 'rgb(99, 102, 241)',
       borderWidth: 2,
       titleFont: { size: 14, weight: 'bold' },
@@ -770,9 +792,9 @@ const pieChartOptions = computed((): ChartOptions<'pie'> => ({
       }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
-      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
-      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
       borderColor: 'rgb(99, 102, 241)',
       borderWidth: 2,
       titleFont: { size: 14, weight: 'bold' },
@@ -810,9 +832,9 @@ const donutChartOptions = computed((): ChartOptions<'doughnut'> => ({
       }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
-      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
-      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
       borderColor: 'rgb(99, 102, 241)',
       borderWidth: 2,
       titleFont: { size: 14, weight: 'bold' },
@@ -844,9 +866,9 @@ const growthChartOptions = computed((): ChartOptions<'line'> => ({
       labels: { color: chartAxisColor.value, usePointStyle: true, pointStyle: 'circle' as const, font: { size: 12, weight: 'bold' } }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
-      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
-      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
       borderColor: 'rgb(236, 72, 153)',
       borderWidth: 2,
       titleFont: { size: 14, weight: 'bold' },
@@ -917,9 +939,9 @@ const invoiceChartOptions = computed((): ChartOptions<'bar'> => ({
       }
     },
     tooltip: {
-      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(30, 41, 59, 0.95)',
-      titleColor: theme.global.current.value.dark ? '#ffffff' : '#f8fafc',
-      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#475569',
+      backgroundColor: theme.global.current.value.dark ? 'rgba(0, 0, 0, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+      titleColor: theme.global.current.value.dark ? '#ffffff' : '#1e293b',
+      bodyColor: theme.global.current.value.dark ? '#e2e8f0' : '#374151',
       borderColor: 'rgb(99, 102, 241)',
       borderWidth: 2,
       titleFont: { size: 14, weight: 'bold' },

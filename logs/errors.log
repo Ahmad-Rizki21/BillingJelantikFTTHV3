@@ -8195,3 +8195,35 @@ sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1452, 'Cannot add o
 2025-10-22 16:37:54 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
 2025-10-22 16:46:44 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
 2025-10-22 16:46:44 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 00:02:13 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 00:02:13 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 09:31:34 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 09:31:34 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 09:39:26 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 09:39:26 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 09:49:03 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 09:49:03 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:06:04 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 10:06:04 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:14:26 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 10:14:26 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:54:27 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 10:54:27 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:54:35 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | _record_failure      | CIRCUIT BREAKER TRIPPED for 192.168.1.1:22!
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | get_connection       | Circuit breaker OPEN for 192.168.1.1:22, connection rejected
+2025-10-23 10:54:36 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): Service unavailable for 192.168.1.1:22 - circuit breaker open
+2025-10-23 10:55:03 | MIDDLEWARE      | [91mERROR   [0m | log_requests_and_activity | Failed to log activity: 'utf-8' codec can't decode byte 0x89 in position 166: invalid start byte
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/ArtacomFTTHBilling_V2/app/main.py", line 285, in log_requests_and_activity
+    details = json.dumps(json.loads(req_body_bytes))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 341, in loads
+    s = s.decode(detect_encoding(s), 'surrogatepass')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x89 in position 166: invalid start byte
+2025-10-23 10:55:04 | SERVICES....    | [91mERROR   [0m | get_connection       | Circuit breaker OPEN for 192.168.1.1:22, connection rejected
+2025-10-23 10:55:04 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): Service unavailable for 192.168.1.1:22 - circuit breaker open
