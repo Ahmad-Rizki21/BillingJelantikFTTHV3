@@ -792,7 +792,20 @@
                   <h3 class="text-h6 font-weight-bold mb-4">Detail ONU</h3>
                   <v-row>
                     <v-col cols="12" sm="6">
-                      <v-text-field v-model.number="editedItem.onu_power" label="ONU Power" type="number" suffix="dBm" variant="outlined"></v-text-field>
+                      <v-text-field
+                        v-model.number="editedItem.onu_power"
+                        label="ONU Power"
+                        type="number"
+                        suffix="dBm"
+                        variant="outlined"
+                        :rules="[
+                          v => v >= -40 || 'ONU Power minimal -40 dBm',
+                          v => v <= 10 || 'ONU Power maksimal 10 dBm'
+                        ]"
+                        :error-messages="getOnuPowerError()"
+                        hint="Range: -40 dBm (sinyal lemah) hingga 10 dBm (sinyal sangat kuat)"
+                        persistent-hint
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-text-field 
@@ -1562,8 +1575,48 @@ async function saveDataTeknis() {
     let updatedData: DataTeknis; // Deklarasikan variabel di sini
 
     if (isEditMode.value) {
+      // Buat payload yang hanya berisi field yang diubah (exclude id)
+      const payloadToSend: any = {};
+      const rawData = editedItem.value as any;
+
+      // Field yang valid untuk update berdasarkan schema DataTeknisUpdate
+      const validUpdateFields = [
+        'pelanggan_id', 'mikrotik_server_id', 'odp_id', 'otb', 'odc', 'port_odp',
+        'id_vlan', 'id_pelanggan', 'password_pppoe', 'ip_pelanggan',
+        'profile_pppoe', 'olt', 'olt_custom', 'pon', 'onu_power',
+        'sn', 'speedtest_proof'
+      ];
+
+      // Copy hanya field yang valid dan memiliki nilai
+      validUpdateFields.forEach(field => {
+        if (rawData[field] !== undefined && rawData[field] !== null) {
+          // Konversi ke number untuk field numeric
+          if (['otb', 'odc', 'port_odp', 'pon', 'onu_power'].includes(field)) {
+            let value = Number(rawData[field]);
+
+            // Validasi khusus untuk onu_power: harus antara -40 sampai 10 dBm
+            if (field === 'onu_power') {
+              if (value < -40) {
+                value = -40;
+                console.warn('ONU Power dibatasi ke minimum -40 dBm');
+              } else if (value > 10) {
+                value = 10;
+                console.warn('ONU Power dibatasi ke maksimal 10 dBm');
+              }
+            }
+
+            payloadToSend[field] = value;
+          } else {
+            payloadToSend[field] = rawData[field];
+          }
+        }
+      });
+
+      // Payload sudah divalidasi dan siap dikirim
+      // (Debug comment: Gunakan console.log jika perlu troubleshooting)
+
       // Tangkap respons dari server setelah PATCH
-      const response = await apiClient.patch(`/data_teknis/${editedItem.value.id}`, editedItem.value);
+      const response = await apiClient.patch(`/data_teknis/${editedItem.value.id}`, payloadToSend);
       updatedData = response.data;
       
       // Cari index dari data lama di dalam array
@@ -1580,8 +1633,30 @@ async function saveDataTeknis() {
     }
     
     closeDialog();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gagal saat menyimpan data teknis:", error);
+
+    // Handle error validasi 422 secara spesifik
+    if (error.response?.status === 422) {
+      const errorDetail = error.response.data?.detail;
+
+      if (typeof errorDetail === 'object' && errorDetail !== null) {
+        // Tampilkan error validasi yang spesifik
+        let errorMessage = "Error validasi:\n";
+        if (Array.isArray(errorDetail)) {
+          errorDetail.forEach((err: any) => {
+            errorMessage += `- ${err.loc?.join('.')}: ${err.msg}\n`;
+          });
+        } else {
+          errorMessage = JSON.stringify(errorDetail, null, 2);
+        }
+        alert(errorMessage);
+      } else {
+        alert("Data tidak valid. Silakan periksa kembali input Anda.");
+      }
+    } else {
+      alert("Gagal menyimpan data teknis. Silakan coba lagi.");
+    }
   } finally {
     saving.value = false;
   }
@@ -1874,6 +1949,26 @@ async function fetchAvailableProfiles(paketLayananId: number, pelangganId: numbe
   } finally {
     profilesLoading.value = false;
   }
+}
+
+// Function untuk validasi ONU Power
+function getOnuPowerError() {
+  const value = editedItem.value.onu_power;
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return 'Format ONU Power tidak valid';
+  }
+  if (numValue < -40) {
+    return 'ONU Power terlalu rendah (minimal -40 dBm)';
+  }
+  if (numValue > 10) {
+    return 'ONU Power terlalu tinggi (maksimal 10 dBm)';
+  }
+  return '';
 }
 
 </script>
