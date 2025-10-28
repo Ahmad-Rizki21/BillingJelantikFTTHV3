@@ -144,7 +144,7 @@
           no-data-text="Tidak ada permissions ditemukan"
         >
           <template v-slot:loading>
-            <v-skeleton-loader type="table-row@5" />
+            <SkeletonLoader type="table" :rows="5" />
           </template>
 
           <template v-slot:item.id="{ item }">
@@ -232,6 +232,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import apiClient from '@/services/api';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 interface Permission {
   id: number;

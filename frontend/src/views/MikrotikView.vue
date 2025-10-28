@@ -92,6 +92,10 @@
         class="elevation-0"
         :items-per-page="10"
       >
+      <template v-slot:loading>
+        <SkeletonLoader type="table" :rows="6" />
+      </template>
+
         <template v-slot:item.name="{ item }">
           <div class="font-weight-bold">{{ item.name }}</div>
           <div class="text-caption text-medium-emphasis">{{ item.host_ip }}:{{ item.port }}</div>
@@ -359,6 +363,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import apiClient from '@/services/api';
 import { debounce } from 'lodash-es';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // --- Type Definitions ---
 interface MikrotikServer {

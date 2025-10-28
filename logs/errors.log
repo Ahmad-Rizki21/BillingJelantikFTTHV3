@@ -8337,3 +8337,23 @@ UnicodeDecodeError: 'utf-8' codec can't decode byte 0x89 in position 166: invali
 2025-10-27 11:17:26 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
 2025-10-27 13:34:08 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
 2025-10-27 13:34:08 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 09:40:21 | ROOT            | [91mERROR   [0m | verify_password      | ***REDACTED***
+2025-10-28 09:40:35 | ROOT            | [91mERROR   [0m | verify_password      | ***REDACTED***
+2025-10-28 09:51:09 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 09:51:09 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 10:00:13 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 10:00:13 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 10:46:42 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 10:46:42 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 11:53:50 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 11:53:50 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 11:55:13 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 11:55:13 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 12:00:52 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 12:00:52 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 12:03:00 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 12:03:00 | SERVICES....    | [91mERROR   [0m | _record_failure      | CIRCUIT BREAKER TRIPPED for 192.168.1.1:22!
+2025-10-28 12:03:00 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused
+2025-10-28 12:12:52 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 192.168.1.1:22: [Errno 111] Connection refused
+2025-10-28 12:12:52 | SERVICES....    | [91mERROR   [0m | _record_failure      | Circuit breaker for 192.168.1.1:22 re-tripped to OPEN
+2025-10-28 12:12:52 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Main Router (192.168.1.1:22): [Errno 111] Connection refused

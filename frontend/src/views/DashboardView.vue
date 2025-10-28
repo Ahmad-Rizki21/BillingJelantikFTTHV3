@@ -20,7 +20,7 @@
 
     <div class="top-layout-grid mb-6">
       <div v-if="revenueData" class="revenue-widget-container">
-        <v-skeleton-loader v-if="loading" type="card-avatar, article" class="fill-height"></v-skeleton-loader>
+        <SkeletonLoader v-if="loading" type="card-grid" :cards="1" />
         <div v-else class="revenue-card">
           <div class="revenue-card-content">
             <div class="revenue-main">
@@ -54,9 +54,7 @@
       </div>
 
       <div v-if="customerStats && customerStats.length > 0" class="stats-subgrid">
-        <div v-if="loading" v-for="n in 3" :key="`skel-stat-${n}`">
-            <v-skeleton-loader type="list-item-avatar-two-line"></v-skeleton-loader>
-        </div>
+        <SkeletonLoader v-if="loading" type="card-grid" :cards="3" />
         <div v-else v-for="(stat, index) in customerStats" :key="stat.title" class="stat-card" :class="`card-${index % 4}`">
           <div class="stat-card-content">
             <div class="stat-header">
@@ -74,7 +72,7 @@
     </div>
 
     <div v-if="serverStats && serverStats.length > 0" class="stats-grid mb-6">
-      <v-skeleton-loader v-if="loading" v-for="n in 3" :key="`skel-srv-${n}`" type="list-item-avatar-two-line"></v-skeleton-loader>
+      <SkeletonLoader v-if="loading" type="card-grid" :cards="3" />
       <div v-else v-for="(stat, index) in serverStats" :key="stat.title" class="stat-card" :class="`card-${(index + 3) % 4}`">
         <div class="stat-card-content">
           <div class="stat-header">
@@ -502,6 +500,7 @@ import {
 } from 'chart.js';
 import { useTheme } from 'vuetify';
 import apiClient from '@/services/api';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 ChartJS.register(
   Title, Tooltip, Legend, BarElement, BarController, LineElement, LineController,

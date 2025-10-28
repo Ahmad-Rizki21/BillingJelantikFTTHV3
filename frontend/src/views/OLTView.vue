@@ -27,6 +27,10 @@
         loading-text="Memuat data OLT..."
         no-data-text="Belum ada data OLT"
       >
+      <template v-slot:loading>
+        <SkeletonLoader type="table" :rows="5" />
+      </template>
+
         <template v-slot:item.actions="{ item }">
           <div class="d-flex justify-center gap-2">
             <v-btn 
@@ -153,6 +157,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import apiClient from '@/services/api';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // --- INTERFACES ---
 interface OLT {

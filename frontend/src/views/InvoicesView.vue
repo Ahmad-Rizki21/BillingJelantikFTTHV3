@@ -223,10 +223,7 @@
             return-object
           >
           <template v-slot:loading>
-            <div class="text-center pa-8">
-              <v-progress-circular indeterminate color="primary"></v-progress-circular>
-              <p class="mt-4 text-medium-emphasis">Memuat data invoice...</p>
-            </div>
+            <SkeletonLoader type="table" :rows="10" />
           </template>
 
           <template v-slot:item.invoice_number="{ item }">
@@ -694,6 +691,7 @@ import apiClient from '@/services/api';
 import type { Invoice, PelangganSelectItem } from '@/interfaces/invoice';
 import InvoiceDetailDialog from '@/components/dialogs/InvoiceDetailDialog.vue';
 import { debounce } from 'lodash-es';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 import { useAuthStore } from '@/stores/auth';
 const auth = useAuthStore();

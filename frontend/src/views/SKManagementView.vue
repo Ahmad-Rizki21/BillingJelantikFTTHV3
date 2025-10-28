@@ -44,6 +44,10 @@
           :loading-text="'Memuat data...'"
           :no-data-text="'Belum ada konten tersedia'"
         >
+        <template v-slot:loading>
+          <SkeletonLoader type="table" :rows="8" />
+        </template>
+
           <template v-slot:item.tipe="{ item }">
             <v-chip 
               :color="item.tipe === 'Pembaruan' ? 'success' : 'primary'"
@@ -352,6 +356,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import apiClient from '@/services/api';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 interface SKItem {
   id: number;

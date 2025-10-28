@@ -258,9 +258,8 @@
       
       <!-- Mobile Card View -->
       <div class="d-block d-md-none">
-  <div v-if="loading" class="text-center py-12">
-    <v-progress-circular color="primary" indeterminate size="48"></v-progress-circular>
-    <p class="mt-4 text-medium-emphasis">Memuat data langganan...</p>
+  <div v-if="loading" class="px-4 py-4">
+    <SkeletonLoader type="list" :items="5" />
   </div>
   
   <div v-else-if="langgananList.length === 0" class="pa-8 text-center">
@@ -373,6 +372,10 @@
           return-object
           hide-default-footer
         >
+
+          <template v-slot:loading>
+            <SkeletonLoader type="table" :rows="8" />
+          </template>
 
           <template v-slot:item.nomor="{ index }: { index: number }">
             {{ index + 1 }}
@@ -857,6 +860,7 @@ import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue';
 import apiClient from '@/services/api';
 import { useDisplay } from 'vuetify';
 import { debounce } from 'lodash-es';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 
 // --- Responsive State ---

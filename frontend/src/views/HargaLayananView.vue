@@ -61,7 +61,7 @@
           :loading-text="'Memuat data brand...'"
         >
           <template v-slot:loading>
-            <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
+            <SkeletonLoader type="table" :rows="5" />
           </template>
 
           <template v-slot:item.id_brand="{ item }">
@@ -264,6 +264,7 @@ import type { HargaLayanan, PaketLayanan } from '@/interfaces/layanan';
 // Import komponen dialog buat form input
 import HargaLayananDialog from '@/components/dialogs/HargaLayananDialog.vue';
 import PaketLayananDialog from '@/components/dialogs/PaketLayananDialog.vue';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // ===== STATE MANAGEMENT =====
 // Data arrays buat nyimpan brand dan paket dari API

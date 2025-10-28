@@ -293,10 +293,7 @@
           hide-default-footer
         >
           <template v-slot:loading>
-            <div class="text-center pa-8">
-              <v-progress-circular indeterminate color="primary" size="64" width="6"></v-progress-circular>
-              <div class="mt-4 text-h6">Memuat data...</div>
-            </div>
+            <SkeletonLoader type="table" :rows="8" />
           </template>
 
           <template v-slot:item.nomor="{ index }">
@@ -1087,6 +1084,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import apiClient from '@/services/api';
 import { debounce } from 'lodash-es';
 import { useAuthStore } from '@/stores/auth';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // --- Interfaces ---
 interface DataTeknis {

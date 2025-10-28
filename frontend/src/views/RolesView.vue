@@ -64,7 +64,7 @@
         no-data-text="Tidak ada data roles"
       >
         <template v-slot:loading>
-          <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
+          <SkeletonLoader type="table" :rows="5" />
         </template>
 
         <template v-slot:item.row_number="{ index }">
@@ -324,6 +324,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import apiClient from '@/services/api';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // --- State ---
 const roles = ref<any[]>([]);

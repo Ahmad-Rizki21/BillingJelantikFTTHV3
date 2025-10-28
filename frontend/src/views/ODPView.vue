@@ -26,6 +26,10 @@
         loading-text="Memuat data ODP..."
         no-data-text="Belum ada data ODP"
       >
+      <template v-slot:loading>
+        <SkeletonLoader type="table" :rows="5" />
+      </template>
+
        <template v-slot:item.kapasitas_port="{ item }">
         <v-progress-linear
             :model-value="(item.port_terpakai / item.kapasitas_port) * 100"
@@ -157,6 +161,7 @@ import { ref, onMounted, computed } from 'vue';
 import apiClient from '@/services/api';
 import { useRouter } from 'vue-router';
 import ODPMap from '@/components/ODPMap.vue';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 
 // --- Interface untuk tipe data ---

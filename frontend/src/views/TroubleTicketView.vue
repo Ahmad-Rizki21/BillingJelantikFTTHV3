@@ -508,16 +508,7 @@
       >
         <!-- Loading slot -->
         <template v-slot:loading>
-          <div class="loading-container">
-            <v-progress-circular
-              indeterminate
-              color="primary"
-              size="64"
-              width="6"
-            ></v-progress-circular>
-            <p class="loading-text mt-4">Loading tickets...</p>
-            <p class="loading-subtext">Please wait a moment</p>
-          </div>
+          <SkeletonLoader type="table" :rows="8" />
         </template>
 
         <!-- Ticket Number -->
@@ -885,6 +876,7 @@ import { debounce } from 'lodash'
 import { useRouter } from 'vue-router'
 import apiClient from '@/services/api'
 import TroubleTicketForm from '@/components/trouble-ticket/TroubleTicketForm.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 
 const router = useRouter()
 

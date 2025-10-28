@@ -139,9 +139,8 @@
       </v-expand-transition>
 
       <div class="d-block d-md-none">
-        <div v-if="loading" class="text-center py-12">
-          <v-progress-circular color="primary" indeterminate size="48"></v-progress-circular>
-          <p class="mt-4 text-medium-emphasis">Memuat data pelanggan...</p>
+        <div v-if="loading" class="px-4 py-4">
+          <SkeletonLoader type="list" :items="5" />
         </div>
         
         <div v-else-if="pelangganList.length === 0" class="no-data-wrapper">
@@ -291,12 +290,7 @@
         >
 
           <template v-slot:loading>
-            <div class="d-flex justify-center align-center py-12">
-              <div class="text-center">
-                <v-progress-circular color="primary" indeterminate size="48"></v-progress-circular>
-                <p class="mt-4 text-medium-emphasis">Memuat data pelanggan...</p>
-              </div>
-            </div>
+            <SkeletonLoader type="table" :rows="10" />
           </template>
 
           <template v-slot:item.nomor="{ index }">
@@ -939,6 +933,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import apiClient from '@/services/api';
 import type { Pelanggan as BasePelanggan } from '@/interfaces/pelanggan';
 import { debounce } from 'lodash-es';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 // --- INTERFACES ---
 interface HargaLayanan {
