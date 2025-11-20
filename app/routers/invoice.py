@@ -693,6 +693,17 @@ async def generate_manual_invoice(invoice_data: InvoiceGenerate, db: AsyncSessio
 
     # 2. Generate new invoice number in format: BRAND/LAYANAN/NAMA_PELANGGAN/BULAN_TAHUN/ALAMAT_SINGKAT/IDPELANGGAN_LAST3
     nomor_invoice = f"{brand_singkat}/ftth/{nama_pelanggan_singkat}/{bulan_tahun}/{alamat_singkat}/{str(data_teknis.id_pelanggan)[-3:]}"
+
+    # 3. Check for duplicate invoice number and add timestamp if needed
+    existing_invoice_number = (await db.execute(
+        select(InvoiceModel.id).where(InvoiceModel.invoice_number == nomor_invoice)
+    )).scalar_one_or_none()
+
+    if existing_invoice_number:
+        # Generate nomor unik dengan tambahan timestamp atau random
+        import time
+        timestamp = str(int(time.time()))[-6:]  # 6 digit terakhir timestamp
+        nomor_invoice = f"{nomor_invoice}/{timestamp}"
     # --- END OF MODIFICATION ---
 
     # Ambil total harga langsung dari data langganan yang sudah dihitung (prorate + PPN).

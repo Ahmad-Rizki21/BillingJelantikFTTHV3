@@ -113,8 +113,6 @@ async def create_xendit_invoice(
     """
     target_key_name = pelanggan.harga_layanan.xendit_key_name
     api_key = settings.XENDIT_API_KEYS.get(target_key_name)
-    if not api_key:
-        raise ValueError(f"Kunci API Xendit untuk '{target_key_name}' tidak ditemukan.")
 
     # Brands Configuration:
     # - ajn-01 (JAKINET) -> JAKINET API key (ARTACOMINDO account)
@@ -138,6 +136,25 @@ async def create_xendit_invoice(
         if jakinet_key:
             logger.info(f" Using JAKINET API key (ARTACOMINDO account) for {pelanggan.nama} (JELANTIK NAGRAK - ajn-03)")
             api_key = jakinet_key
+
+    # Fallback untuk brand yang tidak dikenal tapi mengandung "JELANTIK" atau "NAGRAK"
+    elif not api_key and target_key_name:
+        if "jelantik" in target_key_name.lower() and "nagrak" in target_key_name.lower():
+            # Coba pakai JAKINET API key untuk JELANTIK NAGRAK
+            jakinet_key = settings.XENDIT_API_KEYS.get("JAKINET")
+            if jakinet_key:
+                logger.info(f" Using JAKINET API key (fallback) for {pelanggan.nama} ({target_key_name})")
+                api_key = jakinet_key
+        elif "jelantik" in target_key_name.lower():
+            # Coba pakai JELANTIK API key untuk pure JELANTIK
+            jelantik_key = settings.XENDIT_API_KEYS.get("JELANTIK")
+            if jelantik_key:
+                logger.info(f" Using JELANTIK API key (fallback) for {pelanggan.nama} ({target_key_name})")
+                api_key = jelantik_key
+
+    # Final check jika api_key masih tidak ditemukan setelah semua fallback
+    if not api_key:
+        raise ValueError(f"Kunci API Xendit untuk '{target_key_name}' tidak ditemukan.")
 
     encoded_key = base64.b64encode(f"{api_key}:".encode("utf-8")).decode("utf-8")
     headers = {

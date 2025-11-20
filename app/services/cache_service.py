@@ -234,12 +234,10 @@ async def get_cached_harga_layanan(db: AsyncSession) -> List[Dict[str, Any]]:
     # Transform to dict for caching
     data = [
         {
-            "id": item.id,
             "id_brand": item.id_brand,
             "brand": item.brand,
-            "layanan": item.layanan,
-            "harga": float(item.harga),
-            "created_at": item.created_at.isoformat() if item.created_at else None,
+            "pajak": float(item.pajak),
+            "xendit_key_name": item.xendit_key_name,
         }
         for item in items
     ]
