@@ -321,10 +321,9 @@ class InventoryItemResponse(InventoryItemBase):
     item_type: InventoryItemType
     status: InventoryStatus
 
-
-class Config:
-    from_attributes = True
-    # Izinkan field yang tidak didefinisikan dalam model
-    extra = "allow"
-    # Izinkan assignment nilai
-    validate_assignment = True
+    class Config:
+        from_attributes = True
+        # Izinkan field yang tidak didefinisikan dalam model
+        extra = "allow"
+        # Izinkan assignment nilai
+        validate_assignment = True

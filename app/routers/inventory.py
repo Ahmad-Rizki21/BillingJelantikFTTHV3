@@ -12,6 +12,8 @@ from ..database import get_db
 from ..models.inventory_item import InventoryItem as InventoryItemModel
 from ..models.inventory_item_type import InventoryItemType as InventoryItemTypeModel
 from ..models.inventory_status import InventoryStatus as InventoryStatusModel
+from ..models.inventory_history import InventoryHistory as InventoryHistoryModel
+from ..models.user import User as UserModel
 
 # Import Skema Pydantic dengan alias
 from ..schemas.inventory import (
@@ -21,11 +23,43 @@ from ..schemas.inventory import (
     InventoryItemType as InventoryItemTypeSchema,
     InventoryStatus as InventoryStatusSchema,
 )
+from ..schemas.inventory_history import InventoryHistoryResponse
 
 # Setup logger
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/inventory", tags=["Inventory"])
+
+
+async def log_inventory_change(
+    db: AsyncSession,
+    item_id: int,
+    action: str,
+    user_id: int
+):
+    """
+    Helper function untuk mencatat perubahan inventory ke history
+    """
+    try:
+        from sqlalchemy import text
+
+        # Use direct SQL INSERT to avoid session conflicts
+        query = text("""
+            INSERT INTO inventory_history (item_id, action, user_id, timestamp)
+            VALUES (:item_id, :action, :user_id, NOW())
+        """)
+
+        await db.execute(query, {
+            "item_id": item_id,
+            "action": action,
+            "user_id": user_id
+        })
+        await db.commit()  # Commit immediately to avoid conflicts
+
+        logger.info(f"Logged inventory history: item_id={item_id}, action={action}, user_id={user_id}")
+    except Exception as e:
+        logger.error(f"Failed to log inventory history: {str(e)}")
+        # Jangan raise exception agar tidak mengganggu flow utama
 
 
 @router.post("/", response_model=InventoryItemResponse, status_code=status.HTTP_201_CREATED)
@@ -34,8 +68,14 @@ async def create_inventory_item(item: InventoryItemCreate, db: AsyncSession = De
         db_item = InventoryItemModel(**item.model_dump())
         db.add(db_item)
         await db.commit()
+
+        # Log history
+        action_text = f"Created item - SN: {db_item.serial_number}, Type ID: {db_item.item_type_id}, Location: {db_item.location or 'Not set'}"
+        await log_inventory_change(db, db_item.id, action_text, user_id=1)  # TODO: Get actual user ID
+
         # Muat relasi secara eksplisit setelah commit
         await db.refresh(db_item, ["item_type", "status"])
+
         logger.info(f"Created inventory item with ID: {db_item.id}")
         return db_item
     except Exception as e:
@@ -76,11 +116,35 @@ async def update_inventory_item(item_id: int, item_update: InventoryItemUpdate, 
             raise HTTPException(status_code=404, detail="Item not found")
 
         update_data = item_update.model_dump(exclude_unset=True)
+        changes = []
+
+        # Track changes before applying
+        for key, value in update_data.items():
+            old_value = getattr(db_item, key)
+            if old_value != value:
+                if key == 'status_id':
+                    changes.append(f"Status changed from {old_value} to {value}")
+                elif key == 'location':
+                    changes.append(f"Location changed from '{old_value}' to '{value}'")
+                elif key == 'item_type_id':
+                    changes.append(f"Type changed from {old_value} to {value}")
+                else:
+                    changes.append(f"{key} changed from '{old_value}' to '{value}'")
+
+        # Apply updates
         for key, value in update_data.items():
             setattr(db_item, key, value)
 
         await db.commit()
+
+        # Log history if there are changes
+        if changes:
+            action_text = f"Updated item - SN: {db_item.serial_number}, Changes: {', '.join(changes)}"
+            await log_inventory_change(db, db_item.id, action_text, user_id=1)  # TODO: Get actual user ID
+
+        # Refresh relationships for response
         await db.refresh(db_item, ["item_type", "status"])
+
         logger.info(f"Updated inventory item with ID: {db_item.id}")
         return db_item
     except HTTPException:
@@ -100,8 +164,17 @@ async def delete_inventory_item(item_id: int, db: AsyncSession = Depends(get_db)
         db_item = await db.get(InventoryItemModel, item_id)
         if not db_item:
             raise HTTPException(status_code=404, detail="Item not found")
+
+        # Save info for history before deleting
+        item_info = f"SN: {db_item.serial_number}, Type ID: {db_item.item_type_id}, Location: {db_item.location or 'Not set'}"
+
+        # Log history before delete
+        action_text = f"Deleted item - {item_info}"
+        await log_inventory_change(db, item_id, action_text, user_id=1)  # TODO: Get actual user ID
+
         await db.delete(db_item)
         await db.commit()
+
         logger.info(f"Deleted inventory item with ID: {item_id}")
         return
     except HTTPException:
@@ -226,4 +299,86 @@ async def validate_barcode(barcode_data: dict, db: AsyncSession = Depends(get_db
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to validate barcode: {str(e)}",
+        )
+
+
+@router.get("/{item_id}/history", response_model=List[InventoryHistoryResponse])
+async def get_inventory_history(item_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Mendapatkan history perubahan untuk inventory item tertentu
+    """
+    try:
+        # Cek apakah item ada
+        item = await db.get(InventoryItemModel, item_id)
+        if not item:
+            raise HTTPException(status_code=404, detail="Inventory item not found")
+
+        # Query history dengan relasi user
+        query = (
+            select(InventoryHistoryModel)
+            .options(selectinload(InventoryHistoryModel.user))
+            .where(InventoryHistoryModel.item_id == item_id)
+            .order_by(InventoryHistoryModel.timestamp.desc())
+        )
+        result = await db.execute(query)
+        history_items = result.scalars().all()
+
+        logger.info(f"Retrieved {len(history_items)} history items for inventory item {item_id}")
+        return history_items
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving inventory history for item {item_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve inventory history: {str(e)}",
+        )
+
+
+@router.get("/history/all", response_model=List[dict])
+async def get_all_inventory_history(db: AsyncSession = Depends(get_db)):
+    """
+    Mendapatkan semua history inventory dari semua item dengan informasi item
+    """
+    try:
+        # Query all history dengan join ke item dan user
+        query = (
+            select(
+                InventoryHistoryModel,
+                InventoryItemModel.serial_number,
+                InventoryItemModel.mac_address
+            )
+            .join(InventoryItemModel, InventoryHistoryModel.item_id == InventoryItemModel.id)
+            .options(selectinload(InventoryHistoryModel.user))
+            .order_by(InventoryHistoryModel.timestamp.desc())
+        )
+        result = await db.execute(query)
+        history_rows = result.all()
+
+        # Format response
+        history_items = []
+        for history_row in history_rows:
+            history, serial_number, mac_address = history_row
+            history_items.append({
+                "id": history.id,
+                "item_id": history.item_id,
+                "action": history.action,
+                "timestamp": history.timestamp,
+                "serial_number": serial_number,
+                "mac_address": mac_address,
+                "user": {
+                    "id": history.user.id if history.user else None,
+                    "name": history.user.name if history.user else "System"
+                }
+            })
+
+        logger.info(f"Retrieved {len(history_items)} total history items")
+        return history_items
+
+    except Exception as e:
+        logger.error(f"Error retrieving all inventory history: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve inventory history: {str(e)}",
         )

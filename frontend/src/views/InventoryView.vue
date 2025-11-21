@@ -46,6 +46,10 @@
           <v-icon start size="22">mdi-tag-outline</v-icon>
           <span class="tab-text">Kelola Status</span>
         </v-tab>
+        <v-tab value="history" class="tab-item">
+          <v-icon start size="22">mdi-history</v-icon>
+          <span class="tab-text">History Pergerakan</span>
+        </v-tab>
       </v-tabs>
 
       <v-divider></v-divider>
@@ -60,13 +64,13 @@
               <h2 class="content-title">Daftar Perangkat</h2>
               <p class="content-subtitle">Kelola semua perangkat inventaris</p>
             </div>
-            <div class="d-flex flex-wrap align-center gap-4">
+            <div class="d-flex flex-wrap align-center gap-3">
               <v-btn
                 variant="tonal"
                 color="teal"
                 @click="exportToExcel"
                 prepend-icon="mdi-file-excel"
-                class="add-btn secondary-action-btn"
+                class="add-btn secondary-action-btn me-2"
                 elevation="0"
               >
                 <span class="btn-text">Export to Excel</span>
@@ -76,14 +80,14 @@
                 color="purple"
                 @click="openMultipleScanner"
                 prepend-icon="mdi-barcode-multiple"
-                class="add-btn secondary-action-btn"
+                class="add-btn secondary-action-btn me-2"
                 elevation="0"
               >
                 <span class="btn-text">Multi Scan</span>
               </v-btn>
               <v-btn
                 color="primary"
-                class="add-btn"
+                class="add-btn ms-1"
                 elevation="2"
                 @click="openItemDialog()"
               >
@@ -119,6 +123,20 @@
                 class="flex-grow-1"
                 style="min-width: 200px;"
               ></v-select>
+              <v-select
+                v-model="selectedStatus"
+                :items="statuses"
+                item-title="name"
+                item-value="id"
+                label="Filter Status Perangkat"
+                variant="outlined"
+                density="comfortable"
+                hide-details
+                clearable
+                class="flex-grow-1"
+                style="min-width: 200px;"
+                prepend-inner-icon="mdi-tag-outline"
+              ></v-select>
               <v-btn variant="text" @click="resetFilters" class="text-none">
                 Reset Filter
               </v-btn>
@@ -126,11 +144,11 @@
           </v-card>
 
           <div class="table-container">
-            <v-data-table 
-              :headers="itemHeaders" 
-              :items="filteredInventoryItems" 
+            <v-data-table
+              :headers="itemHeaders"
+              :items="filteredInventoryItems"
               :loading="loading"
-              class="modern-table"
+              class="modern-table elegant-table"
               :items-per-page="15"
               :mobile-breakpoint="768"
             >
@@ -175,37 +193,67 @@
                   <span>{{ item.location || '-' }}</span>
                 </div>
               </template>
+
+              <template v-slot:item.purchase_date="{ item }">
+                <div class="date-wrapper">
+                  <v-icon v-if="item.purchase_date" size="16" class="me-1 text-medium-emphasis">mdi-calendar</v-icon>
+                  <span v-if="item.purchase_date">
+                    {{ new Date(item.purchase_date).toLocaleDateString('id-ID', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    }) }}
+                  </span>
+                  <span v-else class="text-medium-emphasis">-</span>
+                </div>
+              </template>
               
               <template v-slot:item.actions="{ item }">
-                <div class="action-buttons">
+                <div class="action-buttons justify-center">
+                  <v-tooltip text="History">
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        icon
+                        size="small"
+                        variant="text"
+                        color="info"
+                        class="action-btn-small"
+                        v-bind="props"
+                        @click="showHistory(item)"
+                      >
+                        <v-icon size="18">mdi-history</v-icon>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+
                   <v-tooltip text="Edit">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="primary"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="openItemDialog(item)"
                       >
-                        <v-icon size="20">mdi-pencil</v-icon>
+                        <v-icon size="18">mdi-pencil</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
-                  
+
                   <v-tooltip text="Hapus">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="error"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="deleteItem(item)"
                       >
-                        <v-icon size="20">mdi-delete</v-icon>
+                        <v-icon size="18">mdi-delete</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -229,8 +277,8 @@
               <h2 class="content-title">Tipe Item yang Tersedia</h2>
               <p class="content-subtitle">Kelola kategori perangkat inventaris</p>
             </div>
-            <v-btn 
-              color="primary" 
+            <v-btn
+              color="primary"
               class="add-btn"
               elevation="2"
               @click="openTypeDialog()"
@@ -241,11 +289,11 @@
           </div>
 
           <div class="table-container">
-            <v-data-table 
-              :headers="typeHeaders" 
-              :items="itemTypes" 
+            <v-data-table
+              :headers="typeHeaders"
+              :items="itemTypes"
               :loading="loading"
-              class="modern-table"
+              class="modern-table elegant-table"
               :items-per-page="15"
               :mobile-breakpoint="768"
             >
@@ -261,35 +309,35 @@
               </template>
               
               <template v-slot:item.actions="{ item }">
-                <div class="action-buttons">
+                <div class="action-buttons justify-center">
                   <v-tooltip text="Edit">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="primary"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="openTypeDialog(item)"
                       >
-                        <v-icon size="20">mdi-pencil</v-icon>
+                        <v-icon size="18">mdi-pencil</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
-                  
+
                   <v-tooltip text="Hapus">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="error"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="deleteType(item)"
                       >
-                        <v-icon size="20">mdi-delete</v-icon>
+                        <v-icon size="18">mdi-delete</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -313,8 +361,8 @@
               <h2 class="content-title">Status Inventaris yang Tersedia</h2>
               <p class="content-subtitle">Kelola status kondisi perangkat</p>
             </div>
-            <v-btn 
-              color="primary" 
+            <v-btn
+              color="primary"
               class="add-btn"
               elevation="2"
               @click="openStatusDialog()"
@@ -325,11 +373,11 @@
           </div>
 
           <div class="table-container">
-            <v-data-table 
-              :headers="statusHeaders" 
-              :items="statuses" 
+            <v-data-table
+              :headers="statusHeaders"
+              :items="statuses"
               :loading="loading"
-              class="modern-table"
+              class="modern-table elegant-table"
               :items-per-page="15"
               :mobile-breakpoint="768"
             >
@@ -351,35 +399,35 @@
               </template>
               
               <template v-slot:item.actions="{ item }">
-                <div class="action-buttons">
+                <div class="action-buttons justify-center">
                   <v-tooltip text="Edit">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="primary"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="openStatusDialog(item)"
                       >
-                        <v-icon size="20">mdi-pencil</v-icon>
+                        <v-icon size="18">mdi-pencil</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
-                  
+
                   <v-tooltip text="Hapus">
                     <template v-slot:activator="{ props }">
                       <v-btn
                         icon
-                        size="default"
+                        size="small"
                         variant="text"
                         color="error"
-                        class="action-btn"
+                        class="action-btn-small"
                         v-bind="props"
                         @click="deleteStatus(item)"
                       >
-                        <v-icon size="20">mdi-delete</v-icon>
+                        <v-icon size="18">mdi-delete</v-icon>
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -395,289 +443,831 @@
             </v-data-table>
           </div>
         </v-window-item>
+
+        <!-- History Pergerakan Tab -->
+        <v-window-item value="history" class="tab-content">
+          <div class="content-header">
+            <div class="content-title-wrapper">
+              <h2 class="content-title">History Pergerakan Perangkat</h2>
+              <p class="content-subtitle">Lihat semua pergerakan dan perubahan status perangkat</p>
+            </div>
+          </div>
+
+          <!-- Global History Filter -->
+          <v-card class="filter-card mb-6" elevation="0">
+            <div class="d-flex flex-wrap align-center gap-4 pa-4">
+              <v-text-field
+                v-model="historySearchQuery"
+                label="Cari (SN, Lokasi, Aksi)"
+                prepend-inner-icon="mdi-magnify"
+                variant="outlined"
+                density="comfortable"
+                hide-details
+                class="flex-grow-1"
+                style="min-width: 250px;"
+              ></v-text-field>
+              <v-select
+                v-model="selectedHistoryType"
+                :items="historyActionTypes"
+                item-title="label"
+                item-value="value"
+                label="Filter Tipe Aksi"
+                variant="outlined"
+                density="comfortable"
+                hide-details
+                clearable
+                class="flex-grow-1"
+                style="min-width: 200px;"
+              ></v-select>
+              <v-btn variant="text" @click="resetHistoryFilters" class="text-none">
+                Reset Filter
+              </v-btn>
+            </div>
+          </v-card>
+
+          <div class="table-container">
+            <v-data-table
+              :headers="globalHistoryHeaders"
+              :items="filteredGlobalHistory"
+              :loading="globalHistoryLoading"
+              class="modern-table elegant-table"
+              :items-per-page="20"
+              :mobile-breakpoint="768"
+            >
+              <template v-slot:loading>
+                <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
+              </template>
+
+              <template v-slot:item.timestamp="{ item }">
+                <div class="timestamp-wrapper">
+                  <v-icon size="14" class="me-1 text-medium-emphasis">mdi-clock</v-icon>
+                  <span>{{ new Date(item.timestamp).toLocaleString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  }) }}</span>
+                </div>
+              </template>
+
+              <template v-slot:item.serial_number="{ item }">
+                <div class="serial-wrapper">
+                  <code class="serial-code">{{ item.serial_number }}</code>
+                </div>
+              </template>
+
+              <template v-slot:item.action="{ item }">
+                <div class="action-wrapper">
+                  <v-chip
+                    :color="getActionColor(item.action)"
+                    size="small"
+                    variant="elevated"
+                    class="action-chip"
+                  >
+                    {{ getActionType(item.action) }}
+                  </v-chip>
+                  <div class="action-details mt-1 text-caption">
+                    {{ getActionDetails(item.action) }}
+                  </div>
+                </div>
+              </template>
+
+              <template v-slot:item.user="{ item }">
+                <div class="user-wrapper">
+                  <v-avatar size="24" class="me-2" color="primary">
+                    <v-icon size="14" color="white">mdi-account</v-icon>
+                  </v-avatar>
+                  <span class="text-body-2">{{ item.user?.name || 'System' }}</span>
+                </div>
+              </template>
+
+              <template v-slot:no-data>
+                <div class="no-data-wrapper">
+                  <v-icon size="64" class="text-medium-emphasis mb-3">mdi-history</v-icon>
+                  <p class="text-medium-emphasis no-data-text">Belum ada history pergerakan perangkat</p>
+                </div>
+              </template>
+            </v-data-table>
+          </div>
+        </v-window-item>
       </v-window>
     </v-card>
   </div>
 
     <!-- Item Dialog -->
-    <v-dialog v-model="itemDialog" :max-width="isMobile ? '95vw' : '700px'" persistent>
-      <v-card class="dialog-card">
-        <v-card-title class="dialog-header">
-          <v-icon class="me-3" color="primary">mdi-package-variant-closed</v-icon>
-          <span>{{ formItemTitle }}</span>
-          <v-spacer></v-spacer>
-          <v-btn
-            icon
-            variant="text"
-            size="small"
-            @click="closeItemDialog"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-        
-        <v-divider></v-divider>
-        
-        <v-card-text class="dialog-content">
-          <v-row>
-            <v-col cols="12" md="6">
-              <div class="d-flex gap-2">
-                <v-text-field
-                  v-model="editedItem.serial_number"
-                  label="Serial Number"
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-identifier"
-                  class="form-field flex-grow-1"
-                ></v-text-field>
+    <v-dialog v-model="itemDialog" :max-width="isMobile ? '95vw' : '800px'" persistent>
+      <v-card class="modern-dialog-card">
+        <!-- Enhanced Header -->
+        <div class="dialog-modern-header">
+          <div class="header-gradient-bg">
+            <div class="header-content">
+              <div class="dialog-header-left">
+                <div class="dialog-avatar-wrapper">
+                  <v-avatar size="56" class="dialog-avatar">
+                    <v-icon size="32" color="white">mdi-package-variant-closed-plus</v-icon>
+                  </v-avatar>
+                </div>
+                <div class="dialog-title-section">
+                  <h2 class="dialog-main-title">{{ formItemTitle }}</h2>
+                  <p class="dialog-subtitle">
+                    {{ editedItem.id ? 'Edit informasi perangkat yang sudah ada' : 'Tambahkan perangkat baru ke sistem inventaris' }}
+                  </p>
+                </div>
+              </div>
+              <div class="dialog-header-right">
                 <v-btn
-                  color="primary"
-                  variant="outlined"
-                  height="40"
-                  min-width="40"
-                  @click="openSerialScanner"
-                  class="scanner-btn"
+                  icon
+                  variant="text"
+                  size="large"
+                  @click="closeItemDialog"
+                  class="close-btn-modern"
                 >
-                  <v-icon>mdi-barcode-scan</v-icon>
+                  <v-icon size="24" color="white">mdi-close</v-icon>
                 </v-btn>
               </div>
-            </v-col>
-            <v-col cols="12" md="6">
-              <div class="d-flex gap-2">
-                <v-text-field
-                  v-model="editedItem.mac_address"
-                  label="MAC Address"
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-network-outline"
-                  class="form-field flex-grow-1"
-                  hint="Format: AA:BB:CC:DD:EE:FF"
-                  persistent-hint
-                ></v-text-field>
-                <v-btn
-                  color="primary"
-                  variant="outlined"
-                  height="40"
-                  min-width="40"
-                  @click="openMacScanner"
-                  class="scanner-btn"
-                >
-                  <v-icon>mdi-barcode-scan</v-icon>
-                </v-btn>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <v-card-text class="dialog-modern-content pa-0">
+          <!-- Device Identification Section -->
+          <div class="form-section">
+            <div class="section-header-modern">
+              <div class="section-icon-wrapper primary-section">
+                <v-icon size="20" color="white">mdi-fingerprint</v-icon>
               </div>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-select 
-                v-model="editedItem.item_type_id" 
-                :items="itemTypes" 
-                item-title="name" 
-                item-value="id" 
-                label="Tipe Item" 
-                variant="outlined" 
-                density="comfortable"
-                prepend-inner-icon="mdi-shape"
-                class="form-field"
-              ></v-select>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-select 
-                v-model="editedItem.status_id" 
-                :items="statuses" 
-                item-title="name" 
-                item-value="id" 
-                label="Status" 
-                variant="outlined" 
-                density="comfortable"
-                prepend-inner-icon="mdi-tag"
-                class="form-field"
-              ></v-select>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field 
-                v-model="editedItem.location" 
-                label="Lokasi" 
-                variant="outlined" 
-                density="comfortable"
-                prepend-inner-icon="mdi-map-marker"
-                class="form-field"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-textarea 
-                v-model="editedItem.notes" 
-                label="Catatan" 
-                rows="3" 
-                variant="outlined"
-                density="comfortable"
-                prepend-inner-icon="mdi-note-text"
-                class="form-field"
-              ></v-textarea>
-            </v-col>
-          </v-row>
+              <div class="section-content">
+                <h3 class="section-title">Identifikasi Perangkat</h3>
+                <p class="section-description">Informasi unik untuk identifikasi perangkat</p>
+              </div>
+            </div>
+
+            <v-row class="mt-4">
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">Serial Number <span class="required-star">*</span></label>
+                  <div class="scanner-field-wrapper">
+                    <v-text-field
+                      v-model="editedItem.serial_number"
+                      placeholder="Masukkan serial number perangkat"
+                      variant="outlined"
+                      density="comfortable"
+                      prepend-inner-icon="mdi-identifier"
+                      class="modern-text-field"
+                      hide-details
+                    ></v-text-field>
+                    <v-btn
+                      @click="openSerialScanner"
+                      class="scanner-action-btn"
+                      variant="tonal"
+                      color="primary"
+                      size="default"
+                    >
+                      <v-icon>mdi-barcode-scan</v-icon>
+                    </v-btn>
+                  </div>
+                  <div class="field-hint">Scan barcode atau ketik manual</div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">MAC Address</label>
+                  <div class="scanner-field-wrapper">
+                    <v-text-field
+                      v-model="editedItem.mac_address"
+                      placeholder="AA:BB:CC:DD:EE:FF"
+                      variant="outlined"
+                      density="comfortable"
+                      prepend-inner-icon="mdi-network-outline"
+                      class="modern-text-field"
+                      hide-details
+                    ></v-text-field>
+                    <v-btn
+                      @click="openMacScanner"
+                      class="scanner-action-btn"
+                      variant="tonal"
+                      color="primary"
+                      size="default"
+                    >
+                      <v-icon>mdi-barcode-scan</v-icon>
+                    </v-btn>
+                  </div>
+                  <div class="field-hint">Format: AA:BB:CC:DD:EE:FF (opsional)</div>
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- Device Classification Section -->
+          <div class="form-section">
+            <div class="section-header-modern">
+              <div class="section-icon-wrapper secondary-section">
+                <v-icon size="20" color="white">mdi-shape-outline</v-icon>
+              </div>
+              <div class="section-content">
+                <h3 class="section-title">Klasifikasi Perangkat</h3>
+                <p class="section-description">Kategori dan status perangkat</p>
+              </div>
+            </div>
+
+            <v-row class="mt-4">
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">Tipe Item <span class="required-star">*</span></label>
+                  <v-select
+                    v-model="editedItem.item_type_id"
+                    :items="itemTypes"
+                    item-title="name"
+                    item-value="id"
+                    placeholder="Pilih tipe perangkat"
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-shape"
+                    class="modern-select"
+                    hide-details
+                  ></v-select>
+                  <div class="field-hint">Pilih kategori perangkat yang sesuai</div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">Status <span class="required-star">*</span></label>
+                  <v-select
+                    v-model="editedItem.status_id"
+                    :items="statuses"
+                    item-title="name"
+                    item-value="id"
+                    placeholder="Pilih status perangkat"
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-tag"
+                    class="modern-select"
+                    hide-details
+                  ></v-select>
+                  <div class="field-hint">Status kondisi perangkat saat ini</div>
+                </div>
+              </v-col>
+            </v-row>
+          </div>
+
+          <!-- Location & Details Section -->
+          <div class="form-section">
+            <div class="section-header-modern">
+              <div class="section-icon-wrapper accent-section">
+                <v-icon size="20" color="white">mdi-map-marker-multiple</v-icon>
+              </div>
+              <div class="section-content">
+                <h3 class="section-title">Lokasi & Detail</h3>
+                <p class="section-description">Informasi lokasi dan detail tambahan</p>
+              </div>
+            </div>
+
+            <v-row class="mt-4">
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">Lokasi</label>
+                  <v-text-field
+                    v-model="editedItem.location"
+                    placeholder="Masukkan lokasi perangkat"
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-map-marker"
+                    class="modern-text-field"
+                    hide-details
+                  ></v-text-field>
+                  <div class="field-hint">Lokasi penyimpanan atau pemasangan</div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="field-group">
+                  <label class="field-label">Tanggal Pembelian</label>
+                  <v-text-field
+                    v-model="editedItem.purchase_date"
+                    type="date"
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-calendar"
+                    class="modern-text-field"
+                    hide-details
+                  ></v-text-field>
+                  <div class="field-hint">Tanggal pembelian perangkat (opsional)</div>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="field-group">
+                  <label class="field-label">Catatan Tambahan</label>
+                  <v-textarea
+                    v-model="editedItem.notes"
+                    placeholder="Tambahkan catatan atau informasi tambahan tentang perangkat ini..."
+                    rows="3"
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-note-text"
+                    class="modern-textarea"
+                    hide-details
+                    auto-grow
+                  ></v-textarea>
+                  <div class="field-hint">Informasi tambahan yang relevan (opsional)</div>
+                </div>
+              </v-col>
+            </v-row>
+          </div>
         </v-card-text>
-        
+
         <v-divider></v-divider>
         
-        <v-card-actions class="dialog-actions">
-          <v-spacer></v-spacer>
-          <v-btn 
-            variant="text" 
-            color="grey-darken-1"
-            @click="closeItemDialog"
-            class="cancel-btn"
-          >
-            Batal
-          </v-btn>
-          <v-btn 
-            color="primary" 
-            variant="elevated"
-            @click="saveItem" 
-            :loading="saving"
-            class="save-btn"
-          >
-            <v-icon start v-if="!saving">mdi-content-save</v-icon>
-            Simpan
-          </v-btn>
+        <!-- Enhanced Actions -->
+        <v-card-actions class="dialog-modern-actions">
+          <div class="actions-left">
+            <v-btn
+              variant="text"
+              color="medium-emphasis"
+              @click="closeItemDialog"
+              class="modern-cancel-btn"
+              prepend-icon="mdi-close-circle"
+            >
+              Batal
+            </v-btn>
+          </div>
+          <div class="actions-right">
+            <v-btn
+              color="primary"
+              variant="elevated"
+              @click="saveItem"
+              :loading="saving"
+              class="modern-save-btn"
+              prepend-icon="mdi-content-save"
+              size="large"
+            >
+              {{ editedItem.id ? 'Perbarui Item' : 'Tambah Item' }}
+            </v-btn>
+          </div>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Type Dialog -->
-    <v-dialog v-model="typeDialog" :max-width="isMobile ? '95vw' : '550px'" persistent>
-      <v-card class="dialog-card">
-        <v-card-title class="dialog-header">
-          <v-icon class="me-3" color="primary">mdi-shape</v-icon>
-          <span>{{ formTypeTitle }}</span>
-          <v-spacer></v-spacer>
-          <v-btn
-            icon
-            variant="text"
-            size="small"
-            @click="closeTypeDialog"
-          >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-        
-        <v-divider></v-divider>
-        
-        <v-card-text class="dialog-content">
-          <v-text-field 
-            v-model="editedType.name" 
-            label="Nama Tipe" 
-            variant="outlined"
-            density="comfortable"
-            prepend-inner-icon="mdi-shape"
-            class="form-field"
-          ></v-text-field>
+    <v-dialog v-model="typeDialog" :max-width="isMobile ? '95vw' : '600px'" persistent>
+      <v-card class="modern-dialog-card">
+        <!-- Enhanced Header -->
+        <div class="dialog-modern-header">
+          <div class="header-gradient-bg">
+            <div class="header-content">
+              <div class="dialog-header-left">
+                <div class="dialog-avatar-wrapper">
+                  <v-avatar size="56" class="dialog-avatar">
+                    <v-icon size="32" color="white">mdi-shape-plus</v-icon>
+                  </v-avatar>
+                </div>
+                <div class="dialog-title-section">
+                  <h2 class="dialog-main-title">{{ formTypeTitle }}</h2>
+                  <p class="dialog-subtitle">
+                    {{ editedType.id ? 'Edit kategori perangkat yang sudah ada' : 'Tambahkan kategori baru untuk perangkat inventaris' }}
+                  </p>
+                </div>
+              </div>
+              <div class="dialog-header-right">
+                <v-btn
+                  icon
+                  variant="text"
+                  size="large"
+                  @click="closeTypeDialog"
+                  class="close-btn-modern"
+                >
+                  <v-icon size="24" color="white">mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <v-card-text class="dialog-modern-content pa-0">
+          <!-- Category Information Section -->
+          <div class="form-section">
+            <div class="section-header-modern">
+              <div class="section-icon-wrapper secondary-section">
+                <v-icon size="20" color="white">mdi-shape-outline</v-icon>
+              </div>
+              <div class="section-content">
+                <h3 class="section-title">Informasi Kategori</h3>
+                <p class="section-description">Detail kategori untuk perangkat inventaris</p>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="field-group">
+                <label class="field-label">Nama Tipe Item <span class="required-star">*</span></label>
+                <v-text-field
+                  v-model="editedType.name"
+                  placeholder="Masukkan nama kategori perangkat"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-shape"
+                  class="modern-text-field"
+                  hide-details
+                ></v-text-field>
+                <div class="field-hint">
+                  Contoh: ONT, Router, Switch, Access Point, dll.
+                </div>
+              </div>
+
+              <!-- Additional Info Cards -->
+              <div class="info-cards-grid mt-6">
+                <div class="info-card-item">
+                  <div class="info-icon-wrapper">
+                    <v-icon size="20" color="primary">mdi-information-outline</v-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-title">Penting</div>
+                    <div class="info-text">Nama tipe akan digunakan untuk mengelompokkan perangkat dalam sistem inventaris</div>
+                  </div>
+                </div>
+
+                <div class="info-card-item">
+                  <div class="info-icon-wrapper">
+                    <v-icon size="20" color="success">mdi-lightbulb-outline</v-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-title">Tips</div>
+                    <div class="info-text">Gunakan nama yang deskriptif dan mudah dipahami oleh tim teknis</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </v-card-text>
-        
-        <v-divider></v-divider>
-        
-        <v-card-actions class="dialog-actions">
-          <v-spacer></v-spacer>
-          <v-btn 
-            variant="text" 
-            color="grey-darken-1"
-            @click="closeTypeDialog"
-            class="cancel-btn"
-          >
-            Batal
-          </v-btn>
-          <v-btn 
-            color="primary" 
-            variant="elevated"
-            @click="saveType" 
-            :loading="saving"
-            class="save-btn"
-          >
-            <v-icon start v-if="!saving">mdi-content-save</v-icon>
-            Simpan
-          </v-btn>
+
+        <!-- Enhanced Actions -->
+        <v-card-actions class="dialog-modern-actions">
+          <div class="actions-left">
+            <v-btn
+              variant="text"
+              color="medium-emphasis"
+              @click="closeTypeDialog"
+              class="modern-cancel-btn"
+              prepend-icon="mdi-close-circle"
+            >
+              Batal
+            </v-btn>
+          </div>
+          <div class="actions-right">
+            <v-btn
+              color="primary"
+              variant="elevated"
+              @click="saveType"
+              :loading="saving"
+              class="modern-save-btn"
+              prepend-icon="mdi-content-save"
+              size="large"
+            >
+              {{ editedType.id ? 'Perbarui Tipe' : 'Tambah Tipe' }}
+            </v-btn>
+          </div>
         </v-card-actions>
       </v-card>
     </v-dialog>
     
     <!-- Status Dialog -->
-    <v-dialog v-model="statusDialog" :max-width="isMobile ? '95vw' : '550px'" persistent>
+    <v-dialog v-model="statusDialog" :max-width="isMobile ? '95vw' : '600px'" persistent>
+      <v-card class="modern-dialog-card">
+        <!-- Enhanced Header -->
+        <div class="dialog-modern-header">
+          <div class="header-gradient-bg">
+            <div class="header-content">
+              <div class="dialog-header-left">
+                <div class="dialog-avatar-wrapper">
+                  <v-avatar size="56" class="dialog-avatar">
+                    <v-icon size="32" color="white">mdi-tag-plus</v-icon>
+                  </v-avatar>
+                </div>
+                <div class="dialog-title-section">
+                  <h2 class="dialog-main-title">{{ formStatusTitle }}</h2>
+                  <p class="dialog-subtitle">
+                    {{ editedStatus.id ? 'Edit status kondisi perangkat yang sudah ada' : 'Tambahkan status baru untuk kondisi perangkat' }}
+                  </p>
+                </div>
+              </div>
+              <div class="dialog-header-right">
+                <v-btn
+                  icon
+                  variant="text"
+                  size="large"
+                  @click="closeStatusDialog"
+                  class="close-btn-modern"
+                >
+                  <v-icon size="24" color="white">mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <v-card-text class="dialog-modern-content pa-0">
+          <!-- Status Information Section -->
+          <div class="form-section">
+            <div class="section-header-modern">
+              <div class="section-icon-wrapper accent-section">
+                <v-icon size="20" color="white">mdi-tag-outline</v-icon>
+              </div>
+              <div class="section-content">
+                <h3 class="section-title">Informasi Status</h3>
+                <p class="section-description">Detail status kondisi perangkat inventaris</p>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <div class="field-group">
+                <label class="field-label">Nama Status <span class="required-star">*</span></label>
+                <v-text-field
+                  v-model="editedStatus.name"
+                  placeholder="Masukkan nama status perangkat"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-tag"
+                  class="modern-text-field"
+                  hide-details
+                ></v-text-field>
+                <div class="field-hint">
+                  Contoh: Terpasang, Rusak, Gudang, Dalam Perbaikan, dll.
+                </div>
+              </div>
+
+              <!-- Status Preview -->
+              <div class="status-preview-section mt-6">
+                <label class="field-label mb-3">Preview Status</label>
+                <div class="status-preview-wrapper">
+                  <div class="preview-label">Tampilan pada tabel:</div>
+                  <v-chip
+                    :color="getStatusColor(editedStatus.name || 'Status')"
+                    size="large"
+                    variant="elevated"
+                    class="status-preview-chip"
+                  >
+                    <v-icon start size="20">mdi-tag</v-icon>
+                    {{ editedStatus.name || 'Nama Status' }}
+                  </v-chip>
+                </div>
+              </div>
+
+              <!-- Additional Info Cards -->
+              <div class="info-cards-grid mt-6">
+                <div class="info-card-item">
+                  <div class="info-icon-wrapper">
+                    <v-icon size="20" color="warning">mdi-alert-outline</v-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-title">Perhatian</div>
+                    <div class="info-text">Status akan mempengaruhi tampilan dan filter perangkat dalam sistem</div>
+                  </div>
+                </div>
+
+                <div class="info-card-item">
+                  <div class="info-icon-wrapper">
+                    <v-icon size="20" color="info">mdi-help-circle-outline</v-icon>
+                  </div>
+                  <div class="info-content">
+                    <div class="info-title">Bantuan</div>
+                    <div class="info-text">Gunakan status yang jelas dan konsisten dengan workflow tim</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </v-card-text>
+
+        <!-- Enhanced Actions -->
+        <v-card-actions class="dialog-modern-actions">
+          <div class="actions-left">
+            <v-btn
+              variant="text"
+              color="medium-emphasis"
+              @click="closeStatusDialog"
+              class="modern-cancel-btn"
+              prepend-icon="mdi-close-circle"
+            >
+              Batal
+            </v-btn>
+          </div>
+          <div class="actions-right">
+            <v-btn
+              color="primary"
+              variant="elevated"
+              @click="saveStatus"
+              :loading="saving"
+              class="modern-save-btn"
+              prepend-icon="mdi-content-save"
+              size="large"
+            >
+              {{ editedStatus.id ? 'Perbarui Status' : 'Tambah Status' }}
+            </v-btn>
+          </div>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- History Dialog -->
+    <v-dialog v-model="historyDialog" :max-width="isMobile ? '95vw' : '900px'" persistent>
       <v-card class="dialog-card">
         <v-card-title class="dialog-header">
-          <v-icon class="me-3" color="primary">mdi-tag</v-icon>
-          <span>{{ formStatusTitle }}</span>
+          <v-icon class="me-3" color="info">mdi-history</v-icon>
+          <span>Riwayat Pergerakan Perangkat</span>
           <v-spacer></v-spacer>
           <v-btn
             icon
             variant="text"
             size="small"
-            @click="closeStatusDialog"
+            @click="historyDialog = false"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        
+
         <v-divider></v-divider>
-        
-        <v-card-text class="dialog-content">
-          <v-text-field 
-            v-model="editedStatus.name" 
-            label="Nama Status" 
-            variant="outlined"
-            density="comfortable"
-            prepend-inner-icon="mdi-tag"
-            class="form-field"
-          ></v-text-field>
+
+        <v-card-text class="dialog-content pa-6">
+          <!-- Device Info Card -->
+          <v-card class="device-info-card mb-6" elevation="2">
+            <v-card-text class="pa-4">
+              <div class="device-header">
+                <div class="device-avatar-wrapper">
+                  <v-avatar size="48" color="primary" class="elevated-avatar">
+                    <v-icon size="28" color="white">mdi-package-variant-closed</v-icon>
+                  </v-avatar>
+                </div>
+                <div class="device-info">
+                  <h3 class="device-title">
+                    {{ selectedItemForHistory?.serial_number }}
+                  </h3>
+                  <div class="device-subtitle text-medium-emphasis">
+                    Riwayat Pergerakan Perangkat
+                  </div>
+                </div>
+                <div class="flex-grow-1"></div>
+                <v-chip
+                  :color="getStatusColor(selectedItemForHistory?.status?.name || '')"
+                  variant="elevated"
+                  class="status-chip-large"
+                >
+                  <v-icon start size="16">mdi-tag</v-icon>
+                  {{ selectedItemForHistory?.status?.name || '-' }}
+                </v-chip>
+              </div>
+
+              <v-divider class="my-3"></v-divider>
+
+              <div class="device-details-grid">
+                <div class="detail-item">
+                  <div class="detail-icon-wrapper">
+                    <v-icon size="16" color="primary">mdi-shape-outline</v-icon>
+                  </div>
+                  <div class="detail-content">
+                    <div class="detail-label">Tipe Perangkat</div>
+                    <div class="detail-value">{{ selectedItemForHistory?.item_type?.name || '-' }}</div>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon-wrapper">
+                    <v-icon size="16" color="success">mdi-map-marker</v-icon>
+                  </div>
+                  <div class="detail-content">
+                    <div class="detail-label">Lokasi Saat Ini</div>
+                    <div class="detail-value">{{ selectedItemForHistory?.location || '-' }}</div>
+                  </div>
+                </div>
+
+                <div class="detail-item" v-if="selectedItemForHistory?.mac_address">
+                  <div class="detail-icon-wrapper">
+                    <v-icon size="16" color="info">mdi-network-outline</v-icon>
+                  </div>
+                  <div class="detail-content">
+                    <div class="detail-label">MAC Address</div>
+                    <div class="detail-value">{{ selectedItemForHistory?.mac_address }}</div>
+                  </div>
+                </div>
+              </div>
+            </v-card-text>
+          </v-card>
+
+          <!-- History Timeline Section -->
+          <div class="history-section">
+            <div class="section-header">
+              <div class="section-title-wrapper">
+                <v-icon class="section-icon" color="primary">mdi-timeline</v-icon>
+                <div>
+                  <h4 class="section-title">Timeline Pergerakan</h4>
+                  <p class="section-subtitle">Semua aktivitas perubahan status dan lokasi perangkat</p>
+                </div>
+              </div>
+              <v-chip
+                v-if="historyLogs.length > 0"
+                color="primary"
+                variant="tonal"
+                size="small"
+              >
+                {{ historyLogs.length }} aktivitas
+              </v-chip>
+            </div>
+
+            <v-data-table
+              :headers="historyHeaders"
+              :items="historyLogs"
+              :loading="historyLoading"
+              class="modern-table elegant-table history-table"
+              density="compact"
+              :items-per-page="10"
+              :mobile-breakpoint="768"
+            >
+            <template v-slot:loading>
+              <v-skeleton-loader type="table-row@3"></v-skeleton-loader>
+            </template>
+
+            <template v-slot:item.timestamp="{ item }">
+              <div class="timestamp-cell">
+                <div class="timestamp-icon-wrapper">
+                  <v-icon size="16" color="primary">mdi-clock-outline</v-icon>
+                </div>
+                <div class="timestamp-content">
+                  <div class="timestamp-date">
+                    {{ new Date(item.timestamp).toLocaleDateString('id-ID', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    }) }}
+                  </div>
+                  <div class="timestamp-time text-medium-emphasis">
+                    {{ new Date(item.timestamp).toLocaleTimeString('id-ID', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template v-slot:item.action="{ item }">
+              <div class="action-cell">
+                <v-chip
+                  :color="getActionColor(item.action)"
+                  size="small"
+                  variant="elevated"
+                  class="action-type-chip mb-1"
+                >
+                  <v-icon start size="12">{{ getActionIcon(item.action) }}</v-icon>
+                  {{ getActionType(item.action) }}
+                </v-chip>
+                <div class="action-details text-caption text-medium-emphasis">
+                  {{ getActionDetails(item.action) }}
+                </div>
+              </div>
+            </template>
+
+            <template v-slot:item.user="{ item }">
+              <div class="user-cell">
+                <v-avatar size="28" class="user-avatar" :color="getAvatarColor(item.user?.name)">
+                  <v-icon size="16" color="white">
+                    {{ item.user?.name ? 'mdi-account' : 'mdi-robot' }}
+                  </v-icon>
+                </v-avatar>
+                <div class="user-content">
+                  <div class="user-name">{{ item.user?.name || 'System' }}</div>
+                  <div class="user-role text-caption text-medium-emphasis">
+                    {{ item.user?.role || 'Automated' }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template v-slot:no-data>
+              <div class="no-data-wrapper pa-6">
+                <v-icon size="64" class="text-medium-emphasis mb-3">mdi-timeline-help</v-icon>
+                <h5 class="text-h6 font-weight-medium mb-2">Belum Ada Riwayat</h5>
+                <p class="text-medium-emphasis text-center">Perangkat ini belum memiliki riwayat perubahan status atau lokasi</p>
+              </div>
+            </template>
+          </v-data-table>
+        </div>
         </v-card-text>
-        
+
         <v-divider></v-divider>
-        
+
         <v-card-actions class="dialog-actions">
           <v-spacer></v-spacer>
-          <v-btn 
-            variant="text" 
+          <v-btn
+            variant="text"
             color="grey-darken-1"
-            @click="closeStatusDialog"
+            @click="historyDialog = false"
             class="cancel-btn"
           >
-            Batal
-          </v-btn>
-          <v-btn 
-            color="primary" 
-            variant="elevated"
-            @click="saveStatus" 
-            :loading="saving"
-            class="save-btn"
-          >
-            <v-icon start v-if="!saving">mdi-content-save</v-icon>
-            Simpan
+            Tutup
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-dialog v-model="historyDialog" max-width="800px">
-        <v-card>
-            <v-card-title>Riwayat Perubahan untuk SN: {{ selectedItemForHistory?.serial_number }}</v-card-title>
-            <v-card-text>
-            <v-data-table
-                :headers="historyHeaders"
-                :items="historyLogs"
-                :loading="historyLoading"
-                density="compact"
-            >
-                <template v-slot:item.timestamp="{ item }">
-                {{ new Date(item.timestamp).toLocaleString('id-ID') }}
-                </template>
-                <template v-slot:item.user="{ item }">
-                {{ item.user.name }}
-                </template>
-            </v-data-table>
-            </v-card-text>
-            <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" text @click="historyDialog = false">Tutup</v-btn>
-            </v-card-actions>
-        </v-card>
-        </v-dialog>
 
     <!-- Barcode Scanner Dialogs -->
     <BarcodeScanner
@@ -718,6 +1308,7 @@ interface InventoryItem {
   mac_address: string | null;
   location: string | null;
   notes: string | null;
+  purchase_date: string | null;
   item_type_id: number;
   status_id: number;
   item_type: ItemType;
@@ -784,15 +1375,35 @@ function handleMultipleDetected(results: { en?: string; serial?: string; mac?: s
 // --- Filter & Search State ---
 const searchQuery = ref('');
 const selectedType = ref<number | null>(null);
+const selectedStatus = ref<number | null>(null);
 
 const historyDialog = ref(false);
 const historyLoading = ref(false);
 const historyLogs = ref<any[]>([]);
 const selectedItemForHistory = ref<InventoryItem | null>(null);
 const historyHeaders = [
-  { title: 'Waktu', key: 'timestamp' },
-  { title: 'Aksi / Perubahan', key: 'action' },
-  { title: 'Oleh', key: 'user' },
+  { title: 'Waktu', key: 'timestamp', width: '160px' },
+  { title: 'Aksi', key: 'action', sortable: false, width: '150px' },
+  { title: 'Oleh', key: 'user', width: '120px' },
+];
+
+// Global History State
+const globalHistoryLoading = ref(false);
+const globalHistoryLogs = ref<any[]>([]);
+const historySearchQuery = ref('');
+const selectedHistoryType = ref<string | null>(null);
+const historyActionTypes = [
+  { label: 'Semua Aksi', value: null },
+  { label: 'Dibuat', value: 'created' },
+  { label: 'Diubah', value: 'updated' },
+  { label: 'Dihapus', value: 'deleted' },
+];
+
+const globalHistoryHeaders = [
+  { title: 'Waktu', key: 'timestamp', width: '160px' },
+  { title: 'Serial Number', key: 'serial_number', width: '140px' },
+  { title: 'Aksi', key: 'action', sortable: false, width: '150px' },
+  { title: 'Oleh', key: 'user', width: '120px' },
 ];
 
 
@@ -802,32 +1413,33 @@ const inventoryItems = ref<InventoryItem[]>([]);
 const itemDialog = ref(false);
 const editedItem = ref<Partial<InventoryItem>>({});
 const itemHeaders = [
-  { title: 'Serial Number', key: 'serial_number' },
-  { title: 'MAC Address', key: 'mac_address' },
-  { title: 'Tipe', key: 'item_type.name' },
-  { title: 'Status', key: 'status.name' },
-  { title: 'Lokasi', key: 'location' },
-  { title: 'Aksi', key: 'actions', sortable: false },
+  { title: 'Serial Number', key: 'serial_number', width: '140px' },
+  { title: 'MAC Address', key: 'mac_address', width: '120px' },
+  { title: 'Tipe', key: 'item_type.name', width: '100px' },
+  { title: 'Status', key: 'status.name', width: '100px' },
+  { title: 'Lokasi', key: 'location', width: '120px' },
+  { title: 'Tanggal Pembelian', key: 'purchase_date', width: '120px' },
+  { title: 'Aksi', key: 'actions', sortable: false, width: '100px', align: 'center' as const },
 ];
 
 // State for Item Types
 const itemTypes = ref<ItemType[]>([]);
 const typeDialog = ref(false);
 const editedType = ref<Partial<ItemType>>({});
-const typeHeaders = [ 
-  { title: 'ID', key: 'id' }, 
-  { title: 'Nama Tipe', key: 'name' }, 
-  { title: 'Aksi', key: 'actions', sortable: false }
+const typeHeaders = [
+  { title: 'ID', key: 'id', width: '60px', align: 'center' as const },
+  { title: 'Nama Tipe', key: 'name', width: '200px' },
+  { title: 'Aksi', key: 'actions', sortable: false, width: '100px', align: 'center' as const }
 ];
 
 // State for Statuses
 const statuses = ref<Status[]>([]);
 const statusDialog = ref(false);
 const editedStatus = ref<Partial<Status>>({});
-const statusHeaders = [ 
-  { title: 'ID', key: 'id' }, 
-  { title: 'Nama Status', key: 'name' }, 
-  { title: 'Aksi', key: 'actions', sortable: false }
+const statusHeaders = [
+  { title: 'ID', key: 'id', width: '60px', align: 'center' as const },
+  { title: 'Nama Status', key: 'name', width: '200px' },
+  { title: 'Aksi', key: 'actions', sortable: false, width: '100px', align: 'center' as const }
 ];
 
 // --- Computed Titles ---
@@ -840,7 +1452,7 @@ const filteredInventoryItems = computed(() => {
 
   if (searchQuery.value) {
     const lowerQuery = searchQuery.value.toLowerCase();
-    items = items.filter(item => 
+    items = items.filter(item =>
       item.serial_number.toLowerCase().includes(lowerQuery) ||
       (item.mac_address && item.mac_address.toLowerCase().includes(lowerQuery)) ||
       (item.location && item.location.toLowerCase().includes(lowerQuery))
@@ -851,7 +1463,31 @@ const filteredInventoryItems = computed(() => {
     items = items.filter(item => item.item_type_id === selectedType.value);
   }
 
+  if (selectedStatus.value) {
+    items = items.filter(item => item.status_id === selectedStatus.value);
+  }
+
   return items;
+});
+
+const filteredGlobalHistory = computed(() => {
+  let logs = globalHistoryLogs.value;
+
+  if (historySearchQuery.value) {
+    const lowerQuery = historySearchQuery.value.toLowerCase();
+    logs = logs.filter(log =>
+      log.serial_number.toLowerCase().includes(lowerQuery) ||
+      log.action.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  if (selectedHistoryType.value) {
+    logs = logs.filter(log =>
+      log.action.toLowerCase().includes(selectedHistoryType.value!)
+    );
+  }
+
+  return logs;
 });
 
 
@@ -867,8 +1503,29 @@ async function fetchData() {
     inventoryItems.value = itemsRes.data;
     itemTypes.value = typesRes.data;
     statuses.value = statusesRes.data;
-  } catch (error) { console.error("Gagal mengambil data:", error); } 
+
+    // Also fetch global history
+    await fetchGlobalHistory();
+  } catch (error) { console.error("Gagal mengambil data:", error); }
   finally { loading.value = false; }
+}
+
+async function fetchGlobalHistory() {
+  globalHistoryLoading.value = true;
+  try {
+    // Use the new efficient endpoint
+    const response = await apiClient.get('/inventory/history/all');
+    globalHistoryLogs.value = response.data;
+  } catch (error) {
+    console.error("Error fetching global history:", error);
+  } finally {
+    globalHistoryLoading.value = false;
+  }
+}
+
+function resetHistoryFilters() {
+  historySearchQuery.value = '';
+  selectedHistoryType.value = null;
 }
 
 // Methods for Inventory Items
@@ -883,14 +1540,22 @@ async function saveItem() {
   saving.value = true;
   try {
     const payload = { ...editedItem.value };
-    if (payload.id) {
-      await apiClient.patch(`/inventory/${payload.id}`, payload);
+    const itemId = payload.id;
+
+    // Remove id from payload for update requests
+    if (itemId) {
+      delete payload.id;
+      // Also remove any nested objects that shouldn't be sent
+      delete payload.item_type;
+      delete payload.status;
+
+      await apiClient.patch(`/inventory/${itemId}`, payload);
     } else {
       await apiClient.post('/inventory/', payload);
     }
     await fetchData();
     closeItemDialog();
-  } catch (e) { console.error(e); } 
+  } catch (e) { console.error(e); }
   finally { saving.value = false; }
 }
 async function deleteItem(item: InventoryItem) {
@@ -997,6 +1662,62 @@ async function exportToExcel() {
 function resetFilters() {
   searchQuery.value = '';
   selectedType.value = null;
+  selectedStatus.value = null;
+}
+
+// History functions
+async function showHistory(item: InventoryItem) {
+  selectedItemForHistory.value = item;
+  historyLoading.value = true;
+  historyDialog.value = true;
+
+  try {
+    const response = await apiClient.get(`/inventory/${item.id}/history`);
+    historyLogs.value = response.data;
+  } catch (error) {
+    console.error('Error fetching history:', error);
+    // TODO: Show error notification
+  } finally {
+    historyLoading.value = false;
+  }
+}
+
+function getActionType(action: string) {
+  if (action.toLowerCase().includes('created')) return 'Dibuat';
+  if (action.toLowerCase().includes('updated')) return 'Diubah';
+  if (action.toLowerCase().includes('deleted')) return 'Dihapus';
+  return 'Lainnya';
+}
+
+function getActionColor(action: string) {
+  if (action.toLowerCase().includes('created')) return 'success';
+  if (action.toLowerCase().includes('updated')) return 'warning';
+  if (action.toLowerCase().includes('deleted')) return 'error';
+  return 'grey';
+}
+
+function getActionDetails(action: string) {
+  // Extract details after the main action type
+  const match = action.match(/^(Created|Updated|Deleted) item - (.+)$/);
+  if (match) {
+    return match[2];
+  }
+  return action;
+}
+
+function getActionIcon(action: string) {
+  if (action.toLowerCase().includes('created')) return 'mdi-plus-circle';
+  if (action.toLowerCase().includes('updated')) return 'mdi-pencil-circle';
+  if (action.toLowerCase().includes('deleted')) return 'mdi-delete-circle';
+  return 'mdi-information';
+}
+
+function getAvatarColor(userName?: string) {
+  if (!userName) return 'grey';
+
+  const colors = ['blue', 'green', 'purple', 'orange', 'teal', 'indigo', 'pink', 'amber'];
+  const index = userName.charCodeAt(0) % colors.length;
+  return colors[index];
 }
 
 onMounted(fetchData);
@@ -1187,9 +1908,19 @@ onMounted(fetchData);
   color: rgb(var(--v-theme-teal));
 }
 
+.secondary-action-btn {
+  margin-right: 8px !important;
+  padding: 0 20px !important;
+}
+
 .secondary-action-btn:hover {
   background: rgba(var(--v-theme-teal), 0.15) !important;
   transform: translateY(-2px);
+}
+
+.add-btn.ms-1 {
+  margin-left: 4px !important;
+  padding: 0 24px !important;
 }
 
 /* === FILTER CARD === */
@@ -1228,11 +1959,11 @@ onMounted(fetchData);
 .modern-table :deep(.v-data-table-header th) {
   font-weight: 600;
   color: rgb(var(--v-theme-primary));
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(var(--v-theme-primary), 0.1);
-  padding: 20px 16px;
-  height: 60px;
+  padding: 16px 12px;
+  height: auto;
 }
 
 .modern-table :deep(.v-data-table__tr:hover) {
@@ -1240,10 +1971,35 @@ onMounted(fetchData);
 }
 
 .modern-table :deep(.v-data-table__td) {
-  padding: 20px 16px;
+  padding: 12px;
   border-bottom: 1px solid rgba(var(--v-border-color), 0.5);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.4;
+}
+
+/* Elegant Table Styling - Consistent with PelangganView */
+.elegant-table {
+  background: transparent !important;
+}
+
+.elegant-table :deep(th) {
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  opacity: 0.8;
+  border-bottom: 1px solid rgb(var(--v-theme-outline-variant)) !important;
+  padding: 16px 12px !important;
+  height: auto !important;
+}
+
+.elegant-table :deep(td) {
+  border-bottom: 1px solid rgb(var(--v-theme-outline-variant)) !important;
+  padding: 12px !important;
+  font-size: 0.875rem !important;
+}
+
+.elegant-table :deep(.v-data-table__tr:hover) {
+  background: rgba(var(--v-theme-primary), 0.04) !important;
 }
 
 /* === TABLE CELL CONTENT === */
@@ -1258,7 +2014,8 @@ onMounted(fetchData);
 .type-wrapper,
 .serial-wrapper,
 .mac-wrapper,
-.location-wrapper {
+.location-wrapper,
+.date-wrapper {
   display: flex;
   align-items: center;
 }
@@ -1296,11 +2053,11 @@ onMounted(fetchData);
 .modern-table :deep(.v-data-table-header th) {
   font-weight: 600;
   color: rgb(var(--v-theme-primary));
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   letter-spacing: 0.5px;
   border-bottom: 2px solid rgba(var(--v-theme-primary), 0.1);
-  padding: 20px 16px;
-  height: 60px;
+  padding: 16px 12px;
+  height: auto;
 }
 
 .modern-table :deep(.v-data-table__tr:hover) {
@@ -1308,10 +2065,35 @@ onMounted(fetchData);
 }
 
 .modern-table :deep(.v-data-table__td) {
-  padding: 20px 16px;
+  padding: 12px;
   border-bottom: 1px solid rgba(var(--v-border-color), 0.5);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   line-height: 1.4;
+}
+
+/* Elegant Table Styling - Consistent with PelangganView */
+.elegant-table {
+  background: transparent !important;
+}
+
+.elegant-table :deep(th) {
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  color: rgb(var(--v-theme-on-surface)) !important;
+  opacity: 0.8;
+  border-bottom: 1px solid rgb(var(--v-theme-outline-variant)) !important;
+  padding: 16px 12px !important;
+  height: auto !important;
+}
+
+.elegant-table :deep(td) {
+  border-bottom: 1px solid rgb(var(--v-theme-outline-variant)) !important;
+  padding: 12px !important;
+  font-size: 0.875rem !important;
+}
+
+.elegant-table :deep(.v-data-table__tr:hover) {
+  background: rgba(var(--v-theme-primary), 0.04) !important;
 }
 
 /* === TABLE CELL CONTENT === */
@@ -1326,7 +2108,8 @@ onMounted(fetchData);
 .type-wrapper,
 .serial-wrapper,
 .mac-wrapper,
-.location-wrapper {
+.location-wrapper,
+.date-wrapper {
   display: flex;
   align-items: center;
 }
@@ -1367,17 +2150,23 @@ onMounted(fetchData);
 /* === ACTION BUTTONS === */
 .action-buttons {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
-.action-btn {
-  border-radius: 8px;
+.action-buttons.justify-center {
+  justify-content: center;
+}
+
+.action-btn-small {
+  border-radius: 6px;
   transition: all 0.3s ease;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 32px;
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
 }
 
-.action-btn:hover {
+.action-btn-small:hover {
   transform: scale(1.1);
 }
 
@@ -1395,7 +2184,394 @@ onMounted(fetchData);
   margin-top: 8px;
 }
 
-/* === DIALOG STYLING === */
+/* === MODERN DIALOG STYLING === */
+
+/* Main Dialog Card */
+.modern-dialog-card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+}
+
+/* Modern Header */
+.dialog-modern-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.header-gradient-bg {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+  position: relative;
+}
+
+.header-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="modern-pattern" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="5" cy="5" r="0.5" fill="white" opacity="0.05"/><circle cx="15" cy="15" r="0.5" fill="white" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23modern-pattern)"/></svg>');
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 32px 32px 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.dialog-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.dialog-avatar-wrapper {
+  position: relative;
+}
+
+.dialog-avatar {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.dialog-title-section {
+  flex: 1;
+}
+
+.dialog-main-title {
+  color: white !important;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dialog-subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.close-btn-modern {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.close-btn-modern:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.1);
+}
+
+/* Modern Content */
+.dialog-modern-content {
+  background: rgb(var(--v-theme-surface));
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Form Sections */
+.form-section {
+  padding: 24px 32px;
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.08);
+  transition: all 0.3s ease;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.form-section:hover {
+  background: rgba(var(--v-theme-primary), 0.01);
+}
+
+.section-header-modern {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.section-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.primary-section {
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary), 0.8) 100%);
+}
+
+.secondary-section {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.accent-section {
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+.section-header-modern:hover .section-icon-wrapper {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.section-content {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+
+.section-description {
+  font-size: 0.85rem;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Modern Form Fields */
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.required-star {
+  color: rgb(var(--v-theme-error));
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.modern-text-field :deep(.v-field),
+.modern-select :deep(.v-field),
+.modern-textarea :deep(.v-field) {
+  border-radius: 12px;
+  background: rgba(var(--v-theme-surface), 0.6);
+  border: 2px solid rgba(var(--v-border-color), 0.2);
+  transition: all 0.3s ease;
+}
+
+.modern-text-field :deep(.v-field:hover),
+.modern-select :deep(.v-field:hover),
+.modern-textarea :deep(.v-field:hover) {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  background: rgba(var(--v-theme-surface), 0.8);
+}
+
+.modern-text-field :deep(.v-field--focused),
+.modern-select :deep(.v-field--focused),
+.modern-textarea :deep(.v-field--focused) {
+  border-color: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-primary), 0.1);
+}
+
+.scanner-field-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scanner-field-wrapper .modern-text-field {
+  flex: 1;
+}
+
+.scanner-action-btn {
+  height: 56px !important;
+  min-width: 56px !important;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.scanner-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: rgba(var(--v-theme-on-surface), 0.5);
+  margin-top: 6px;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* Info Cards Grid */
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.info-card-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(var(--v-theme-surface), 0.6);
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.info-card-item:hover {
+  background: rgba(var(--v-theme-primary), 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.info-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(var(--v-theme-surface), 0.8);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.info-card-item:hover .info-icon-wrapper {
+  transform: scale(1.1);
+}
+
+.info-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.info-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.info-text {
+  font-size: 0.8rem;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  line-height: 1.4;
+}
+
+/* Status Preview Section */
+.status-preview-section {
+  padding: 20px;
+  background: rgba(var(--v-theme-surface), 0.4);
+  border: 1px solid rgba(var(--v-border-color), 0.08);
+  border-radius: 12px;
+  margin-top: 24px;
+}
+
+.status-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-style: italic;
+}
+
+.status-preview-chip {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.status-preview-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Modern Actions */
+.dialog-modern-actions {
+  padding: 24px 32px;
+  background: linear-gradient(to bottom, rgba(var(--v-theme-surface), 0.5), rgba(var(--v-theme-surface), 0.8));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(var(--v-border-color), 0.1);
+}
+
+.actions-left,
+.actions-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modern-cancel-btn {
+  border-radius: 12px;
+  text-transform: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0 20px;
+  height: 48px;
+  transition: all 0.3s ease;
+}
+
+.modern-cancel-btn:hover {
+  background: rgba(var(--v-theme-error), 0.08);
+  transform: translateY(-1px);
+}
+
+.modern-save-btn {
+  border-radius: 12px;
+  text-transform: none;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0 28px;
+  height: 48px;
+  box-shadow: 0 4px 16px rgba(var(--v-theme-primary), 0.3);
+  transition: all 0.3s ease;
+}
+
+.modern-save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(var(--v-theme-primary), 0.4);
+}
+
+/* Legacy Dialog Compatibility */
 .dialog-card {
   border-radius: 16px;
   overflow: hidden;
@@ -1895,6 +3071,267 @@ onMounted(fetchData);
   min-height: 48px;
 }
 
+/* === HISTORY DIALOG STYLES === */
+
+/* Device Info Card */
+.device-info-card {
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.05) 0%, rgba(var(--v-theme-secondary), 0.05) 100%);
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  overflow: hidden;
+}
+
+.device-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.device-avatar-wrapper {
+  position: relative;
+}
+
+.elevated-avatar {
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
+  border: 3px solid white;
+}
+
+.device-info {
+  flex: 1;
+}
+
+.device-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+  letter-spacing: -0.5px;
+}
+
+.device-subtitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.status-chip-large {
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Device Details Grid */
+.device-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(var(--v-theme-surface), 0.6);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+  transition: all 0.3s ease;
+}
+
+.detail-item:hover {
+  background: rgba(var(--v-theme-primary), 0.05);
+  transform: translateY(-1px);
+}
+
+.detail-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(var(--v-theme-primary), 0.1);
+  flex-shrink: 0;
+}
+
+.detail-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgb(var(--v-theme-on-surface));
+  word-break: break-word;
+}
+
+/* History Section */
+.history-section {
+  margin-top: 24px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: rgba(var(--v-theme-surface), 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--v-border-color), 0.1);
+}
+
+.section-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-icon {
+  font-size: 24px;
+  opacity: 0.8;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+}
+
+.section-subtitle {
+  font-size: 0.8rem;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+  margin: 0;
+}
+
+/* Enhanced Table Cells */
+.timestamp-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timestamp-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(var(--v-theme-primary), 0.1);
+  flex-shrink: 0;
+}
+
+.timestamp-content {
+  flex: 1;
+}
+
+.timestamp-date {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+}
+
+.timestamp-time {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.action-cell {
+  min-width: 180px;
+}
+
+.action-type-chip {
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.action-details {
+  line-height: 1.3;
+  word-break: break-word;
+  font-size: 0.7rem;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 150px;
+}
+
+.user-avatar {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid white;
+}
+
+.user-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 0.7rem;
+  line-height: 1.2;
+}
+
+/* History Table Specific */
+.history-table :deep(.v-data-table__tr:hover) {
+  background: rgba(var(--v-theme-primary), 0.03) !important;
+}
+
+.history-table :deep(.v-data-table__td) {
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.3) !important;
+  padding: 16px 12px !important;
+  vertical-align: top;
+}
+
+/* Legacy compatibility */
+.timestamp-wrapper {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.action-wrapper {
+  min-width: 200px;
+}
+
+.action-chip {
+  font-weight: 500;
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+}
+
+.user-wrapper {
+  display: flex;
+  align-items: center;
+}
+
 /* === PRINT STYLES === */
 @media print {
   .add-btn,
@@ -1902,12 +3339,12 @@ onMounted(fetchData);
   .modern-tabs {
     display: none !important;
   }
-  
+
   .inventory-card {
     box-shadow: none;
     border: 1px solid #ccc;
   }
-  
+
   .page-title {
     color: #000 !important;
   }
