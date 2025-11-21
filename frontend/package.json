@@ -8,43 +8,32 @@
   "scripts": {
     "dev": "vite --host",
     "dev:tsc": "run-p dev \"type-check {@}\" --",
-
     "build": "vite build",
     "build:prod": "npm run build && npm run build:analyze",
     "build:analyze": "npm run build && echo '📊 Bundle analysis complete! Open dist/bundle-analysis.html'",
     "build:preview": "npm run build && npm run preview",
     "build:fast": "vite build --minify=false",
     "build:report": "npm run build && npm run analyze:bundle",
-
     "build-only": "vite build",
     "preview": "vite preview --port 4173 --host",
-
     "type-check": "vue-tsc --build",
     "type-check:watch": "vue-tsc --build --watch",
-
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "lint:check": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",
-
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
-
     "test": "vitest",
     "test:unit": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest --coverage",
     "test:e2e": "cypress run",
     "test:e2e:dev": "cypress open",
-
     "analyze:bundle": "echo '📊 Opening bundle analysis...' && xdg-open dist/bundle-analysis.html 2>/dev/null || open dist/bundle-analysis.html 2>/dev/null || echo 'Bundle analysis file: dist/bundle-analysis.html'",
     "analyze:size": "echo '💾 Total bundle size:' && du -sh dist/ && echo '📈 Largest files:' && du -sh dist/assets/*/* | sort -rh | head -10",
-
     "performance": "echo '🚀 Build performance metrics:' && npm run build && npm run analyze:size",
-
     "clean": "rm -rf dist node_modules/.vite",
     "clean:full": "rm -rf dist node_modules package-lock.json && npm install",
-
     "pre-commit": "npm run type-check && npm run lint:check && npm run format:check",
-
     "serve": "vite preview",
     "serve:https": "vite preview --https"
   },
@@ -59,6 +48,7 @@
     "@types/leaflet": "^1.9.20",
     "@types/lodash": "^4.17.20",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
+    "@zxing/library": "^0.21.3",
     "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "d3-force": "^3.0.0",

@@ -4,6 +4,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from typing import List
 import logging
+import re
 
 from ..database import get_db
 
@@ -138,4 +139,91 @@ async def get_statuses(db: AsyncSession = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve statuses: {str(e)}",
+        )
+
+
+@router.post("/validate-barcode")
+async def validate_barcode(barcode_data: dict, db: AsyncSession = Depends(get_db)):
+    """
+    Validasi dan format barcode data untuk Serial Number atau MAC Address
+    """
+    try:
+        barcode_text = barcode_data.get("barcode", "").strip()
+        barcode_type = barcode_data.get("type", "serial")  # 'serial' atau 'mac'
+
+        if not barcode_text:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Barcode text cannot be empty"
+            )
+
+        result = {
+            "original": barcode_text,
+            "type": barcode_type,
+            "valid": False,
+            "formatted": None,
+            "message": ""
+        }
+
+        if barcode_type == "mac":
+            # Clean MAC address
+            cleaned = re.sub(r'[^a-fA-F0-9]', '', barcode_text)
+
+            if len(cleaned) != 12:
+                result["message"] = "MAC Address harus terdiri dari 12 karakter hexadesimal"
+                return result
+
+            # Validate hex characters
+            if not all(c in "0123456789ABCDEF" for c in cleaned.upper()):
+                result["message"] = "MAC Address hanya boleh mengandung karakter hexadesimal (0-9, A-F)"
+                return result
+
+            # Format as AA:BB:CC:DD:EE:FF
+            formatted_mac = ":".join([cleaned[i:i+2] for i in range(0, 12, 2)]).upper()
+
+            # Check for duplicates
+            existing = await db.execute(
+                select(InventoryItemModel).where(InventoryItemModel.mac_address == formatted_mac)
+            )
+            if existing.scalar():
+                result["message"] = "MAC Address sudah terdaftar dalam sistem"
+                return result
+
+            result["valid"] = True
+            result["formatted"] = formatted_mac
+            result["message"] = "MAC Address valid"
+
+        elif barcode_type == "serial":
+            # Clean serial number
+            cleaned = re.sub(r'[^A-Za-z0-9\-_]', '', barcode_text).upper()
+
+            if not cleaned:
+                result["message"] = "Serial Number tidak valid"
+                return result
+
+            if len(cleaned) > 100:
+                result["message"] = "Serial Number terlalu panjang (maksimal 100 karakter)"
+                return result
+
+            # Check for duplicates
+            existing = await db.execute(
+                select(InventoryItemModel).where(InventoryItemModel.serial_number == cleaned)
+            )
+            if existing.scalar():
+                result["message"] = "Serial Number sudah terdaftar dalam sistem"
+                return result
+
+            result["valid"] = True
+            result["formatted"] = cleaned
+            result["message"] = "Serial Number valid"
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error validating barcode: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to validate barcode: {str(e)}",
         )

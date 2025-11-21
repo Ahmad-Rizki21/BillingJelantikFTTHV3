@@ -61,9 +61,9 @@
               <p class="content-subtitle">Kelola semua perangkat inventaris</p>
             </div>
             <div class="d-flex flex-wrap align-center gap-4">
-              <v-btn 
-                variant="tonal" 
-                color="teal" 
+              <v-btn
+                variant="tonal"
+                color="teal"
                 @click="exportToExcel"
                 prepend-icon="mdi-file-excel"
                 class="add-btn secondary-action-btn"
@@ -71,8 +71,18 @@
               >
                 <span class="btn-text">Export to Excel</span>
               </v-btn>
-              <v-btn 
-                color="primary" 
+              <v-btn
+                variant="tonal"
+                color="purple"
+                @click="openMultipleScanner"
+                prepend-icon="mdi-barcode-multiple"
+                class="add-btn secondary-action-btn"
+                elevation="0"
+              >
+                <span class="btn-text">Multi Scan</span>
+              </v-btn>
+              <v-btn
+                color="primary"
                 class="add-btn"
                 elevation="2"
                 @click="openItemDialog()"
@@ -411,24 +421,50 @@
         <v-card-text class="dialog-content">
           <v-row>
             <v-col cols="12" md="6">
-              <v-text-field 
-                v-model="editedItem.serial_number" 
-                label="Serial Number" 
-                variant="outlined" 
-                density="comfortable"
-                prepend-inner-icon="mdi-identifier"
-                class="form-field"
-              ></v-text-field>
+              <div class="d-flex gap-2">
+                <v-text-field
+                  v-model="editedItem.serial_number"
+                  label="Serial Number"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-identifier"
+                  class="form-field flex-grow-1"
+                ></v-text-field>
+                <v-btn
+                  color="primary"
+                  variant="outlined"
+                  height="40"
+                  min-width="40"
+                  @click="openSerialScanner"
+                  class="scanner-btn"
+                >
+                  <v-icon>mdi-barcode-scan</v-icon>
+                </v-btn>
+              </div>
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field 
-                v-model="editedItem.mac_address" 
-                label="MAC Address" 
-                variant="outlined" 
-                density="comfortable"
-                prepend-inner-icon="mdi-network-outline"
-                class="form-field"
-              ></v-text-field>
+              <div class="d-flex gap-2">
+                <v-text-field
+                  v-model="editedItem.mac_address"
+                  label="MAC Address"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-network-outline"
+                  class="form-field flex-grow-1"
+                  hint="Format: AA:BB:CC:DD:EE:FF"
+                  persistent-hint
+                ></v-text-field>
+                <v-btn
+                  color="primary"
+                  variant="outlined"
+                  height="40"
+                  min-width="40"
+                  @click="openMacScanner"
+                  class="scanner-btn"
+                >
+                  <v-icon>mdi-barcode-scan</v-icon>
+                </v-btn>
+              </div>
             </v-col>
             <v-col cols="12" md="6">
               <v-select 
@@ -643,6 +679,25 @@
         </v-card>
         </v-dialog>
 
+    <!-- Barcode Scanner Dialogs -->
+    <BarcodeScanner
+      v-model="isSerialScannerOpen"
+      scan-type="serial"
+      @detected="handleSerialDetected"
+    />
+
+    <BarcodeScanner
+      v-model="isMacScannerOpen"
+      scan-type="mac"
+      @detected="handleMacDetected"
+    />
+
+    <BarcodeScanner
+      v-model="isMultipleScannerOpen"
+      scan-type="multiple"
+      @multiple-detected="handleMultipleDetected"
+    />
+
   </v-container>
 </template>
 
@@ -651,6 +706,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 // XLSX akan di-import secara dinamis saat fungsi export dipanggil
 import apiClient from '@/services/api';
+import BarcodeScanner from '@/components/BarcodeScanner.vue';
+import { useBarcodeScanner } from '@/composables/useBarcodeScanner';
 
 // --- INTERFACES ---
 interface ItemType { id: number; name: string; }
@@ -675,6 +732,54 @@ const isMobile = computed(() => mobile.value);
 const tab = ref('items');
 const loading = ref(true);
 const saving = ref(false);
+
+// --- Barcode Scanner State ---
+const {
+  isSerialScannerOpen,
+  isMacScannerOpen,
+  openSerialScanner,
+  openMacScanner,
+  handleSerialDetected,
+  handleMacDetected,
+} = useBarcodeScanner({
+  onSerialDetected: (serial: string) => {
+    editedItem.value.serial_number = serial;
+  },
+  onMacDetected: (mac: string) => {
+    editedItem.value.mac_address = mac;
+  }
+});
+
+// Multiple scanner state
+const isMultipleScannerOpen = ref(false);
+
+function openMultipleScanner() {
+  // Open item dialog first if not open
+  if (!itemDialog.value) {
+    openItemDialog();
+  }
+  // Then open multiple scanner
+  isMultipleScannerOpen.value = true;
+}
+
+function handleMultipleDetected(results: { en?: string; serial?: string; mac?: string }) {
+  // Auto-fill the dialog with scanned results
+  if (results.serial) {
+    editedItem.value.serial_number = results.serial;
+  }
+  if (results.mac) {
+    editedItem.value.mac_address = results.mac;
+  }
+  // Note: EN is not used in current inventory model, but we could store it in notes
+  if (results.en) {
+    editedItem.value.notes = editedItem.value.notes
+      ? `${editedItem.value.notes}\nEN: ${results.en}`
+      : `EN: ${results.en}`;
+  }
+
+  // Show success message
+  console.log('Multiple barcode scanned:', results);
+}
 
 // --- Filter & Search State ---
 const searchQuery = ref('');
@@ -1334,6 +1439,18 @@ onMounted(fetchData);
 
 .form-field :deep(.v-field__prepend-inner) {
   padding-inline-start: 12px;
+}
+
+.scanner-btn {
+  border-radius: 8px;
+  min-width: 40px !important;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.scanner-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.3);
 }
 
 .cancel-btn {
