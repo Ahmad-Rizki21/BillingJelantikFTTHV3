@@ -11,12 +11,10 @@ class InventoryStatusCreate(InventoryStatusBase):
     pass
 
 
-# ▼▼▼ KEMUNGKINAN KELAS INI YANG HILANG DARI FILE ANDA ▼▼▼
+
 class InventoryStatusUpdate(InventoryStatusBase):
     pass
 
-
-# ▲▲▲ PASTIKAN KELAS INI ADA ▲▲▲
 
 
 class InventoryStatus(InventoryStatusBase):

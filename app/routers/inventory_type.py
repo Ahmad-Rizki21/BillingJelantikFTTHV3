@@ -13,7 +13,7 @@ from ..schemas.inventory_type import (
     InventoryItemTypeUpdate,
 )
 
-router = APIRouter(prefix="/inventory-types", tags=["Inventory Types"])
+router = APIRouter(prefix="/api/inventory-types", tags=["Inventory Types"])
 
 
 @router.post("/", response_model=InventoryItemTypeSchema, status_code=status.HTTP_201_CREATED)

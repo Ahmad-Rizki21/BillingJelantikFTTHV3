@@ -28,7 +28,7 @@ from ..schemas.inventory_history import InventoryHistoryResponse
 # Setup logger
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/inventory", tags=["Inventory"])
+router = APIRouter(prefix="/api/inventory", tags=["Inventory"])
 
 
 async def log_inventory_change(

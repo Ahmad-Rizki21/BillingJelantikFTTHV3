@@ -741,15 +741,15 @@ const menuGroups = ref([
         permission: 'view_odp_management',
         description: 'Kelola titik distribusi optik'
       },
-      { 
-        title: 'Manajemen Inventaris', 
-        icon: 'mdi-archive-outline', 
-        value: 'inventory', 
-        to: '/inventory', 
+      {
+        title: 'Manajemen Inventaris',
+        icon: 'mdi-archive-outline',
+        value: 'inventory',
+        to: '/inventory',
         permission: 'view_inventory',
         description: 'Stok perangkat & material'
-      }
-    ]
+      },
+      ]
   },
 
   { 

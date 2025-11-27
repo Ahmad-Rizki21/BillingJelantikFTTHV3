@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from .activity_log import ActivityLog  # <-- Tambahkan import ActivityLog
     from .token_blacklist import TokenBlacklist  # <-- Tambahkan import TokenBlacklist
     from .inventory_history import InventoryHistory
-
+  
 
 class User(Base):
     """
@@ -94,3 +94,5 @@ class User(Base):
     # Relasi ke InventoryHistory - History perubahan inventory yang dilakukan user ini
     # Satu user bisa punya banyak inventory history logs
     inventory_histories: Mapped[List["InventoryHistory"]] = relationship(back_populates="user")
+
+    

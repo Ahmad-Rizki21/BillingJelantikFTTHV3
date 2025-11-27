@@ -84,7 +84,7 @@ from .routers import (
     permission,        # Manajemen permission
     report,            # Laporan-laporan
     role,              # Role-based access control
-    trouble_ticket,    # Sistem trouble ticket
+      trouble_ticket,    # Sistem trouble ticket
 )
 from .routers import settings as settings_router  # Pengaturan sistem
 from .routers import (
@@ -96,6 +96,7 @@ from .routers import (
 from .routers import rate_limiter_monitor  # Rate limiter monitoring
 from .routers import whatsapp_optin  # WhatsApp opt-in management
 from .routers import user  # User management
+from .routers import error_report  # Error reporting system
 
 # WebSocket manager untuk notifikasi real-time
 from .websocket_manager import manager
@@ -136,6 +137,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 evidence_dir = os.path.join(os.getcwd(), "static", "uploads", "evidence")
 os.makedirs(evidence_dir, exist_ok=True)  # Buat folder kalo belum ada
 app.mount("/static/uploads/evidence", StaticFiles(directory=evidence_dir), name="evidence")
+
 
 # Mount evidence files at /api path for frontend compatibility
 #app.mount("/api/static/uploads/evidence", StaticFiles(directory=evidence_dir), name="evidence_api")
@@ -287,10 +289,16 @@ async def log_requests_and_activity(request: Request, call_next):
                         details = None
                         if req_body_bytes:
                             try:
-                                details = json.dumps(json.loads(req_body_bytes))
-                            except json.JSONDecodeError:
-                                # Jika bukan JSON (misal: file upload), catat placeholder
-                                details = f"[Data non-JSON, Content-Type: {request.headers.get('content-type')}]"
+                                # Hanya coba decode JSON untuk content-type application/json
+                                content_type = request.headers.get('content-type', '')
+                                if 'application/json' in content_type:
+                                    details = json.dumps(json.loads(req_body_bytes.decode('utf-8')))
+                                else:
+                                    # Skip JSON parsing untuk non-JSON content (file uploads, etc.)
+                                    details = f"[Binary data, Content-Type: {content_type}]"
+                            except (json.JSONDecodeError, UnicodeDecodeError, AttributeError) as e:
+                                # Tangkap berbagai jenis decode error
+                                details = f"[Parse error - {str(e)}, Content-Type: {request.headers.get('content-type')}"
                         log_entry = ActivityLog(
                             user_id=user.id,
                             action=f"{request.method} {request.url.path}",
@@ -696,6 +704,7 @@ app.include_router(trouble_ticket.router)
 app.include_router(traffic_monitoring.router)
 app.include_router(rate_limiter_monitor.router)
 app.include_router(whatsapp_optin.router)
+app.include_router(error_report.router)
 
 
 
@@ -703,6 +712,138 @@ app.include_router(whatsapp_optin.router)
 @app.get("/")
 def read_root():
     return {"message": "Selamat datang di API Billing System"}
+
+
+# Health Check Endpoint untuk monitoring
+@app.get("/health")
+async def health_check():
+    """
+    Simple health check endpoint untuk monitoring server status.
+    Digunakan oleh frontend untuk mengecek apakah backend online.
+    """
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "Artacom FTTH Billing System",
+        "version": "1.0.0"
+    }
+
+
+# Health Check endpoint dengan /api prefix untuk frontend compatibility
+@app.get("/api/health")
+async def health_check_api():
+    """
+    Health check endpoint dengan /api prefix.
+    Memastikan frontend bisa mengecek status backend dengan mudah.
+    """
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "Artacom FTTH Billing System",
+        "version": "1.0.0",
+        "api_version": "v1"
+    }
+
+
+# ====================================================================
+# CUSTOM 404 ERROR HANDLER
+# ====================================================================
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    """
+    Custom handler untuk 404 Not Found errors.
+    Memberikan response yang informatif untuk client yang mengakses endpoint yang tidak ada.
+    """
+    import logging
+    logger = logging.getLogger("app.error_handler")
+
+    # Log 404 error untuk monitoring
+    logger.warning(f"404 Error - Path: {request.url.path} - Method: {request.method} - IP: {request.client.host if request.client else 'unknown'}")
+
+    # Response format yang konsisten
+    return JSONResponse(
+        status_code=404,
+        content={
+            "error": {
+                "code": "NOT_FOUND",
+                "message": "Endpoint tidak ditemukan",
+                "description": f"URL '{request.method} {request.url.path}' tidak tersedia di API ini",
+                "suggestions": [
+                    "Periksa kembali URL yang Anda ketik",
+                    "Lihat dokumentasi API di /docs atau /redoc",
+                    "Pastikan method HTTP yang digunakan benar (GET, POST, PUT, DELETE)",
+                    "Hubungi IT Support jika masalah berlanjut"
+                ],
+                "available_endpoints": {
+                    "docs": "/docs (Swagger UI)",
+                    "redoc": "/redoc (ReDoc)",
+                    "health": "/ (Health Check)",
+                    "auth": "/auth/token (Authentication)",
+                    "common_api": [
+                        "/pelanggan",
+                        "/langganan",
+                        "/invoices",
+                        "/dashboard",
+                        "/mikrotik",
+                        "/reports"
+                    ]
+                },
+                "timestamp": datetime.now().isoformat(),
+                "request_id": f"404-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            }
+        },
+        headers={"Content-Type": "application/json"}
+    )
+
+
+# ====================================================================
+# GLOBAL EXCEPTION HANDLER
+# ====================================================================
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global exception handler untuk menangkap semua error yang tidak tertangani.
+    Memberikan response yang aman dan informatif tanpa exposing internal details.
+    """
+    import logging
+    logger = logging.getLogger("app.error_handler")
+
+    # Generate error ID untuk tracking
+    error_id = f"ERR-{datetime.now().strftime('%Y%m%d%H%M%S')}-{id(exc) % 10000:04d}"
+
+    # Log error detail untuk debugging
+    logger.error(
+        f"Unhandled Exception - ID: {error_id} - Path: {request.url.path} - Error: {str(exc)}",
+        exc_info=True,
+        extra={
+            "error_id": error_id,
+            "path": request.url.path,
+            "method": request.method,
+            "ip": request.client.host if request.client else "unknown",
+            "user_agent": request.headers.get("user-agent", "unknown")
+        }
+    )
+
+    # Response yang aman untuk client
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "Terjadi kesalahan pada server",
+                "description": "Sistem sedang mengalami gangguan. Silakan coba lagi beberapa saat.",
+                "error_id": error_id,
+                "suggestions": [
+                    "Refresh halaman dan coba lagi",
+                    "Periksa koneksi internet Anda",
+                    "Hubungi IT Support dengan menyebutkan Error ID ini",
+                    "Coba kembali dalam beberapa menit"
+                ],
+                "timestamp": datetime.now().isoformat()
+            }
+        },
+        headers={"Content-Type": "application/json"}
+    )
 
 
 # Test endpoint untuk webhook

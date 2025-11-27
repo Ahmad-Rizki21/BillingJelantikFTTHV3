@@ -3,6 +3,7 @@
 import axios from 'axios';
 import router from '@/router'; // 1. Impor router Vue Anda
 import { getEncryptedToken, removeEncryptedToken } from '@/utils/crypto';
+import { errorStorage, networkErrorRateLimit } from './errorStorage';
 
 // Konfigurasi instance axios
 const apiClient = axios.create({
@@ -94,6 +95,133 @@ apiClient.interceptors.response.use(
 );
 // ==========================================================
 
+
+// ==========================================================
+// --- NETWORK ERROR INTERCEPTOR ---
+// ==========================================================
+apiClient.interceptors.response.use(
+  (response) => response, // Success: just return response
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Skip if it's already a network error request
+    if (originalRequest.headers?.['X-Skip-Network-Interceptor']) {
+      return Promise.reject(error);
+    }
+
+    // Rate limiting check
+    if (!networkErrorRateLimit.canRedirect()) {
+      console.warn('[Rate Limit] Too many network error redirects');
+      return Promise.reject(error);
+    }
+
+    // Handle network-related errors
+    if (!error.response && error.code === 'NETWORK_ERROR') {
+      console.error('[Network Error] Connection failed:', error.message);
+      const errorId = errorStorage.storeError('network', 0, originalRequest.url, originalRequest.method?.toUpperCase(), error.message);
+
+      router.push({
+        name: 'network-error',
+        query: { errorId }
+      });
+      return Promise.reject(error);
+    }
+
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+      console.error('[Timeout Error] Request timed out:', error.message);
+      const errorId = errorStorage.storeError('timeout', 0, originalRequest.url, originalRequest.method?.toUpperCase(), 'Request timeout - server took too long to respond');
+
+      router.push({
+        name: 'network-error',
+        query: { errorId }
+      });
+      return Promise.reject(error);
+    }
+
+    // Handle server unavailable (5xx errors)
+    if (error.response?.status >= 500) {
+      console.error('[Server Error] Server error:', error.response.status);
+
+      // Don't redirect for auth errors (let the auth interceptor handle it)
+      if (error.response.status === 401) {
+        return Promise.reject(error);
+      }
+
+      const errorId = errorStorage.storeError('server', error.response.status, originalRequest.url, originalRequest.method?.toUpperCase(), `Server error: ${error.response.status} ${error.response.statusText}`);
+
+      router.push({
+        name: 'network-error',
+        query: { errorId }
+      });
+      return Promise.reject(error);
+    }
+
+    // Handle connection refused / server down
+    if (
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ERR_CONNECTION_REFUSED' ||
+      error.message?.includes('Network Error') ||
+      error.message?.includes('fetch failed')
+    ) {
+      console.error('[Connection Error] Server unreachable:', error.message);
+      const errorId = errorStorage.storeError('network', 0, originalRequest.url, originalRequest.method?.toUpperCase(), 'Cannot connect to server - server may be down');
+
+      router.push({
+        name: 'network-error',
+        query: { errorId }
+      });
+      return Promise.reject(error);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// Health check function
+export const checkServerHealth = async () => {
+  try {
+    const response = await apiClient.get('/health', {
+      headers: { 'X-Skip-Network-Interceptor': 'true' }, // Skip network interceptor for health check
+      timeout: 5000
+    });
+    return { success: true, status: response.status, data: response.data };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message || 'Health check failed',
+      code: error.code || 'UNKNOWN'
+    };
+  }
+};
+
+// Retry mechanism for failed requests
+export const retryRequest = async (originalRequest: any, maxRetries = 3) => {
+  let retryCount = 0;
+
+  while (retryCount < maxRetries) {
+    try {
+      const response = await apiClient({
+        ...originalRequest,
+        headers: {
+          ...originalRequest.headers,
+          'X-Skip-Network-Interceptor': 'true' // Skip network interceptor for retries
+        }
+      });
+      return response;
+    } catch (error) {
+      retryCount++;
+      console.warn(`[Retry] Attempt ${retryCount}/${maxRetries} failed:`, error.message);
+
+      if (retryCount >= maxRetries) {
+        throw error;
+      }
+
+      // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+    }
+  }
+};
 
 // ==========================================================
 // --- TROUBLE TICKET API METHODS ---

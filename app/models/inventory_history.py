@@ -8,6 +8,9 @@ if TYPE_CHECKING:
 else:
     from ..database import Base
 
+if TYPE_CHECKING:
+    from .inventory_item import InventoryItem
+
 
 class InventoryHistory(Base):
     __tablename__ = "inventory_history"
@@ -20,3 +23,4 @@ class InventoryHistory(Base):
 
     # Add relationships
     user: Mapped["User"] = relationship(back_populates="inventory_histories")
+    inventory_item: Mapped["InventoryItem"] = relationship(back_populates="inventory_histories")

@@ -14,7 +14,7 @@ const router = createRouter({
       component: DefaultLayout,
       meta: { requiresAuth: true },
       children: [
-        // TAMBAHKAN INI: Jika user ke path '/', langsung arahkan ke dashboard
+        // MENAMBAHKAN path: Jika user ke path '/', langsung arahkan ke dashboard
         { path: '', redirect: '/dashboard' },
         
         // Definisikan semua halaman di sini
@@ -136,7 +136,7 @@ const router = createRouter({
           component: () => import('../views/InventoryView.vue'),
           meta: { requiresAuth: true } // Opsional: jika rute ini butuh login
         },
-        {
+          {
           path: '/dashboard-pelanggan',
           name: 'DashboardPelanggan',
           component: () => import('@/views/DashboardPelangganView.vue'),
@@ -201,6 +201,68 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
       meta: { guest: true }
     },
+
+    // Rute untuk 404 - Page Not Found (DITARUH PALING AKHIR)
+    {
+      path: '/404',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue'),
+      meta: { requiresAuth: false }
+    },
+
+    // Rute untuk Network Error (Backend/Connection issues)
+    {
+      path: '/network-error',
+      name: 'network-error',
+      component: () => import('../views/NetworkErrorView.vue'),
+      meta: { requiresAuth: false },
+      props: async (route) => {
+        // Get error details from secure storage
+        const errorId = route.query.errorId as string;
+        if (errorId) {
+          try {
+            // Dynamic import to avoid circular dependencies
+            const { errorStorage } = await import('@/services/errorStorage');
+            const errorDetails = errorStorage.getError(errorId);
+
+            if (errorDetails) {
+              return {
+                errorType: errorDetails.errorType,
+                errorStatus: errorDetails.errorStatus,
+                errorDetails: {
+                  url: errorDetails.url,
+                  method: errorDetails.method,
+                  status: errorDetails.errorStatus,
+                  message: errorDetails.message
+                }
+              };
+            }
+          } catch (error) {
+            console.warn('Failed to retrieve error details:', error);
+          }
+        }
+
+        // Fallback to generic error
+        return {
+          errorType: 'unknown',
+          errorStatus: undefined,
+          errorDetails: {
+            url: undefined,
+            method: undefined,
+            status: undefined,
+            message: undefined
+          }
+        };
+      }
+    },
+
+    // Catch all route untuk redirect ke 404 (DITARUH PALING BAWAH)
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'catch-all',
+      component: () => import('../views/NotFoundView.vue'),
+      meta: { requiresAuth: false }
+    }
   ],
 });
 

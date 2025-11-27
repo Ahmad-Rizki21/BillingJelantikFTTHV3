@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from .inventory_item_type import InventoryItemType
     from .inventory_status import InventoryStatus
     from .pelanggan import Pelanggan
+    from .inventory_history import InventoryHistory
 
 
 class InventoryItem(Base):
@@ -49,9 +50,13 @@ class InventoryItem(Base):
     status_id: Mapped[int] = mapped_column(ForeignKey("inventory_statuses.id"))
     pelanggan_id: Mapped[int | None] = mapped_column(ForeignKey("pelanggan.id"))
 
-    # --- 3. TAMBAHKAN DUA BARIS RELATIONSHIP INI ▼▼▼ ---
+    
     item_type: Mapped["InventoryItemType"] = relationship()
     status: Mapped["InventoryStatus"] = relationship()
     # Tambahkan relasi ke pelanggan
     pelanggan: Mapped["Pelanggan"] = relationship(back_populates="inventory_items")
-    # --- AKHIR BLOK TAMBAHAN ▲▲▲
+    # Tambahkan relasi ke inventory history dengan cascade delete
+    inventory_histories: Mapped[list["InventoryHistory"]] = relationship(
+        back_populates="inventory_item",
+        cascade="all, delete-orphan"
+    )

@@ -10,6 +10,8 @@ import logging
 import math
 import traceback
 import uuid
+import calendar
+import time
 from datetime import date, datetime, timedelta
 from sqlalchemy import Date as SQLDate
 
@@ -63,13 +65,28 @@ async def generate_single_invoice(db: AsyncSession, langganan: LanggananModel) -
         total_harga = harga_dasar + pajak
 
         # --- MODIFICATION FOR INVOICE NUMBER ---
-        # 1. Sanitize and shorten customer name and address
-        nama_pelanggan_singkat = re.sub(r'[^a-zA-Z0-9]', '', pelanggan.nama).upper()[:10]
-        alamat_singkat = re.sub(r'[^a-zA-Z0-9]', '', pelanggan.alamat or '').upper()[:10]
-        brand_singkat = re.sub(r'[^a-zA-Z0-9]', '', brand.brand or '').upper()[:10]
+        # 1. Sanitize and prepare customer name and address
+        import calendar
+        nama_pelanggan_singkat = re.sub(r'[^a-zA-Z0-9]', '', pelanggan.nama).upper()
+        alamat_singkat = re.sub(r'[^a-zA-Z0-9]', '', pelanggan.alamat or '').upper()
+        brand_singkat = re.sub(r'[^a-zA-Z0-9]', '', brand.brand or '').upper()
 
-        # 2. Generate new invoice number
-        nomor_invoice_baru = f"INV-{brand_singkat}-{nama_pelanggan_singkat}-{alamat_singkat}-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
+        # 2. Format untuk bulan-tahun
+        bulan_tahun = f"{calendar.month_name[date.today().month].upper()}-{date.today().year}"
+
+        # 3. Generate new invoice number (sama format dengan manual)
+        nomor_invoice_baru = f"{brand_singkat}/ftth/{nama_pelanggan_singkat}/{bulan_tahun}/{alamat_singkat}/{str(data_teknis.id_pelanggan)[-3:]}"
+
+        # 4. Check for duplicate invoice number and add timestamp if needed
+        existing_invoice_number = (await db.execute(
+            select(InvoiceModel.id).where(InvoiceModel.invoice_number == nomor_invoice_baru)
+        )).scalar_one_or_none()
+
+        if existing_invoice_number:
+            # Generate nomor unik dengan tambahan timestamp atau random
+            import time
+            timestamp = str(int(time.time()))[-6:]  # 6 digit terakhir timestamp
+            nomor_invoice_baru = f"{nomor_invoice_baru}/{timestamp}"
         # --- END OF MODIFICATION ---
 
         new_invoice_data = {

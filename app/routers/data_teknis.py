@@ -422,7 +422,6 @@ async def update_data_teknis(
     if not db_data_teknis:
         raise HTTPException(status_code=404, detail="Data Teknis not found")
 
-    # ▼▼▼ PERUBAHAN DI SINI ▼▼▼
     # Simpan ID Pelanggan (nama secret) LAMA sebelum diubah
     old_id_pelanggan = db_data_teknis.id_pelanggan
 

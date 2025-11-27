@@ -41,10 +41,8 @@ async def get_all_odps(db: AsyncSession = Depends(get_db)):
 
     query = (
         select(ODPModel, func.coalesce(subquery.c.jumlah_terpakai, 0)).outerjoin(subquery, ODPModel.id == subquery.c.odp_id)
-        # --- ▼▼▼ PERUBAHAN DI SINI ▼▼▼ ---
         # Eager load relasi 'olt' dan 'parent_odp' dalam satu query
         .options(selectinload(ODPModel.olt), selectinload(ODPModel.parent_odp))
-        # --- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ ---
         .order_by(ODPModel.kode_odp)
     )
 
@@ -58,7 +56,6 @@ async def get_all_odps(db: AsyncSession = Depends(get_db)):
     return odp_list
 
 
-# Anda bisa menambahkan endpoint GET by ID, PATCH, dan DELETE di sini
 # dengan mencontoh dari file app/routers/olt.py
 
 
@@ -69,9 +66,7 @@ async def get_odp_by_id(odp_id: int, db: AsyncSession = Depends(get_db)):
 
     query = (
         select(ODPModel, func.coalesce(subquery, 0)).filter(ODPModel.id == odp_id)
-        # --- ▼▼▼ PERUBAHAN DI SINI ▼▼▼ ---
         .options(selectinload(ODPModel.olt), selectinload(ODPModel.parent_odp))
-        # --- ▲▲▲ AKHIR PERUBAHAN ▲▲▲ ---
     )
 
     result = await db.execute(query)

@@ -1363,7 +1363,7 @@ async function importFromCsv() {
     closeImportDialog();
 
   } catch (error: any) {
-    // ▼▼▼ UBAH BAGIAN CATCH INI ▼▼▼
+    
     console.error("Gagal mengimpor data:", error);
     if (error.response?.data?.errors) {
       // Jika backend mengirimkan daftar error yang spesifik
@@ -1380,7 +1380,6 @@ async function importFromCsv() {
       // Fallback untuk error jaringan atau lainnya
       importErrors.value = ["Tidak dapat terhubung ke server atau terjadi error."];
     }
-    // ▲▲▲ AKHIR PERUBAHAN ▲▲▲
   } finally {
     importing.value = false;
   }
