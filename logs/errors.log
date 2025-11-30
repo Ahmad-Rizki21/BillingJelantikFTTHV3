@@ -6236,3 +6236,1748 @@ sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - c
 2025-11-26 22:30:37 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Parama (18.18.18.4:9729): timed out
 2025-11-26 22:30:52 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.6:9729: timed out
 2025-11-26 22:30:52 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tipar Cakung (12.12.12.6:9729): timed out
+2025-11-29 21:44:43 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 17.17.17.2:9729: timed out
+2025-11-29 21:44:43 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (17.17.17.2:9729): timed out
+2025-11-29 21:44:58 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.10:9729: timed out
+2025-11-29 21:44:58 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Pinus (12.12.12.10:9729): timed out
+2025-11-29 21:45:13 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 18.18.18.6:9729: timed out
+2025-11-29 21:45:13 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Waringin (18.18.18.6:9729): timed out
+2025-11-29 21:45:28 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 18.18.18.2:9729: timed out
+2025-11-29 21:45:28 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Nagrak (18.18.18.2:9729): timed out
+2025-11-29 21:45:43 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.2:9729: timed out
+2025-11-29 21:45:43 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Pulogebang (12.12.12.2:9729): timed out
+2025-11-29 21:45:58 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 18.18.18.4:9729: timed out
+2025-11-29 21:45:58 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Parama (18.18.18.4:9729): timed out
+2025-11-29 21:46:13 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.6:9729: timed out
+2025-11-29 21:46:13 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tipar Cakung (12.12.12.6:9729): timed out
+2025-11-29 22:05:59 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 17.17.17.2:9729: timed out
+2025-11-29 22:05:59 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (17.17.17.2:9729): timed out
+2025-11-29 22:06:14 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.10:9729: timed out
+2025-11-29 22:06:14 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Pinus (12.12.12.10:9729): timed out
+2025-11-29 22:16:27 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:16:27 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129221627-0224 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:16:37 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:16:37 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129221637-5648 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:22:19 | WEBSOCKET       | [91mERROR   [0m | websocket_notifications | [main.py] WebSocket connection error: 
+2025-11-29 22:22:31 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:22:31 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129222231-7904 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:24:32 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:24:32 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129222432-4448 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 536, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:26:50 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:26:50 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129222650-4352 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:28:50 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:28:50 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129222850-2176 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:28:55 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:28:55 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129222855-3520 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:30:35 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:30:35 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129223035-4192 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:31:14 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:31:14 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129223114-8944 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:31:54 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:31:54 | ERROR_HAN...    | [91mERROR   [0m | global_exception_handler | Unhandled Exception - ID: ERR-20251129223154-7136 - Path: /inventory/template/download - Error: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+  |     yield
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 190, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/anyio/_backends/_asyncio.py", line 678, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     )
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    |     response = await call_next(request_with_body)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    |     with collapse_excgroups():
+    |          ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    |     raise app_exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    |     raise exc
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    |     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    | AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 275, in log_requests_and_activity
+    response = await call_next(request_with_body)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 189, in __call__
+    with collapse_excgroups():
+         ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_utils.py", line 89, in collapse_excgroups
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 191, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/main.py", line 222, in maintenance_mode_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 165, in call_next
+    raise app_exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/base.py", line 151, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 148, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 65, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 754, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 774, in app
+    await route.handle(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 295, in handle
+    await self.app(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 77, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/starlette/routing.py", line 74, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/venv/lib/python3.13/site-packages/fastapi/routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ahmad/Documents/Projects/BillingJelantikFTTHV3/app/routers/inventory.py", line 537, in download_inventory_template
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'InventoryStatus' object has no attribute 'HTTP_500_INTERNAL_SERVER_ERROR'
+2025-11-29 22:34:58 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-29 22:37:37 | ROUTERS.I...    | [91mERROR   [0m | download_inventory_template | Error generating inventory template: 'Workbook' object has no attribute 'add_validation'
+2025-11-30 07:39:43 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 12.12.12.10:9729: timed out
+2025-11-30 07:39:43 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Pinus (12.12.12.10:9729): timed out
+2025-11-30 07:39:58 | SERVICES....    | [91mERROR   [0m | _get_connection      | Failed to create connection to 17.17.17.2:9729: timed out
+2025-11-30 07:39:58 | SERVICES....    | [91mERROR   [0m | get_api_connection   | Gagal mendapatkan koneksi dari pool ke Mikrotik Tambun (17.17.17.2:9729): timed out

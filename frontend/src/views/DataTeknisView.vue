@@ -1234,20 +1234,31 @@ const isEditMode = computed(() => !!editedItem.value.id);
 const formTitle = computed(() => isEditMode.value ? 'Edit Data Teknis' : 'Tambah Data Teknis');
 
 const availablePppoeProfiles = computed(() => {
-  // 1. Filter profile yang masih tersedia (kurang dari 5)
-  const available = profilesFromApi.value
-    .filter(p => p.usage_count < 5)
-    .map(p => p.profile_name);
+  // 1. Buat array objects dengan informasi lengkap (nama + slot tersedia)
+  const profilesWithInfo = profilesFromApi.value
+    .filter(p => p.usage_count < 5) // Hanya profile yang masih tersedia
+    .map(p => ({
+      title: `${p.profile_name} (${5 - p.usage_count} slot tersedia)`,
+      value: p.profile_name,
+      usageCount: p.usage_count,
+      slotsLeft: 5 - p.usage_count
+    }));
 
   // 2. Ambil profile yang sedang digunakan oleh user yang diedit
   const currentProfile = editedItem.value.profile_pppoe;
+  const currentProfileData = profilesFromApi.value.find(p => p.profile_name === currentProfile);
 
-  // 3. Jika profile saat ini ada DAN belum termasuk di daftar, tambahkan.
-  if (currentProfile && !available.includes(currentProfile)) {
-    available.unshift(currentProfile); // Taruh di paling atas
+  // 3. Jika profile saat ini ada DAN sudah penuh, tetap tampilkan dengan indikator
+  if (currentProfile && currentProfileData && !profilesWithInfo.find(p => p.value === currentProfile)) {
+    profilesWithInfo.unshift({
+      title: `${currentProfile} (saat ini digunakan - ${currentProfileData.usage_count}/5 terpakai)`,
+      value: currentProfile,
+      usageCount: currentProfileData.usage_count,
+      slotsLeft: 5 - currentProfileData.usage_count
+    });
   }
 
-  return available;
+  return profilesWithInfo;
 });
 
 

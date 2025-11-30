@@ -916,9 +916,11 @@ async def get_available_profiles(
             logger.info(f"Tidak ada profile dengan '{kecepatan_str}' ditemukan di Mikrotik.")
             return []
 
-        active_connections = mikrotik_service.get_active_connections(api)
-        active_profile_names = [conn.get("profile") for conn in active_connections if "profile" in conn]
-        profile_usage_map = Counter(active_profile_names)
+        # Active connections hanya menampilkan user yang sedang online
+        # PPPoE secrets menampilkan SEMUA user yang terdaftar (online maupun offline)
+        ppp_secrets = mikrotik_service.get_all_ppp_secrets(api)
+        secret_profile_names = [secret.get("profile") for secret in ppp_secrets if "profile" in secret]
+        profile_usage_map = Counter(secret_profile_names)
 
         response_data = []
         for profile_name in relevant_profiles:
@@ -973,10 +975,12 @@ async def get_available_profiles_legacy(paket_layanan_id: int, db: AsyncSession 
         all_profiles_on_router = mikrotik_service.get_all_ppp_profiles(api)
         relevant_profiles = [p for p in all_profiles_on_router if kecepatan_str in p]
 
-        active_connections = mikrotik_service.get_active_connections(api)
-        active_profile_names = [conn.get("profile") for conn in active_connections if "profile" in conn]
-
-        profile_usage_map = Counter(active_profile_names)
+        # MODIFIKASI: Gunakan PPPoE Secrets bukan Active Connections
+        # Active connections hanya menampilkan user yang sedang online
+        # PPPoE secrets menampilkan SEMUA user yang terdaftar (online maupun offline)
+        ppp_secrets = mikrotik_service.get_all_ppp_secrets(api)
+        secret_profile_names = [secret.get("profile") for secret in ppp_secrets if "profile" in secret]
+        profile_usage_map = Counter(secret_profile_names)
 
         response_data = []
         for profile_name in relevant_profiles:

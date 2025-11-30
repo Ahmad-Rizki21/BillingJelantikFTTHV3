@@ -86,6 +86,26 @@
                 <span class="btn-text">Multi Scan</span>
               </v-btn>
               <v-btn
+                variant="tonal"
+                color="teal"
+                @click="downloadTemplate"
+                prepend-icon="mdi-microsoft-excel"
+                class="add-btn secondary-action-btn me-2"
+                elevation="0"
+              >
+                <span class="btn-text">Download Template</span>
+              </v-btn>
+              <v-btn
+                variant="tonal"
+                color="orange"
+                @click="openBulkImportDialog"
+                prepend-icon="mdi-upload-multiple"
+                class="add-btn secondary-action-btn me-2"
+                elevation="0"
+              >
+                <span class="btn-text">Bulk Import</span>
+              </v-btn>
+              <v-btn
                 color="primary"
                 class="add-btn ms-1"
                 elevation="2"
@@ -144,129 +164,249 @@
           </v-card>
 
           <div class="table-container">
-            <v-data-table
-              :headers="itemHeaders"
-              :items="filteredInventoryItems"
-              :loading="loading"
-              class="modern-table elegant-table"
-              :items-per-page="15"
-              :mobile-breakpoint="768"
-            >
-              <template v-slot:loading>
-                <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
-              </template>
-              
-              <template v-slot:item.status="{ item }">
-                <v-chip 
-                  :color="getStatusColor(item.status.name)" 
-                  size="default"
+            <!-- Desktop Table View -->
+            <div class="d-none d-md-block">
+              <v-data-table
+                :headers="itemHeaders"
+                :items="filteredInventoryItems"
+                :loading="loading"
+                class="modern-table elegant-table"
+                :items-per-page="15"
+                :mobile-breakpoint="768"
+              >
+                <template v-slot:loading>
+                  <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
+                </template>
+
+                <template v-slot:item.status="{ item }">
+                  <v-chip
+                    :color="getStatusColor(item.status.name)"
+                    size="default"
+                    variant="elevated"
+                    class="status-chip"
+                  >
+                    {{ item.status.name }}
+                  </v-chip>
+                </template>
+
+                <template v-slot:item.item_type="{ item }">
+                  <div class="type-wrapper">
+                    <v-icon size="18" class="me-2 text-medium-emphasis">mdi-package-variant</v-icon>
+                    {{ item.item_type.name }}
+                  </div>
+                </template>
+
+                <template v-slot:item.serial_number="{ item }">
+                  <div class="serial-wrapper">
+                    <code class="serial-code">{{ item.serial_number }}</code>
+                  </div>
+                </template>
+
+                <template v-slot:item.mac_address="{ item }">
+                  <div class="mac-wrapper">
+                    <code v-if="item.mac_address" class="mac-code">{{ item.mac_address }}</code>
+                    <span v-else class="text-medium-emphasis">-</span>
+                  </div>
+                </template>
+
+                <template v-slot:item.location="{ item }">
+                  <div class="location-wrapper">
+                    <v-icon v-if="item.location" size="16" class="me-1 text-medium-emphasis">mdi-map-marker</v-icon>
+                    <span>{{ item.location || '-' }}</span>
+                  </div>
+                </template>
+
+                <template v-slot:item.purchase_date="{ item }">
+                  <div class="date-wrapper">
+                    <v-icon v-if="item.purchase_date" size="16" class="me-1 text-medium-emphasis">mdi-calendar</v-icon>
+                    <span v-if="item.purchase_date">
+                      {{ new Date(item.purchase_date).toLocaleDateString('id-ID', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      }) }}
+                    </span>
+                    <span v-else class="text-medium-emphasis">-</span>
+                  </div>
+                </template>
+
+                <template v-slot:item.actions="{ item }">
+                  <div class="action-buttons justify-center">
+                    <v-tooltip text="History">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          icon
+                          size="small"
+                          variant="text"
+                          color="info"
+                          class="action-btn-small"
+                          v-bind="props"
+                          @click="showHistory(item)"
+                        >
+                          <v-icon size="18">mdi-history</v-icon>
+                        </v-btn>
+                      </template>
+                    </v-tooltip>
+
+                    <v-tooltip text="Edit">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          icon
+                          size="small"
+                          variant="text"
+                          color="primary"
+                          class="action-btn-small"
+                          v-bind="props"
+                          @click="openItemDialog(item)"
+                        >
+                          <v-icon size="18">mdi-pencil</v-icon>
+                        </v-btn>
+                      </template>
+                    </v-tooltip>
+
+                    <v-tooltip text="Hapus">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          icon
+                          size="small"
+                          variant="text"
+                          color="error"
+                          class="action-btn-small"
+                          v-bind="props"
+                          @click="deleteItem(item)"
+                        >
+                          <v-icon size="18">mdi-delete</v-icon>
+                        </v-btn>
+                      </template>
+                    </v-tooltip>
+                  </div>
+                </template>
+
+                <template v-slot:no-data>
+                  <div class="no-data-wrapper">
+                    <v-icon size="64" class="text-medium-emphasis mb-3">mdi-package-variant-closed-remove</v-icon>
+                    <p class="text-medium-emphasis no-data-text">Belum ada perangkat inventaris</p>
+                  </div>
+                </template>
+              </v-data-table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="d-block d-md-none">
+              <div v-if="loading" class="px-4 py-4">
+                <SkeletonLoader type="list" :items="5" />
+              </div>
+
+              <div v-else-if="filteredInventoryItems.length === 0" class="no-data-wrapper">
+                <v-icon size="64" color="surface-variant">mdi-package-variant-closed-remove</v-icon>
+                <div class="no-data-text">Belum ada perangkat inventaris</div>
+                <p class="text-medium-emphasis mt-2">Mulai dengan menambahkan perangkat pertama Anda</p>
+                <v-btn
+                  color="primary"
                   variant="elevated"
-                  class="status-chip"
+                  @click="openItemDialog()"
+                  class="mt-6 text-none"
+                  prepend-icon="mdi-plus"
                 >
-                  {{ item.status.name }}
-                </v-chip>
-              </template>
-              
-              <template v-slot:item.item_type="{ item }">
-                <div class="type-wrapper">
-                  <v-icon size="18" class="me-2 text-medium-emphasis">mdi-package-variant</v-icon>
-                  {{ item.item_type.name }}
-                </div>
-              </template>
-              
-              <template v-slot:item.serial_number="{ item }">
-                <div class="serial-wrapper">
-                  <code class="serial-code">{{ item.serial_number }}</code>
-                </div>
-              </template>
-              
-              <template v-slot:item.mac_address="{ item }">
-                <div class="mac-wrapper">
-                  <code v-if="item.mac_address" class="mac-code">{{ item.mac_address }}</code>
-                  <span v-else class="text-medium-emphasis">-</span>
-                </div>
-              </template>
-              
-              <template v-slot:item.location="{ item }">
-                <div class="location-wrapper">
-                  <v-icon v-if="item.location" size="16" class="me-1 text-medium-emphasis">mdi-map-marker</v-icon>
-                  <span>{{ item.location || '-' }}</span>
-                </div>
-              </template>
+                  Tambah Item
+                </v-btn>
+              </div>
 
-              <template v-slot:item.purchase_date="{ item }">
-                <div class="date-wrapper">
-                  <v-icon v-if="item.purchase_date" size="16" class="me-1 text-medium-emphasis">mdi-calendar</v-icon>
-                  <span v-if="item.purchase_date">
-                    {{ new Date(item.purchase_date).toLocaleDateString('id-ID', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric'
-                    }) }}
-                  </span>
-                  <span v-else class="text-medium-emphasis">-</span>
-                </div>
-              </template>
-              
-              <template v-slot:item.actions="{ item }">
-                <div class="action-buttons justify-center">
-                  <v-tooltip text="History">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        icon
+              <div v-else class="mobile-cards-container">
+                <v-card
+                  v-for="item in filteredInventoryItems"
+                  :key="item.id"
+                  class="mobile-inventory-card mb-3"
+                  elevation="2"
+                >
+                  <v-card-text class="pa-4">
+                    <!-- Header dengan Serial Number dan Status -->
+                    <div class="d-flex align-center mb-3">
+                      <div class="flex-grow-1">
+                        <div class="d-flex align-center mb-1">
+                          <v-icon size="16" class="me-2 text-primary">mdi-fingerprint</v-icon>
+                          <h3 class="mobile-inventory-title">{{ item.serial_number }}</h3>
+                        </div>
+                        <div v-if="item.mac_address" class="d-flex align-center">
+                          <v-icon size="14" class="me-2 text-medium-emphasis">mdi-network-outline</v-icon>
+                          <code class="mobile-mac-code">{{ item.mac_address }}</code>
+                        </div>
+                      </div>
+                      <v-chip
+                        :color="getStatusColor(item.status.name)"
                         size="small"
-                        variant="text"
+                        variant="elevated"
+                        class="mobile-status-chip"
+                      >
+                        <v-icon start size="12">mdi-tag</v-icon>
+                        {{ item.status.name }}
+                      </v-chip>
+                    </div>
+
+                    <!-- Device Details -->
+                    <div class="mobile-inventory-details">
+                      <div class="detail-row">
+                        <v-icon size="small" class="me-2 text-medium-emphasis">mdi-shape-outline</v-icon>
+                        <span class="detail-label">Tipe:</span>
+                        <span class="detail-value">{{ item.item_type.name }}</span>
+                      </div>
+
+                      <div v-if="item.location" class="detail-row">
+                        <v-icon size="small" class="me-2 text-medium-emphasis">mdi-map-marker</v-icon>
+                        <span class="detail-label">Lokasi:</span>
+                        <span class="detail-value">{{ item.location }}</span>
+                      </div>
+
+                      <div v-if="item.purchase_date" class="detail-row">
+                        <v-icon size="small" class="me-2 text-medium-emphasis">mdi-calendar</v-icon>
+                        <span class="detail-label">Beli:</span>
+                        <span class="detail-value">{{ formatDate(item.purchase_date) }}</span>
+                      </div>
+
+                      <div v-if="item.notes" class="detail-row">
+                        <v-icon size="small" class="me-2 text-medium-emphasis">mdi-note-text</v-icon>
+                        <span class="detail-label">Catatan:</span>
+                        <span class="detail-value text-truncate">{{ item.notes }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                      <v-btn
+                        size="small"
+                        variant="tonal"
                         color="info"
-                        class="action-btn-small"
-                        v-bind="props"
                         @click="showHistory(item)"
+                        prepend-icon="mdi-history"
+                        class="flex-grow-1"
                       >
-                        <v-icon size="18">mdi-history</v-icon>
+                        History
                       </v-btn>
-                    </template>
-                  </v-tooltip>
-
-                  <v-tooltip text="Edit">
-                    <template v-slot:activator="{ props }">
                       <v-btn
-                        icon
                         size="small"
-                        variant="text"
+                        variant="tonal"
                         color="primary"
-                        class="action-btn-small"
-                        v-bind="props"
                         @click="openItemDialog(item)"
+                        prepend-icon="mdi-pencil"
+                        class="flex-grow-1"
                       >
-                        <v-icon size="18">mdi-pencil</v-icon>
+                        Edit
                       </v-btn>
-                    </template>
-                  </v-tooltip>
-
-                  <v-tooltip text="Hapus">
-                    <template v-slot:activator="{ props }">
                       <v-btn
-                        icon
                         size="small"
-                        variant="text"
+                        variant="tonal"
                         color="error"
-                        class="action-btn-small"
-                        v-bind="props"
                         @click="deleteItem(item)"
+                        prepend-icon="mdi-delete"
+                        class="flex-grow-1"
                       >
-                        <v-icon size="18">mdi-delete</v-icon>
+                        Hapus
                       </v-btn>
-                    </template>
-                  </v-tooltip>
-                </div>
-              </template>
-              
-              <template v-slot:no-data>
-                <div class="no-data-wrapper">
-                  <v-icon size="64" class="text-medium-emphasis mb-3">mdi-package-variant-closed-remove</v-icon>
-                  <p class="text-medium-emphasis no-data-text">Belum ada perangkat inventaris</p>
-                </div>
-              </template>
-            </v-data-table>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </div>
+            </div>
           </div>
         </v-window-item>
 
@@ -288,7 +428,8 @@
             </v-btn>
           </div>
 
-          <div class="table-container">
+          <!-- Desktop Table View for Types -->
+          <div class="d-none d-md-block table-container">
             <v-data-table
               :headers="typeHeaders"
               :items="itemTypes"
@@ -300,14 +441,14 @@
               <template v-slot:loading>
                 <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
               </template>
-              
+
               <template v-slot:item.name="{ item }">
                 <div class="type-name-wrapper">
                   <v-icon size="18" class="me-2 text-primary">mdi-shape</v-icon>
                   <span class="type-name">{{ item.name }}</span>
                 </div>
               </template>
-              
+
               <template v-slot:item.actions="{ item }">
                 <div class="action-buttons justify-center">
                   <v-tooltip text="Edit">
@@ -343,7 +484,7 @@
                   </v-tooltip>
                 </div>
               </template>
-              
+
               <template v-slot:no-data>
                 <div class="no-data-wrapper">
                   <v-icon size="64" class="text-medium-emphasis mb-3">mdi-shape-outline</v-icon>
@@ -351,6 +492,84 @@
                 </div>
               </template>
             </v-data-table>
+          </div>
+
+          <!-- Mobile Card View for Types -->
+          <div class="d-block d-md-none">
+            <div v-if="loading" class="px-4 py-4">
+              <SkeletonLoader type="list" :items="5" />
+            </div>
+
+            <div v-else-if="itemTypes.length === 0" class="no-data-wrapper">
+              <v-icon size="64" color="surface-variant">mdi-shape-outline</v-icon>
+              <div class="no-data-text">Belum ada tipe item</div>
+              <p class="text-medium-emphasis mt-2">Mulai dengan menambahkan tipe item pertama Anda</p>
+              <v-btn
+                color="primary"
+                variant="elevated"
+                @click="openTypeDialog()"
+                class="mt-6 text-none"
+                prepend-icon="mdi-plus"
+              >
+                Tambah Tipe
+              </v-btn>
+            </div>
+
+            <div v-else class="mobile-cards-container">
+              <v-card
+                v-for="item in itemTypes"
+                :key="item.id"
+                class="mobile-type-card mb-3"
+                elevation="2"
+              >
+                <v-card-text class="pa-4">
+                  <!-- Header dengan Icon dan Nama -->
+                  <div class="d-flex align-center mb-3">
+                    <div class="flex-grow-1">
+                      <div class="d-flex align-center mb-1">
+                        <v-avatar size="40" color="primary" variant="tonal" class="me-3">
+                          <v-icon size="20">mdi-shape</v-icon>
+                        </v-avatar>
+                        <h3 class="mobile-type-title">{{ item.name }}</h3>
+                      </div>
+                    </div>
+                    <v-chip
+                      size="small"
+                      color="primary"
+                      variant="tonal"
+                      class="mobile-type-chip"
+                    >
+                      <v-icon start size="12">mdi-tag</v-icon>
+                      ID: {{ item.id }}
+                    </v-chip>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="d-flex gap-2">
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="primary"
+                      @click="openTypeDialog(item)"
+                      prepend-icon="mdi-pencil"
+                      class="flex-grow-1"
+                    >
+                      Edit
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="error"
+                      @click="deleteType(item)"
+                      prepend-icon="mdi-delete"
+                      class="flex-grow-1"
+                    >
+                      Hapus
+                    </v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
           </div>
         </v-window-item>
 
@@ -372,7 +591,8 @@
             </v-btn>
           </div>
 
-          <div class="table-container">
+          <!-- Desktop Table View for Statuses -->
+          <div class="d-none d-md-block table-container">
             <v-data-table
               :headers="statusHeaders"
               :items="statuses"
@@ -384,11 +604,11 @@
               <template v-slot:loading>
                 <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
               </template>
-              
+
               <template v-slot:item.name="{ item }">
                 <div class="status-name-wrapper">
-                  <v-chip 
-                    :color="getStatusColor(item.name)" 
+                  <v-chip
+                    :color="getStatusColor(item.name)"
                     size="default"
                     variant="elevated"
                     class="status-preview-chip"
@@ -397,7 +617,7 @@
                   </v-chip>
                 </div>
               </template>
-              
+
               <template v-slot:item.actions="{ item }">
                 <div class="action-buttons justify-center">
                   <v-tooltip text="Edit">
@@ -433,7 +653,7 @@
                   </v-tooltip>
                 </div>
               </template>
-              
+
               <template v-slot:no-data>
                 <div class="no-data-wrapper">
                   <v-icon size="64" class="text-medium-emphasis mb-3">mdi-tag-outline</v-icon>
@@ -441,6 +661,101 @@
                 </div>
               </template>
             </v-data-table>
+          </div>
+
+          <!-- Mobile Card View for Statuses -->
+          <div class="d-block d-md-none">
+            <div v-if="loading" class="px-4 py-4">
+              <SkeletonLoader type="list" :items="5" />
+            </div>
+
+            <div v-else-if="statuses.length === 0" class="no-data-wrapper">
+              <v-icon size="64" color="surface-variant">mdi-tag-outline</v-icon>
+              <div class="no-data-text">Belum ada status inventaris</div>
+              <p class="text-medium-emphasis mt-2">Mulai dengan menambahkan status pertama Anda</p>
+              <v-btn
+                color="primary"
+                variant="elevated"
+                @click="openStatusDialog()"
+                class="mt-6 text-none"
+                prepend-icon="mdi-plus"
+              >
+                Tambah Status
+              </v-btn>
+            </div>
+
+            <div v-else class="mobile-cards-container">
+              <v-card
+                v-for="item in statuses"
+                :key="item.id"
+                class="mobile-status-card mb-3"
+                elevation="2"
+              >
+                <v-card-text class="pa-4">
+                  <!-- Header dengan Icon dan Nama Status -->
+                  <div class="d-flex align-center mb-3">
+                    <div class="flex-grow-1">
+                      <div class="d-flex align-center mb-1">
+                        <v-avatar size="40" color="primary" variant="tonal" class="me-3">
+                          <v-icon size="20">mdi-tag</v-icon>
+                        </v-avatar>
+                        <h3 class="mobile-status-title">{{ item.name }}</h3>
+                      </div>
+                    </div>
+                    <v-chip
+                      :color="getStatusColor(item.name)"
+                      size="small"
+                      variant="elevated"
+                      class="mobile-status-preview-chip"
+                    >
+                      <v-icon start size="12">mdi-tag</v-icon>
+                      ID: {{ item.id }}
+                    </v-chip>
+                  </div>
+
+                  <!-- Status Preview -->
+                  <div class="mobile-status-preview-section">
+                    <label class="field-label mb-2">Preview Status</label>
+                    <div class="status-preview-wrapper">
+                      <div class="preview-label">Tampilan pada tabel:</div>
+                      <v-chip
+                        :color="getStatusColor(item.name)"
+                        size="large"
+                        variant="elevated"
+                        class="status-preview-display"
+                      >
+                        <v-icon start size="16">mdi-tag</v-icon>
+                        {{ item.name }}
+                      </v-chip>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="d-flex gap-2 mt-4">
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="primary"
+                      @click="openStatusDialog(item)"
+                      prepend-icon="mdi-pencil"
+                      class="flex-grow-1"
+                    >
+                      Edit
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      variant="tonal"
+                      color="error"
+                      @click="deleteStatus(item)"
+                      prepend-icon="mdi-delete"
+                      class="flex-grow-1"
+                    >
+                      Hapus
+                    </v-btn>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </div>
           </div>
         </v-window-item>
 
@@ -1297,6 +1612,7 @@ import { useDisplay } from 'vuetify';
 // XLSX akan di-import secara dinamis saat fungsi export dipanggil
 import apiClient from '@/services/api';
 import BarcodeScanner from '@/components/BarcodeScanner.vue';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 import { useBarcodeScanner } from '@/composables/useBarcodeScanner';
 
 // --- INTERFACES ---
@@ -1665,6 +1981,54 @@ function resetFilters() {
   selectedStatus.value = null;
 }
 
+function downloadTemplate() {
+  // Create template data for Excel import
+  const templateData = [
+    {
+      'Serial Number': 'SN001234567890',
+      'MAC Address': 'AA:BB:CC:DD:EE:FF',
+      'Tipe': 'ONT',
+      'Status': 'Gudang',
+      'Lokasi': 'Gudang Utama',
+      'Catatan': 'Contoh catatan'
+    }
+  ];
+
+  // Import XLSX dynamically
+  import('xlsx').then(XLSX => {
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Template Inventaris');
+
+    // Auto-size columns
+    const cols = Object.keys(templateData[0] || {}).map(key => ({
+      wch: Math.max(key.length, 15)
+    }));
+    worksheet['!cols'] = cols;
+
+    XLSX.writeFile(workbook, `template_inventaris_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }).catch(error => {
+    console.error('Error downloading template:', error);
+    // Fallback: create a simple CSV
+    const csvContent = 'Serial Number,MAC Address,Tipe,Status,Lokasi,Catatan\nSN001234567890,AA:BB:CC:DD:EE:FF,ONT,Gudang,Gudang Utama,Contoh catatan';
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `template_inventaris_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  });
+}
+
+const bulkImportDialog = ref(false);
+
+function openBulkImportDialog() {
+  bulkImportDialog.value = true;
+}
+
+function closeBulkImportDialog() {
+  bulkImportDialog.value = false;
+}
+
 // History functions
 async function showHistory(item: InventoryItem) {
   selectedItemForHistory.value = item;
@@ -1718,6 +2082,34 @@ function getAvatarColor(userName?: string) {
   const colors = ['blue', 'green', 'purple', 'orange', 'teal', 'indigo', 'pink', 'amber'];
   const index = userName.charCodeAt(0) % colors.length;
   return colors[index];
+}
+
+// Format date helper function for mobile cards
+function formatDate(date: string | Date | null): string {
+  if (!date) return '-';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '-';
+  const offset = d.getTimezoneOffset();
+  const correctedDate = new Date(d.getTime() + (offset * 60 * 1000));
+  return correctedDate.toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+// Format datetime helper function for mobile history cards
+function formatDateTime(timestamp: string | Date): string {
+  if (!timestamp) return '-';
+  const d = new Date(timestamp);
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 onMounted(fetchData);
@@ -2691,6 +3083,20 @@ onMounted(fetchData);
   color: rgb(var(--v-theme-primary));
 }
 
+.v-theme--dark .mobile-inventory-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.v-theme--dark .mobile-inventory-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.v-theme--dark .mobile-mac-code {
+  background: rgba(var(--v-theme-primary), 0.2);
+  color: rgb(var(--v-theme-primary));
+}
+
 /* === DESKTOP OPTIMIZATIONS === */
 @media (min-width: 1024px) {
   .inventory-container {
@@ -2818,6 +3224,236 @@ onMounted(fetchData);
   }
 }
 
+/* === MOBILE CARD STYLING === */
+/* Mobile Cards Container */
+.mobile-cards-container {
+  padding: 16px;
+}
+
+.mobile-inventory-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.5);
+}
+
+.mobile-inventory-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--v-theme-shadow), 0.15);
+}
+
+.mobile-inventory-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.mobile-mac-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  background: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.mobile-status-chip {
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Inventory Details */
+.mobile-inventory-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Mobile Type Cards */
+.mobile-type-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.5);
+}
+
+.mobile-type-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--v-theme-shadow), 0.15);
+}
+
+.mobile-type-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.mobile-type-chip {
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Status Cards */
+.mobile-status-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.5);
+}
+
+.mobile-status-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--v-theme-shadow), 0.15);
+}
+
+.mobile-status-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.mobile-status-preview-chip {
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-status-preview-section {
+  padding: 16px;
+  background: rgba(var(--v-theme-surface), 0.4);
+  border: 1px solid rgba(var(--v-border-color), 0.08);
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.preview-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.status-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-display {
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.preview-display:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile History Cards */
+.mobile-history-cards-container {
+  padding: 16px;
+}
+
+.mobile-history-card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(var(--v-theme-outline-variant), 0.5);
+}
+
+.mobile-history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--v-theme-shadow), 0.15);
+}
+
+.mobile-history-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgb(var(--v-theme-on-surface));
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.mobile-history-serial {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  background: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.mobile-history-action-chip {
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-history-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(var(--v-theme-outline-variant), 0.2);
+}
+
+.mobile-history-user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.2;
+}
+
+.mobile-history-user-role {
+  font-size: 0.8rem;
+  color: rgba(var(--v-theme-on-surface), 0.7);
+  margin-top: 2px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: rgb(var(--v-theme-on-surface));
+  margin-left: 8px;
+  margin-right: 8px;
+  min-width: 60px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: rgba(var(--v-theme-on-surface), 0.8);
+  flex: 1;
+  word-break: break-word;
+}
+
+.text-truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* === RESPONSIVE DESIGN === */
 
 /* Tablet (768px and below) */
@@ -2869,6 +3505,32 @@ onMounted(fetchData);
   .modern-table :deep(.v-data-table__th:nth-child(2)),
   .modern-table :deep(.v-data-table__td:nth-child(2)) {
     display: none;
+  }
+
+  /* Mobile Card Optimizations */
+  .mobile-inventory-card {
+    margin-bottom: 16px;
+  }
+
+  .mobile-inventory-card .v-card-text {
+    padding: 16px !important;
+  }
+
+  .mobile-inventory-title {
+    font-size: 1rem;
+  }
+
+  .detail-row {
+    font-size: 0.8rem;
+  }
+
+  .detail-label {
+    min-width: 55px;
+    font-size: 0.8rem;
+  }
+
+  .mobile-status-chip {
+    font-size: 0.75rem;
   }
 }
 
@@ -2925,10 +3587,32 @@ onMounted(fetchData);
   .modern-table :deep(.v-data-table__td:nth-child(3)) {
     display: none;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 2px;
+  }
+
+  /* Extra small mobile card optimizations */
+  .mobile-inventory-title {
+    font-size: 0.95rem;
+  }
+
+  .mobile-mac-code {
+    font-size: 0.75rem;
+  }
+
+  .detail-row {
+    font-size: 0.75rem;
+  }
+
+  .detail-label {
+    min-width: 50px;
+    font-size: 0.75rem;
+  }
+
+  .mobile-status-chip {
+    font-size: 0.7rem;
   }
 }
 
@@ -3006,6 +3690,33 @@ onMounted(fetchData);
   .modern-table :deep(.v-data-table__th:nth-child(5)),
   .modern-table :deep(.v-data-table__td:nth-child(5)) {
     display: none;
+  }
+
+  /* Extra small mobile card optimizations */
+  .mobile-inventory-title {
+    font-size: 0.9rem;
+  }
+
+  .mobile-mac-code {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+  }
+
+  .detail-row {
+    font-size: 0.7rem;
+  }
+
+  .detail-label {
+    min-width: 45px;
+    font-size: 0.7rem;
+  }
+
+  .mobile-status-chip {
+    font-size: 0.65rem;
+  }
+
+  .text-truncate {
+    max-width: 150px;
   }
 }
 

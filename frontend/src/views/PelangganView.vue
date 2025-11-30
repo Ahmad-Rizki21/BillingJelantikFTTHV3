@@ -409,17 +409,17 @@
     </v-card>
 
     <!-- Dialogs (unchanged) -->
-    <v-dialog v-model="dialog" max-width="1000px" :fullscreen="$vuetify.display.mobile" persistent class="form-dialog">
+    <v-dialog v-model="dialog" max-width="1000px" :fullscreen="display.mobile.value" persistent class="form-dialog">
       <v-card class="form-card">
         <div class="form-header">
           <div class="form-header-content">
             <v-icon class="mr-3" size="24">mdi-account-edit</v-icon>
             <span class="form-title">{{ formTitle }}</span>
           </div>
-          <v-btn 
-            v-if="$vuetify.display.mobile"
-            icon 
-            variant="text" 
+          <v-btn
+            v-if="display.mobile.value"
+            icon
+            variant="text"
             @click="closeDialog"
             class="mobile-close-btn"
           >
@@ -429,7 +429,7 @@
         
         <v-card-text class="form-content">
           <v-form ref="form" v-model="isFormValid">
-            <v-stepper v-model="currentStep" flat class="elegant-stepper" :mobile="$vuetify.display.mobile">
+            <v-stepper v-model="currentStep" flat class="elegant-stepper" :mobile="display.mobile.value">
               <v-stepper-header class="stepper-header">
                 <v-stepper-item 
                   title="Info Pribadi" 
@@ -660,8 +660,8 @@
             Kembali
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn 
-            v-if="!$vuetify.display.mobile"
+          <v-btn
+            v-if="!display.mobile.value"
             @click="closeDialog" 
             variant="text" 
             class="nav-btn"
@@ -778,7 +778,7 @@
     </v-dialog>
 
     <!-- Import Dialog -->
-    <v-dialog v-model="dialogImport" max-width="800px" :fullscreen="$vuetify.display.mobile" persistent class="import-dialog">
+    <v-dialog v-model="dialogImport" max-width="800px" :fullscreen="display.mobile.value" persistent class="import-dialog">
       <v-card class="import-card">
         <div class="import-header">
           <v-icon class="mr-3">mdi-upload</v-icon>
@@ -818,7 +818,7 @@
                 :loading="downloadingTemplate"
                 prepend-icon="mdi-download"
                 class="template-btn"
-                :block="$vuetify.display.mobile"
+                :block="display.mobile.value"
               >
                 Unduh Template
               </v-btn>
@@ -930,10 +930,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
+import { useDisplay } from 'vuetify';
 import apiClient from '@/services/api';
 import type { Pelanggan as BasePelanggan } from '@/interfaces/pelanggan';
 import { debounce } from 'lodash-es';
 import SkeletonLoader from '@/components/SkeletonLoader.vue';
+
+// --- VUETIFY DISPLAY ---
+const display = useDisplay();
 
 // --- INTERFACES ---
 interface HargaLayanan {

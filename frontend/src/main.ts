@@ -29,6 +29,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import 'leaflet/dist/leaflet.css';
 
 import { useAuthStore } from './stores/auth'
+import NotificationsPlugin from './plugins/notifications'
 
 // 2. Buat instance Vuetify dengan tema light dan dark yang kontras
 const vuetify = createVuetify({
@@ -86,6 +87,7 @@ async function startup() {
 
   app.use(router)
   app.use(vuetify)
+  app.use(NotificationsPlugin)
 
   // 4. Mount aplikasi setelah semua siap
   app.mount('#app')
